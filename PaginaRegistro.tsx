@@ -189,7 +189,7 @@ const PaginaRegistro: React.FC = () => {
                 type="date"
                 value={formData.data_registro}
                 onChange={e => setFormData({ ...formData, data_registro: e.target.value })}
-                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase transition-all outline-none"
+                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-800 transition-all outline-none"
                 required
               />
             </div>
@@ -216,7 +216,7 @@ const PaginaRegistro: React.FC = () => {
                 min="0"
                 value={formData.carga_horaria}
                 onChange={e => setFormData({ ...formData, carga_horaria: parseFloat(e.target.value) || 0 })}
-                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase transition-all outline-none"
+                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-800 transition-all outline-none"
                 required
               />
             </div>
@@ -228,7 +228,7 @@ const PaginaRegistro: React.FC = () => {
                 placeholder="REF LOTE"
                 value={formData.lote}
                 onChange={e => setFormData({ ...formData, lote: e.target.value })}
-                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-mono font-black uppercase transition-all outline-none"
+                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-mono font-black uppercase text-slate-800 transition-all outline-none"
               />
             </div>
 
@@ -239,7 +239,7 @@ const PaginaRegistro: React.FC = () => {
               <select
                 value={formData.linha_producao}
                 onChange={e => setFormData({ ...formData, linha_producao: e.target.value })}
-                className="w-full p-4 bg-blue-600 text-white border-none rounded-2xl text-xs font-black uppercase transition-all outline-none"
+                className="w-full p-4 bg-blue-600 text-white border-2 border-blue-600 rounded-2xl text-xs font-black uppercase transition-all outline-none"
                 required
               >
                 <option value="">Selecione...</option>
@@ -348,7 +348,7 @@ const PaginaRegistro: React.FC = () => {
                         type="text"
                         value={parada.motivo}
                         onChange={e => updateParada(index, 'motivo', e.target.value)}
-                        className="w-full p-4 bg-slate-50 border-none rounded-2xl text-[10px] font-black uppercase outline-none shadow-inner"
+                        className="w-full p-4 bg-slate-50 border-none rounded-2xl text-[10px] font-black uppercase text-slate-800 outline-none shadow-inner"
                         placeholder="Ex: Falha no sensor"
                         required
                       />
