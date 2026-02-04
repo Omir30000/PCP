@@ -54,6 +54,7 @@ const RelatorioRegistros: React.FC = () => {
 
     // Estado para Nova Parada no Modal
     const [novaParada, setNovaParada] = useState<ParadaCompleta>({ inicio: '', fim: '', duracao: 0, motivo: '' });
+    const [editingParadaIndex, setEditingParadaIndex] = useState<number | null>(null);
 
     useEffect(() => {
         loadAuxiliaryData();
@@ -159,7 +160,7 @@ const RelatorioRegistros: React.FC = () => {
             // Ajusta referencias para os selects funcionarem
             linha_producao: findValueForSelect(record.linha_producao, linhasOpcoes) || record.linha_producao,
             produto_volume: findValueForSelect(record.produto_volume, produtosOpcoes) || record.produto_volume,
-            paradas_detalhadas: paradasIniciais as ParadaCompleta[]
+            paradas_detalhadas: (paradasIniciais as unknown) as ParadaCompleta[]
         });
         setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '' });
     };
@@ -167,6 +168,8 @@ const RelatorioRegistros: React.FC = () => {
     const handleCloseModal = () => {
         setEditingRecord(null);
         setIsSaving(false);
+        setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '' });
+        setEditingParadaIndex(null);
     };
 
     // --- Lógica de Paradas ---
@@ -183,7 +186,18 @@ const RelatorioRegistros: React.FC = () => {
         return diff;
     };
 
-    const handleAddParada = () => {
+    const calculateFim = (inicio: string, duracaoMinutos: number) => {
+        if (!inicio) return '';
+        const [h1, m1] = inicio.split(':').map(Number);
+        let totalMin = h1 * 60 + m1 + duracaoMinutos;
+
+        const h2 = Math.floor(totalMin / 60) % 24;
+        const m2 = totalMin % 60;
+
+        return `${h2.toString().padStart(2, '0')}:${m2.toString().padStart(2, '0')}`;
+    };
+
+    const handleSaveParada = () => {
         if (!novaParada.inicio || !novaParada.fim || !novaParada.motivo) {
             alert("Preencha todos os campos da parada");
             return;
@@ -192,12 +206,34 @@ const RelatorioRegistros: React.FC = () => {
         if (!editingRecord) return;
 
         const duracao = calculateDuration(novaParada.inicio, novaParada.fim);
-        const paradaComId = { ...novaParada, duracao, id: Math.random().toString(36).substr(2, 9) };
+        const paradaToSave = { ...novaParada, duracao };
 
-        const novasParadas = [...(editingRecord.paradas_detalhadas || []), paradaComId];
+        let novasParadas = [...(editingRecord.paradas_detalhadas || [])];
+
+        if (editingParadaIndex !== null) {
+            // Edição
+            novasParadas[editingParadaIndex] = { ...paradaToSave, id: novasParadas[editingParadaIndex].id || Math.random().toString(36).substr(2, 9) };
+        } else {
+            // Adição
+            novasParadas.push({ ...paradaToSave, id: Math.random().toString(36).substr(2, 9) });
+        }
 
         setEditingRecord({ ...editingRecord, paradas_detalhadas: novasParadas });
         setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '' });
+        setEditingParadaIndex(null);
+    };
+
+    const handleEditParada = (index: number) => {
+        if (!editingRecord || !editingRecord.paradas_detalhadas) return;
+
+        const parada = editingRecord.paradas_detalhadas[index];
+        setNovaParada({
+            inicio: parada.inicio || '',
+            fim: parada.fim || '',
+            duracao: parada.duracao || 0,
+            motivo: parada.motivo || ''
+        });
+        setEditingParadaIndex(index);
     };
 
     const handleRemoveParada = (index: number) => {
@@ -205,6 +241,23 @@ const RelatorioRegistros: React.FC = () => {
         const novasParadas = [...(editingRecord.paradas_detalhadas || [])];
         novasParadas.splice(index, 1);
         setEditingRecord({ ...editingRecord, paradas_detalhadas: novasParadas });
+
+        // Se estava editando o item removido, cancela edição
+        if (editingParadaIndex === index) {
+            setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '' });
+            setEditingParadaIndex(null);
+        }
+    };
+
+    const getHorariosFormatados = (parada: ParadaCompleta) => {
+        if (parada.inicio && parada.fim) {
+            return `${parada.inicio} - ${parada.fim}`;
+        }
+        if (parada.inicio && parada.duracao) {
+            const fimCalculado = calculateFim(parada.inicio, parada.duracao);
+            return `${parada.inicio} - ${fimCalculado}`;
+        }
+        return '--:--';
     };
 
     // -------------------------
@@ -409,8 +462,8 @@ const RelatorioRegistros: React.FC = () => {
                                             </td>
                                             <td className="p-4 text-xs font-bold text-right whitespace-nowrap">
                                                 <span className={`px-2 py-1 rounded-full text-[10px] ${eficiencia >= 90 ? 'bg-emerald-500/20 text-emerald-400' :
-                                                        eficiencia >= 70 ? 'bg-yellow-500/20 text-yellow-400' :
-                                                            'bg-red-500/20 text-red-400'
+                                                    eficiencia >= 70 ? 'bg-yellow-500/20 text-yellow-400' :
+                                                        'bg-red-500/20 text-red-400'
                                                     }`}>
                                                     {eficiencia.toFixed(1)}%
                                                 </span>
@@ -596,10 +649,17 @@ const RelatorioRegistros: React.FC = () => {
                                         />
                                         <button
                                             type="button"
-                                            onClick={handleAddParada}
-                                            className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-black uppercase text-[10px] tracking-wider rounded-lg flex items-center gap-2"
+                                            onClick={handleSaveParada}
+                                            className={`px-4 py-2 font-black uppercase text-[10px] tracking-wider rounded-lg flex items-center gap-2 ${editingParadaIndex !== null
+                                                ? 'bg-blue-500 hover:bg-blue-400 text-white'
+                                                : 'bg-amber-500 hover:bg-amber-400 text-black'
+                                                }`}
                                         >
-                                            <Plus className="w-3 h-3" /> Adicionar
+                                            {editingParadaIndex !== null ? (
+                                                <><Save className="w-3 h-3" /> Atualizar</>
+                                            ) : (
+                                                <><Plus className="w-3 h-3" /> Adicionar</>
+                                            )}
                                         </button>
                                     </div>
                                 </div>
@@ -608,20 +668,33 @@ const RelatorioRegistros: React.FC = () => {
                                 <div className="space-y-2">
                                     {editingRecord.paradas_detalhadas && editingRecord.paradas_detalhadas.length > 0 ? (
                                         editingRecord.paradas_detalhadas.map((parada, idx) => (
-                                            <div key={idx} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/5 hover:bg-white/10 group transition-all">
+                                            <div key={idx} className={`flex items-center justify-between p-3 rounded-lg border hover:bg-white/10 group transition-all ${editingParadaIndex === idx ? 'bg-white/10 border-blue-500/50' : 'bg-white/5 border-white/5'
+                                                }`}>
                                                 <div className="flex items-center gap-4">
-                                                    <span className="text-amber-500 font-mono font-bold text-xs">{parada.inicio} - {parada.fim}</span>
+                                                    <span className="text-amber-500 font-mono font-bold text-xs">{getHorariosFormatados(parada)}</span>
                                                     <span className="text-white font-bold text-xs uppercase">{parada.motivo}</span>
                                                 </div>
                                                 <div className="flex items-center gap-4">
                                                     <span className="text-slate-500 font-bold text-[10px] uppercase tracking-widest">{parada.duracao} min</span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleRemoveParada(idx)}
-                                                        className="text-slate-600 hover:text-red-500 transition-colors"
-                                                    >
-                                                        <Trash2 className="w-3 h-3" />
-                                                    </button>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleEditParada(idx)}
+                                                            className="text-slate-600 hover:text-blue-500 transition-colors"
+                                                            title="Editar Parada"
+                                                        >
+                                                            <FileText className="w-3 h-3" />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveParada(idx)}
+                                                            className="text-slate-600 hover:text-red-500 transition-colors"
+                                                            title="Remover Parada"
+                                                        >
+                                                            <Trash2 className="w-3 h-3" />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))
