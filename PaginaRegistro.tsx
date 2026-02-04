@@ -2,14 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import { Linha, Produto, Maquina, Parada, Database } from './types/database';
-import { 
-  ClipboardCheck, 
-  Settings, 
-  AlertTriangle, 
-  Plus, 
-  Trash2, 
-  Save, 
-  Clock, 
+import {
+  ClipboardCheck,
+  Settings,
+  AlertTriangle,
+  Plus,
+  Trash2,
+  Save,
+  Clock,
   Droplets,
   Loader2,
   Calendar,
@@ -24,7 +24,7 @@ const PaginaRegistro: React.FC = () => {
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [maquinasDaLinha, setMaquinasDaLinha] = useState<Maquina[]>([]);
-  
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -71,7 +71,7 @@ const PaginaRegistro: React.FC = () => {
         .from('maquinas')
         .select('*')
         .eq('linha_id', formData.linha_producao);
-      
+
       if (error) console.error('Erro ao buscar máquinas:', error);
       if (data) setMaquinasDaLinha(data);
     }
@@ -121,11 +121,11 @@ const PaginaRegistro: React.FC = () => {
 
       setMessage({ type: 'success', text: 'Registro industrial publicado com sucesso!' });
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      setFormData(prev => ({ 
-        ...prev, 
-        quantidade_produced: 0, 
-        quantidade_perda: 0, 
+
+      setFormData(prev => ({
+        ...prev,
+        quantidade_produced: 0,
+        quantidade_perda: 0,
         lote: '',
         carga_horaria: 8
       }));
@@ -148,7 +148,7 @@ const PaginaRegistro: React.FC = () => {
 
   return (
     <div className="max-w-[98%] mx-auto space-y-8 w-full animate-in fade-in duration-700 pb-20 font-sans">
-      
+
       <header className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/70 backdrop-blur-xl p-8 rounded-[32px] border border-white/20 shadow-2xl w-full relative overflow-hidden">
         <div className="absolute top-0 left-0 w-64 h-64 bg-blue-100/20 rounded-full -ml-32 -mt-32 blur-3xl pointer-events-none" />
         <div className="flex items-center gap-6 relative z-10">
@@ -162,11 +162,10 @@ const PaginaRegistro: React.FC = () => {
             </p>
           </div>
         </div>
-        
+
         {message && (
-          <div className={`px-6 py-3 rounded-2xl flex items-center gap-3 animate-in slide-in-from-right duration-500 relative z-10 ${
-            message.type === 'success' ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-200' : 'bg-red-500 text-white shadow-xl shadow-red-200'
-          }`}>
+          <div className={`px-6 py-3 rounded-2xl flex items-center gap-3 animate-in slide-in-from-right duration-500 relative z-10 ${message.type === 'success' ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-200' : 'bg-red-500 text-white shadow-xl shadow-red-200'
+            }`}>
             {message.type === 'success' ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertTriangle className="w-5 h-5 shrink-0" />}
             <span className="font-black text-[10px] uppercase tracking-widest">{message.text}</span>
           </div>
@@ -174,33 +173,33 @@ const PaginaRegistro: React.FC = () => {
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-8 w-full">
-        
+
         <section className="bg-white/80 backdrop-blur-md p-8 md:p-10 rounded-[40px] shadow-xl border border-white/50 w-full relative">
           <div className="flex items-center gap-4 mb-10 border-b border-slate-100/50 pb-6">
             <div className="p-3 bg-slate-900 rounded-2xl"><Settings className="w-5 h-5 text-blue-400" /></div>
             <h2 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Contexto da Operação</h2>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-8 w-full">
             <div className="space-y-3">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
                 <Calendar className="w-3 h-3" /> Data
               </label>
-              <input 
-                type="date" 
-                value={formData.data_registro} 
-                onChange={e => setFormData({...formData, data_registro: e.target.value})} 
-                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase transition-all outline-none" 
-                required 
+              <input
+                type="date"
+                value={formData.data_registro}
+                onChange={e => setFormData({ ...formData, data_registro: e.target.value })}
+                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase transition-all outline-none"
+                required
               />
             </div>
 
             <div className="space-y-3">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Turno</label>
-              <select 
-                value={formData.turno} 
-                onChange={e => setFormData({...formData, turno: e.target.value})} 
-                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase transition-all outline-none cursor-pointer"
+              <select
+                value={formData.turno}
+                onChange={e => setFormData({ ...formData, turno: e.target.value })}
+                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-800 transition-all outline-none cursor-pointer"
               >
                 <option value="1º Turno">1º TURNO</option>
                 <option value="2º Turno">2º TURNO</option>
@@ -211,25 +210,25 @@ const PaginaRegistro: React.FC = () => {
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
                 <Clock className="w-3 h-3 text-blue-500" /> Carga Horária (h)
               </label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 step="0.1"
                 min="0"
-                value={formData.carga_horaria} 
-                onChange={e => setFormData({...formData, carga_horaria: parseFloat(e.target.value) || 0})} 
-                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase transition-all outline-none" 
-                required 
+                value={formData.carga_horaria}
+                onChange={e => setFormData({ ...formData, carga_horaria: parseFloat(e.target.value) || 0 })}
+                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase transition-all outline-none"
+                required
               />
             </div>
 
             <div className="space-y-3">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Lote</label>
-              <input 
-                type="text" 
-                placeholder="REF LOTE" 
-                value={formData.lote} 
-                onChange={e => setFormData({...formData, lote: e.target.value})} 
-                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-mono font-black uppercase transition-all outline-none" 
+              <input
+                type="text"
+                placeholder="REF LOTE"
+                value={formData.lote}
+                onChange={e => setFormData({ ...formData, lote: e.target.value })}
+                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-mono font-black uppercase transition-all outline-none"
               />
             </div>
 
@@ -237,10 +236,10 @@ const PaginaRegistro: React.FC = () => {
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
                 <Activity className="w-3 h-3 text-blue-500" /> Linha
               </label>
-              <select 
-                value={formData.linha_producao} 
-                onChange={e => setFormData({...formData, linha_producao: e.target.value})} 
-                className="w-full p-4 bg-blue-600 text-white border-none rounded-2xl text-xs font-black uppercase transition-all outline-none" 
+              <select
+                value={formData.linha_producao}
+                onChange={e => setFormData({ ...formData, linha_producao: e.target.value })}
+                className="w-full p-4 bg-blue-600 text-white border-none rounded-2xl text-xs font-black uppercase transition-all outline-none"
                 required
               >
                 <option value="">Selecione...</option>
@@ -252,10 +251,10 @@ const PaginaRegistro: React.FC = () => {
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
                 <Layers className="w-3 h-3 text-emerald-500" /> SKU
               </label>
-              <select 
-                value={formData.produto_volume} 
-                onChange={e => setFormData({...formData, produto_volume: e.target.value})} 
-                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase transition-all outline-none" 
+              <select
+                value={formData.produto_volume}
+                onChange={e => setFormData({ ...formData, produto_volume: e.target.value })}
+                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-800 transition-all outline-none"
                 required
               >
                 <option value="">Selecione...</option>
@@ -275,13 +274,13 @@ const PaginaRegistro: React.FC = () => {
             <div className="space-y-4">
               <label className="text-[11px] font-black text-blue-600 uppercase tracking-[0.3em] ml-2">Produção Total (UN)</label>
               <div className="relative">
-                <input 
-                  type="number" 
-                  min="0" 
-                  value={formData.quantidade_produced} 
-                  onChange={e => setFormData({...formData, quantidade_produced: parseInt(e.target.value) || 0})} 
-                  className="w-full p-10 text-6xl md:text-8xl font-black border-4 border-transparent bg-blue-50/50 text-blue-700 rounded-[48px] text-center focus:border-blue-500 focus:bg-white transition-all outline-none" 
-                  required 
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.quantidade_produced}
+                  onChange={e => setFormData({ ...formData, quantidade_produced: parseInt(e.target.value) || 0 })}
+                  className="w-full p-10 text-6xl md:text-8xl font-black border-4 border-transparent bg-blue-50/50 text-blue-700 rounded-[48px] text-center focus:border-blue-500 focus:bg-white transition-all outline-none"
+                  required
                 />
               </div>
             </div>
@@ -289,13 +288,13 @@ const PaginaRegistro: React.FC = () => {
             <div className="space-y-4">
               <label className="text-[11px] font-black text-red-500 uppercase tracking-[0.3em] ml-2">Refugo / Perdas (UN)</label>
               <div className="relative">
-                <input 
-                  type="number" 
-                  min="0" 
-                  value={formData.quantidade_perda} 
-                  onChange={e => setFormData({...formData, quantidade_perda: parseInt(e.target.value) || 0})} 
-                  className="w-full p-10 text-6xl md:text-8xl font-black border-4 border-transparent bg-red-50/50 text-red-700 rounded-[48px] text-center focus:border-red-500 focus:bg-white transition-all outline-none" 
-                  required 
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.quantidade_perda}
+                  onChange={e => setFormData({ ...formData, quantidade_perda: parseInt(e.target.value) || 0 })}
+                  className="w-full p-10 text-6xl md:text-8xl font-black border-4 border-transparent bg-red-50/50 text-red-700 rounded-[48px] text-center focus:border-red-500 focus:bg-white transition-all outline-none"
+                  required
                 />
               </div>
             </div>
@@ -308,10 +307,10 @@ const PaginaRegistro: React.FC = () => {
               <div className="p-3 bg-red-50 rounded-2xl"><Timer className="w-5 h-5 text-red-500" /></div>
               <h2 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Registro de Paradas</h2>
             </div>
-            <button 
-              type="button" 
-              onClick={handleAddParada} 
-              disabled={!formData.linha_producao} 
+            <button
+              type="button"
+              onClick={handleAddParada}
+              disabled={!formData.linha_producao}
               className="px-8 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] disabled:opacity-20 hover:scale-[1.05] transition-all flex items-center gap-3"
             >
               <Plus className="w-4 h-4" /> Adicionar Parada
@@ -326,16 +325,16 @@ const PaginaRegistro: React.FC = () => {
             ) : (
               <div className="space-y-6">
                 {paradas.map((parada, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className="bg-white p-6 md:p-8 rounded-[32px] border border-slate-100 shadow-sm flex flex-col lg:flex-row items-center gap-8 relative group hover:border-red-200 transition-all"
                   >
                     <div className="w-full lg:w-1/4">
                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Máquina</label>
-                      <select 
-                        value={parada.maquina_id} 
-                        onChange={e => updateParada(index, 'maquina_id', e.target.value)} 
-                        className="w-full p-4 bg-slate-50 border-none rounded-2xl text-[10px] font-black uppercase outline-none" 
+                      <select
+                        value={parada.maquina_id}
+                        onChange={e => updateParada(index, 'maquina_id', e.target.value)}
+                        className="w-full p-4 bg-slate-50 border-none rounded-2xl text-[10px] font-black uppercase text-slate-800 outline-none"
                         required
                       >
                         <option value="">Selecione Máquina...</option>
@@ -345,31 +344,31 @@ const PaginaRegistro: React.FC = () => {
 
                     <div className="w-full lg:flex-1">
                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Motivo</label>
-                      <input 
-                        type="text" 
-                        value={parada.motivo} 
-                        onChange={e => updateParada(index, 'motivo', e.target.value)} 
-                        className="w-full p-4 bg-slate-50 border-none rounded-2xl text-[10px] font-black uppercase outline-none shadow-inner" 
-                        placeholder="Ex: Falha no sensor" 
-                        required 
+                      <input
+                        type="text"
+                        value={parada.motivo}
+                        onChange={e => updateParada(index, 'motivo', e.target.value)}
+                        className="w-full p-4 bg-slate-50 border-none rounded-2xl text-[10px] font-black uppercase outline-none shadow-inner"
+                        placeholder="Ex: Falha no sensor"
+                        required
                       />
                     </div>
 
                     <div className="w-full lg:w-32">
                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 text-center">Minutos</label>
-                      <input 
-                        type="number" 
-                        min="1" 
-                        value={parada.duracao} 
-                        onChange={e => updateParada(index, 'duracao', parseInt(e.target.value) || 0)} 
-                        className="w-full p-4 bg-red-50 text-red-600 border-none rounded-2xl text-lg font-black text-center outline-none shadow-sm" 
-                        required 
+                      <input
+                        type="number"
+                        min="1"
+                        value={parada.duracao}
+                        onChange={e => updateParada(index, 'duracao', parseInt(e.target.value) || 0)}
+                        className="w-full p-4 bg-red-50 text-red-600 border-none rounded-2xl text-lg font-black text-center outline-none shadow-sm"
+                        required
                       />
                     </div>
 
-                    <button 
-                      type="button" 
-                      onClick={() => handleRemoveParada(index)} 
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveParada(index)}
                       className="p-4 text-slate-300 hover:text-red-500 transition-all"
                     >
                       <Trash2 className="w-6 h-6" />
@@ -382,9 +381,9 @@ const PaginaRegistro: React.FC = () => {
         </section>
 
         <footer className="pt-10 pb-20">
-          <button 
-            type="submit" 
-            disabled={saving} 
+          <button
+            type="submit"
+            disabled={saving}
             className="w-full relative group overflow-hidden bg-slate-900 text-white font-black py-8 md:py-10 rounded-[40px] shadow-2xl hover:bg-blue-600 transition-all flex items-center justify-center gap-6 disabled:opacity-50"
           >
             <div className="relative z-10 flex items-center gap-6">
