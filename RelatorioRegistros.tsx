@@ -3,61 +3,86 @@ import { supabase } from './lib/supabase';
 import {
     FileText,
     Search,
-    Download,
     Filter,
     Calendar,
-    ChevronDown,
-    ChevronUp,
-    Loader2,
-    AlertTriangle
+    Loader2
 } from 'lucide-react';
 import { RegistroProducao, Linha, Produto } from './types/database';
 
-// Estendendo o tipo para incluir os joins se necessário, 
-// mas o supabase js client geralmente retorna um objeto mesclado ou aninhado
-// dependendo da query. Vamos tipar de forma flexível inicialmente.
-type RegistroComJoin = RegistroProducao & {
-    linhas: { nome: string } | null;
-    produtos: { nome: string } | null;
+// Estendendo o tipo para incluir as propriedades resolvidas manualmente
+type RegistroExpandido = RegistroProducao & {
+    nome_linha?: string;
+    nome_produto?: string;
 };
 
 const RelatorioRegistros: React.FC = () => {
-    const [registros, setRegistros] = useState<RegistroComJoin[]>([]);
+    const [registros, setRegistros] = useState<RegistroExpandido[]>([]);
     const [loading, setLoading] = useState(false);
+
+    // Datas padrão: Hoje
     const [dataInicio, setDataInicio] = useState(new Date().toISOString().split('T')[0]);
     const [dataFim, setDataFim] = useState(new Date().toISOString().split('T')[0]);
 
-    // Filtros adicionais (opcional, mas bom ter estrutura)
     const [linhaFiltro, setLinhaFiltro] = useState('');
+
+    // Maps para lookup (ID ou Nome -> Objeto)
+    const [linhasMap, setLinhasMap] = useState<Record<string, string>>({});
+    const [produtosMap, setProdutosMap] = useState<Record<string, string>>({});
     const [linhasOpcoes, setLinhasOpcoes] = useState<Linha[]>([]);
 
     useEffect(() => {
-        // Carregar opções de filtros se necessário
-        const loadFilters = async () => {
-            const { data } = await supabase.from('linhas').select('*').order('nome');
-            if (data) setLinhasOpcoes(data);
-        };
-        loadFilters();
-        // Carregar dados iniciais
-        fetchData();
+        loadAuxiliaryData();
     }, []);
+
+    // Busca dados de apoio (Linhas e Produtos) para fazer o "Join" no frontend
+    const loadAuxiliaryData = async () => {
+        try {
+            const [linesRes, productsRes] = await Promise.all([
+                supabase.from('linhas').select('*').order('nome'),
+                supabase.from('produtos').select('*').order('nome')
+            ]);
+
+            if (linesRes.data) {
+                setLinhasOpcoes(linesRes.data);
+                const lMap: Record<string, string> = {};
+                linesRes.data.forEach(l => {
+                    lMap[l.id] = l.nome;
+                    // Caso o campo linha_producao salve o NOME em vez do ID (backup logic)
+                    lMap[l.nome] = l.nome;
+                });
+                setLinhasMap(lMap);
+            }
+
+            if (productsRes.data) {
+                const pMap: Record<string, string> = {};
+                productsRes.data.forEach(p => {
+                    pMap[p.id] = p.nome;
+                    pMap[p.nome] = p.nome;
+                });
+                setProdutosMap(pMap);
+            }
+
+            // Carrega registros após carregar os mapas
+            fetchData();
+        } catch (err) {
+            console.error("Erro ao carregar dados auxiliares:", err);
+        }
+    };
 
     const fetchData = async () => {
         setLoading(true);
         try {
+            // Setup da query SEM joins complexos que podem falhar se não houver FK
             let query = supabase
                 .from('registros_producao')
-                .select(`
-          *,
-          linhas:linha_producao(nome),
-          produtos:produto_volume(nome)
-        `)
+                .select('*') // Traz tudo raw
                 .gte('data_registro', dataInicio)
                 .lte('data_registro', dataFim)
                 .order('data_registro', { ascending: false })
                 .order('created_at', { ascending: false });
 
             if (linhaFiltro) {
+                // Se linhaFiltro for ID, busca por ID. Se a coluna for texto, pode funcionar se o texto for o ID.
                 query = query.eq('linha_producao', linhaFiltro);
             }
 
@@ -65,11 +90,22 @@ const RelatorioRegistros: React.FC = () => {
 
             if (error) throw error;
 
-            // Cast forçado pois o tipo retornado pelo select com join é complexo
-            if (data) setRegistros(data as any);
+            if (data) {
+                // Enriquecer os dados manualmente usando os mapas
+                const enrichedData: RegistroExpandido[] = data.map((reg: RegistroProducao) => ({
+                    ...reg,
+                    nome_linha: linhasMap[reg.linha_producao] || reg.linha_producao || '-',
+                    nome_produto: produtosMap[reg.produto_volume] || reg.produto_volume || '-'
+                }));
 
-        } catch (error) {
+                setRegistros(enrichedData);
+            } else {
+                setRegistros([]);
+            }
+
+        } catch (error: any) {
             console.error('Erro ao buscar registros:', error);
+            alert(`Erro ao buscar dados: ${error.message}`);
         } finally {
             setLoading(false);
         }
@@ -173,24 +209,22 @@ const RelatorioRegistros: React.FC = () => {
                                 </tr>
                             ) : (
                                 registros.map((reg) => {
-                                    // Cálculo de eficiência simples (Exemplo: Produzido / (Produzido + Perda))
-                                    // Ajuste conforme regra de negócio correta
                                     const total = (reg.quantidade_produzida || 0) + (reg.quantidade_perda || 0);
                                     const eficiencia = total > 0 ? ((reg.quantidade_produzida || 0) / total) * 100 : 0;
 
                                     return (
                                         <tr key={reg.id} className="hover:bg-white/5 transition-colors">
                                             <td className="p-4 text-xs font-bold text-slate-300 whitespace-nowrap">
-                                                {new Date(reg.data_registro).toLocaleDateString()}
+                                                {reg.data_registro ? new Date(reg.data_registro).toLocaleDateString() : '-'}
                                             </td>
                                             <td className="p-4 text-xs font-bold text-slate-300 whitespace-nowrap uppercase">
                                                 {reg.turno}
                                             </td>
                                             <td className="p-4 text-xs font-bold text-white whitespace-nowrap uppercase">
-                                                {reg.linhas?.nome || '-'}
+                                                {reg.nome_linha}
                                             </td>
                                             <td className="p-4 text-xs font-bold text-slate-300 whitespace-nowrap uppercase">
-                                                {reg.produtos?.nome || '-'}
+                                                {reg.nome_produto}
                                             </td>
                                             <td className="p-4 text-xs font-mono font-bold text-slate-400 whitespace-nowrap uppercase">
                                                 {reg.lote || '-'}
