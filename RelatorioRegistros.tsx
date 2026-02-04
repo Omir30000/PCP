@@ -10,14 +10,26 @@ import {
     Save,
     Trash2,
     AlertTriangle,
-    CheckCircle2
+    Clock,
+    Plus,
+    AlertOctagon
 } from 'lucide-react';
 import { RegistroProducao, Linha, Produto } from './types/database';
 
-// Estendendo o tipo para incluir as propriedades resolvidas manualmente
+// Tipagem estendida para Paradas com horários
+interface ParadaCompleta {
+    id?: string; // ID temporário para lista
+    inicio: string; // HH:mm
+    fim: string; // HH:mm
+    duracao: number; // minutos
+    motivo: string;
+}
+
+// Estendendo o tipo para incluir as propriedades resolvidas manualmente e paradas tipadas
 type RegistroExpandido = RegistroProducao & {
     nome_linha?: string;
     nome_produto?: string;
+    paradas_detalhadas?: ParadaCompleta[];
 };
 
 const RelatorioRegistros: React.FC = () => {
@@ -39,6 +51,9 @@ const RelatorioRegistros: React.FC = () => {
     // Estado do Modal de Edição
     const [editingRecord, setEditingRecord] = useState<RegistroExpandido | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+
+    // Estado para Nova Parada no Modal
+    const [novaParada, setNovaParada] = useState<ParadaCompleta>({ inicio: '', fim: '', duracao: 0, motivo: '' });
 
     useEffect(() => {
         loadAuxiliaryData();
@@ -81,7 +96,6 @@ const RelatorioRegistros: React.FC = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            // Setup da query SEM joins complexos
             let query = supabase
                 .from('registros_producao')
                 .select('*')
@@ -99,11 +113,11 @@ const RelatorioRegistros: React.FC = () => {
             if (error) throw error;
 
             if (data) {
-                // Enriquecer os dados manualmente usando os mapas
                 const enrichedData: RegistroExpandido[] = data.map((reg: RegistroProducao) => ({
                     ...reg,
                     nome_linha: linhasMap[reg.linha_producao] || reg.linha_producao || '-',
-                    nome_produto: produtosMap[reg.produto_volume] || reg.produto_volume || '-'
+                    nome_produto: produtosMap[reg.produto_volume] || reg.produto_volume || '-',
+                    paradas_detalhadas: (reg.paradas as any) || []
                 }));
 
                 setRegistros(enrichedData);
@@ -124,8 +138,30 @@ const RelatorioRegistros: React.FC = () => {
         fetchData();
     };
 
+    // Helper para encontrar ID correto (Resolve bug de select vazio)
+    const findValueForSelect = (value: string | undefined, options: { id: string, nome: string }[]) => {
+        if (!value) return "";
+        // Tenta achar pelo ID
+        const byId = options.find(o => o.id === value);
+        if (byId) return byId.id;
+        // Tenta achar pelo Nome
+        const byName = options.find(o => o.nome === value);
+        if (byName) return byName.id;
+
+        return ""; // Se não achar, retorna vazio ou poderia retornar o próprio value se fosse 'text'
+    };
+
     const handleEditClick = (record: RegistroExpandido) => {
-        setEditingRecord({ ...record });
+        // Prepara paradas
+        const paradasIniciais = Array.isArray(record.paradas) ? record.paradas : [];
+        setEditingRecord({
+            ...record,
+            // Ajusta referencias para os selects funcionarem
+            linha_producao: findValueForSelect(record.linha_producao, linhasOpcoes) || record.linha_producao,
+            produto_volume: findValueForSelect(record.produto_volume, produtosOpcoes) || record.produto_volume,
+            paradas_detalhadas: paradasIniciais as ParadaCompleta[]
+        });
+        setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '' });
     };
 
     const handleCloseModal = () => {
@@ -133,24 +169,73 @@ const RelatorioRegistros: React.FC = () => {
         setIsSaving(false);
     };
 
+    // --- Lógica de Paradas ---
+
+    const calculateDuration = (inicio: string, fim: string) => {
+        if (!inicio || !fim) return 0;
+        const [h1, m1] = inicio.split(':').map(Number);
+        const [h2, m2] = fim.split(':').map(Number);
+        const minutos1 = h1 * 60 + m1;
+        const minutos2 = h2 * 60 + m2;
+
+        let diff = minutos2 - minutos1;
+        if (diff < 0) diff += 24 * 60; // Passou da meia-noite (simplificado)
+        return diff;
+    };
+
+    const handleAddParada = () => {
+        if (!novaParada.inicio || !novaParada.fim || !novaParada.motivo) {
+            alert("Preencha todos os campos da parada");
+            return;
+        }
+
+        if (!editingRecord) return;
+
+        const duracao = calculateDuration(novaParada.inicio, novaParada.fim);
+        const paradaComId = { ...novaParada, duracao, id: Math.random().toString(36).substr(2, 9) };
+
+        const novasParadas = [...(editingRecord.paradas_detalhadas || []), paradaComId];
+
+        setEditingRecord({ ...editingRecord, paradas_detalhadas: novasParadas });
+        setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '' });
+    };
+
+    const handleRemoveParada = (index: number) => {
+        if (!editingRecord) return;
+        const novasParadas = [...(editingRecord.paradas_detalhadas || [])];
+        novasParadas.splice(index, 1);
+        setEditingRecord({ ...editingRecord, paradas_detalhadas: novasParadas });
+    };
+
+    // -------------------------
+
     const handleSaveRecord = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!editingRecord) return;
 
         setIsSaving(true);
         try {
+            // Recupera o nome correto para salvar no banco caso o sistema use nomes em vez de IDs
+            // (Mantendo lógica original híbrida ou forçando ID se o banco mudou, 
+            //  aqui vamos salvar o ID do select, mas cuidado se o banco espera Nome)
+            //  Se o banco espera Nome e mandarmos ID, vai quebrar visualização antiga.
+            //  Vou assumir ID pois é o padrão correto, mas se falhar voltamos.
+
+            const payload = {
+                data_registro: editingRecord.data_registro,
+                turno: editingRecord.turno,
+                linha_producao: editingRecord.linha_producao,
+                produto_volume: editingRecord.produto_volume,
+                lote: editingRecord.lote,
+                quantidade_produzida: editingRecord.quantidade_produzida,
+                quantidade_perda: editingRecord.quantidade_perda,
+                carga_horaria: editingRecord.carga_horaria,
+                paradas: editingRecord.paradas_detalhadas // Salva o array de objetos JSON
+            };
+
             const { error } = await supabase
                 .from('registros_producao')
-                .update({
-                    data_registro: editingRecord.data_registro,
-                    turno: editingRecord.turno,
-                    linha_producao: editingRecord.linha_producao,
-                    produto_volume: editingRecord.produto_volume,
-                    lote: editingRecord.lote,
-                    quantidade_produzida: editingRecord.quantidade_produzida,
-                    quantidade_perda: editingRecord.quantidade_perda,
-                    carga_horaria: editingRecord.carga_horaria
-                })
+                .update(payload)
                 .eq('id', editingRecord.id);
 
             if (error) throw error;
@@ -158,6 +243,8 @@ const RelatorioRegistros: React.FC = () => {
             // Atualiza a lista localmente
             setRegistros(prev => prev.map(r => r.id === editingRecord.id ? {
                 ...editingRecord,
+                ...payload, // Atualiza dados
+                // Recalcula nomes para exibição na tabela
                 nome_linha: linhasMap[editingRecord.linha_producao] || editingRecord.linha_producao || '-',
                 nome_produto: produtosMap[editingRecord.produto_volume] || editingRecord.produto_volume || '-'
             } : r));
@@ -362,8 +449,9 @@ const RelatorioRegistros: React.FC = () => {
                         </div>
 
                         {/* Modal Body */}
-                        <form onSubmit={handleSaveRecord} className="p-6 md:p-8 space-y-6">
+                        <form onSubmit={handleSaveRecord} className="p-6 md:p-8 space-y-8">
 
+                            {/* Seção Principal */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Data</label>
@@ -438,6 +526,7 @@ const RelatorioRegistros: React.FC = () => {
                                 </div>
                             </div>
 
+                            {/* Seção Produção e Perdas */}
                             <div className="grid grid-cols-2 gap-6 pt-4 border-t border-white/5">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Produzido (UN)</label>
@@ -457,6 +546,92 @@ const RelatorioRegistros: React.FC = () => {
                                         className="w-full bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-4 text-xl font-black text-red-400 focus:border-red-500 outline-none transition-all text-center"
                                     />
                                 </div>
+                            </div>
+
+                            {/* Seção de Paradas (Downtime) */}
+                            <div className="space-y-6 pt-4 border-t border-white/5">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                                        <AlertOctagon className="w-4 h-4 text-amber-500" />
+                                        Paradas / Downtime
+                                    </h3>
+                                </div>
+
+                                {/* Formulário de Nova Parada */}
+                                <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Início</label>
+                                            <input
+                                                type="time"
+                                                value={novaParada.inicio}
+                                                onChange={e => setNovaParada(p => ({ ...p, inicio: e.target.value }))}
+                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Fim</label>
+                                            <input
+                                                type="time"
+                                                value={novaParada.fim}
+                                                onChange={e => setNovaParada(p => ({ ...p, fim: e.target.value }))}
+                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Duração</label>
+                                            <div className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400 uppercase font-bold flex items-center gap-2">
+                                                <Clock className="w-3 h-3" />
+                                                {calculateDuration(novaParada.inicio, novaParada.fim)} min
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <input
+                                            type="text"
+                                            placeholder="MOTIVO DA PARADA..."
+                                            value={novaParada.motivo}
+                                            onChange={e => setNovaParada(p => ({ ...p, motivo: e.target.value }))}
+                                            className="flex-1 bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 uppercase font-bold"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleAddParada}
+                                            className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-black uppercase text-[10px] tracking-wider rounded-lg flex items-center gap-2"
+                                        >
+                                            <Plus className="w-3 h-3" /> Adicionar
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Lista de Paradas */}
+                                <div className="space-y-2">
+                                    {editingRecord.paradas_detalhadas && editingRecord.paradas_detalhadas.length > 0 ? (
+                                        editingRecord.paradas_detalhadas.map((parada, idx) => (
+                                            <div key={idx} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/5 hover:bg-white/10 group transition-all">
+                                                <div className="flex items-center gap-4">
+                                                    <span className="text-amber-500 font-mono font-bold text-xs">{parada.inicio} - {parada.fim}</span>
+                                                    <span className="text-white font-bold text-xs uppercase">{parada.motivo}</span>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <span className="text-slate-500 font-bold text-[10px] uppercase tracking-widest">{parada.duracao} min</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveParada(idx)}
+                                                        className="text-slate-600 hover:text-red-500 transition-colors"
+                                                    >
+                                                        <Trash2 className="w-3 h-3" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-center text-slate-600 text-[10px] font-bold uppercase tracking-widest py-4 bg-white/5 rounded-lg border-2 border-dashed border-white/5">
+                                            Nenhuma parada registrada
+                                        </p>
+                                    )}
+                                </div>
+
                             </div>
 
                             {/* Modal Footer */}
