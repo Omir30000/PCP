@@ -9,9 +9,10 @@ import AnaliseDisponibilidade from './AnaliseDisponibilidade';
 import Relatorios from './Relatorios';
 import RelatoriosProdutos from './RelatoriosProdutos';
 import RelatoriosDowntime from './RelatoriosDowntime';
+import RelatorioRegistros from './RelatorioRegistros';
 
-import { 
-  LayoutDashboard, 
+import {
+  LayoutDashboard,
   ShoppingCart,
   CalendarDays,
   ClipboardPenLine,
@@ -28,16 +29,17 @@ import {
   LayoutGrid
 } from 'lucide-react';
 
-type Tab = 
-  | 'dashboard' 
-  | 'kanban' 
-  | 'vendas' 
-  | 'registro' 
+type Tab =
+  | 'dashboard'
+  | 'kanban'
+  | 'vendas'
+  | 'registro'
   | 'produtos'
   | 'analise_disponibilidade'
   | 'relatorios'
   | 'relatorios_produtos'
-  | 'relatorios_downtime';
+  | 'relatorios_downtime'
+  | 'relatorio_registros';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -47,7 +49,7 @@ const App: React.FC = () => {
   const NavItem = ({ id, icon: Icon, label, isSubItem = false }: { id: Tab, icon: any, label: string, isSubItem?: boolean }) => {
     const isActive = activeTab === id;
     return (
-      <button 
+      <button
         onClick={() => setActiveTab(id)}
         className={`w-full flex items-center transition-all duration-300 relative group/item
           ${isSidebarExpanded ? (isSubItem ? 'pl-12 pr-4 py-2.5' : 'px-4 py-3 gap-4') : 'justify-center py-4'}
@@ -70,8 +72,8 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-slate-100 flex overflow-hidden font-sans selection:bg-[#facc15]/30">
-      
-      <aside 
+
+      <aside
         onMouseEnter={() => setIsSidebarExpanded(true)}
         onMouseLeave={() => setIsSidebarExpanded(false)}
         className={`hidden lg:flex flex-col h-screen sticky top-0 z-50 transition-all duration-500 border-r border-white/5 shadow-2xl
@@ -95,12 +97,12 @@ const App: React.FC = () => {
           <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
           <NavItem id="kanban" icon={LayoutGrid} label="Programação" />
           <NavItem id="vendas" icon={ShoppingCart} label="Pedidos" />
-          
+
           <div className="h-px bg-white/5 my-6 mx-4" />
-          
+
           <NavItem id="registro" icon={ClipboardPenLine} label="Apontamento" />
           <NavItem id="produtos" icon={Package} label="Catálogo" />
-          
+
           <div className="h-px bg-white/5 my-6 mx-4" />
 
           {isSidebarExpanded && (
@@ -108,6 +110,7 @@ const App: React.FC = () => {
           )}
           <NavItem id="analise_disponibilidade" icon={Scale} label="Balanço" isSubItem={isSidebarExpanded} />
           <NavItem id="relatorios" icon={FileText} label="Boletim" isSubItem={isSidebarExpanded} />
+          <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" isSubItem={isSidebarExpanded} />
           <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime" isSubItem={isSidebarExpanded} />
         </div>
 
@@ -134,11 +137,13 @@ const App: React.FC = () => {
           {activeTab === 'analise_disponibilidade' && <AnaliseDisponibilidade />}
           {activeTab === 'relatorios' && <Relatorios />}
           {activeTab === 'relatorios_produtos' && <RelatoriosProdutos />}
+          {activeTab === 'relatorio_registros' && <RelatorioRegistros />}
           {activeTab === 'relatorios_downtime' && <RelatoriosDowntime />}
         </div>
       </main>
-      
-      <style dangerouslySetInnerHTML={{ __html: `
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}} />
