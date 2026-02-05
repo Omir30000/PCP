@@ -23,6 +23,7 @@ interface ParadaCompleta {
     fim: string; // HH:mm
     duracao: number; // minutos
     motivo: string;
+    maquina_id?: string;
 }
 
 // Estendendo o tipo para incluir as propriedades resolvidas manualmente e paradas tipadas
@@ -47,13 +48,14 @@ const RelatorioRegistros: React.FC = () => {
     const [produtosMap, setProdutosMap] = useState<Record<string, string>>({});
     const [linhasOpcoes, setLinhasOpcoes] = useState<Linha[]>([]);
     const [produtosOpcoes, setProdutosOpcoes] = useState<Produto[]>([]);
+    const [maquinasOpcoes, setMaquinasOpcoes] = useState<any[]>([]);
 
     // Estado do Modal de Edição
     const [editingRecord, setEditingRecord] = useState<RegistroExpandido | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
     // Estado para Nova Parada no Modal
-    const [novaParada, setNovaParada] = useState<ParadaCompleta>({ inicio: '', fim: '', duracao: 0, motivo: '' });
+    const [novaParada, setNovaParada] = useState<ParadaCompleta>({ inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
     const [editingParadaIndex, setEditingParadaIndex] = useState<number | null>(null);
 
     useEffect(() => {
@@ -63,9 +65,10 @@ const RelatorioRegistros: React.FC = () => {
     // Busca dados de apoio (Linhas e Produtos) para fazer o "Join" no frontend
     const loadAuxiliaryData = async () => {
         try {
-            const [linesRes, productsRes] = await Promise.all([
+            const [linesRes, productsRes, machinesRes] = await Promise.all([
                 supabase.from('linhas').select('*').order('nome'),
-                supabase.from('produtos').select('*').order('nome')
+                supabase.from('produtos').select('*').order('nome'),
+                supabase.from('maquinas').select('*')
             ]);
 
             if (linesRes.data) {
@@ -86,6 +89,10 @@ const RelatorioRegistros: React.FC = () => {
                     pMap[p.nome] = p.nome;
                 });
                 setProdutosMap(pMap);
+            }
+
+            if (machinesRes.data) {
+                setMaquinasOpcoes(machinesRes.data);
             }
 
             fetchData();
@@ -162,13 +169,13 @@ const RelatorioRegistros: React.FC = () => {
             produto_volume: findValueForSelect(record.produto_volume, produtosOpcoes) || record.produto_volume,
             paradas_detalhadas: (paradasIniciais as unknown) as ParadaCompleta[]
         });
-        setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '' });
+        setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
     };
 
     const handleCloseModal = () => {
         setEditingRecord(null);
         setIsSaving(false);
-        setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '' });
+        setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
         setEditingParadaIndex(null);
     };
 
@@ -199,7 +206,7 @@ const RelatorioRegistros: React.FC = () => {
 
     const handleSaveParada = () => {
         if (!novaParada.inicio || !novaParada.fim || !novaParada.motivo) {
-            alert("Preencha todos os campos da parada");
+            alert("Preencha Início, Fim e Motivo");
             return;
         }
 
@@ -219,7 +226,7 @@ const RelatorioRegistros: React.FC = () => {
         }
 
         setEditingRecord({ ...editingRecord, paradas_detalhadas: novasParadas });
-        setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '' });
+        setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
         setEditingParadaIndex(null);
     };
 
@@ -231,7 +238,8 @@ const RelatorioRegistros: React.FC = () => {
             inicio: parada.inicio || '',
             fim: parada.fim || '',
             duracao: parada.duracao || 0,
-            motivo: parada.motivo || ''
+            motivo: parada.motivo || '',
+            maquina_id: parada.maquina_id || ''
         });
         setEditingParadaIndex(index);
     };
@@ -244,7 +252,7 @@ const RelatorioRegistros: React.FC = () => {
 
         // Se estava editando o item removido, cancela edição
         if (editingParadaIndex === index) {
-            setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '' });
+            setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
             setEditingParadaIndex(null);
         }
     };
@@ -278,32 +286,39 @@ const RelatorioRegistros: React.FC = () => {
                 data_registro: editingRecord.data_registro,
                 turno: editingRecord.turno,
                 linha_producao: editingRecord.linha_producao,
+                linha_id: editingRecord.linha_producao,
                 produto_volume: editingRecord.produto_volume,
+                produto_id: editingRecord.produto_volume,
                 lote: editingRecord.lote,
-                quantidade_produzida: editingRecord.quantidade_produzida,
-                quantidade_perda: editingRecord.quantidade_perda,
-                carga_horaria: editingRecord.carga_horaria,
-                paradas: editingRecord.paradas_detalhadas // Salva o array de objetos JSON
+                quantidade_produzida: Number(editingRecord.quantidade_produzida),
+                quantidade_perda: editingRecord.quantidade_perda !== undefined ? Number(editingRecord.quantidade_perda) : 0,
+                carga_horaria: Number(editingRecord.carga_horaria),
+                paradas: editingRecord.paradas_detalhadas
             };
 
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('registros_producao')
                 .update(payload)
-                .eq('id', editingRecord.id);
+                .eq('id', editingRecord.id)
+                .select();
 
             if (error) throw error;
 
-            // Atualiza a lista localmente
+            if (!data || data.length === 0) {
+                throw new Error("Nenhum registro foi atualizado. Verifique se o ID ainda existe ou se há restrições de acesso (RLS).");
+            }
+
+            const updatedRow = data[0];
+
             setRegistros(prev => prev.map(r => r.id === editingRecord.id ? {
-                ...editingRecord,
-                ...payload, // Atualiza dados
-                // Recalcula nomes para exibição na tabela
-                nome_linha: linhasMap[editingRecord.linha_producao] || editingRecord.linha_producao || '-',
-                nome_produto: produtosMap[editingRecord.produto_volume] || editingRecord.produto_volume || '-'
+                ...updatedRow,
+                nome_linha: linhasMap[updatedRow.linha_id || updatedRow.linha_producao] || updatedRow.linha_producao || '-',
+                nome_produto: produtosMap[updatedRow.produto_id || updatedRow.produto_volume] || updatedRow.produto_volume || '-',
+                paradas_detalhadas: (updatedRow.paradas as any) || []
             } : r));
 
             handleCloseModal();
-            alert('Registro atualizado com sucesso!');
+            alert('Registro salvo com sucesso no banco de dados!');
         } catch (err: any) {
             console.error('Erro ao atualizar registro:', err);
             alert(`Falha ao atualizar: ${err.message}`);
@@ -612,7 +627,21 @@ const RelatorioRegistros: React.FC = () => {
 
                                 {/* Formulário de Nova Parada */}
                                 <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Máquina</label>
+                                            <select
+                                                value={novaParada.maquina_id}
+                                                onChange={e => setNovaParada(p => ({ ...p, maquina_id: e.target.value }))}
+                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold outline-none"
+                                            >
+                                                <option value="">Geral</option>
+                                                {maquinasOpcoes
+                                                    .filter(m => m.linha_id === editingRecord.linha_producao)
+                                                    .map(m => <option key={m.id} value={m.id}>{m.nome}</option>)
+                                                }
+                                            </select>
+                                        </div>
                                         <div className="space-y-1">
                                             <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Início</label>
                                             <input
@@ -672,7 +701,14 @@ const RelatorioRegistros: React.FC = () => {
                                                 }`}>
                                                 <div className="flex items-center gap-4">
                                                     <span className="text-amber-500 font-mono font-bold text-xs">{getHorariosFormatados(parada)}</span>
-                                                    <span className="text-white font-bold text-xs uppercase">{parada.motivo}</span>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-white font-bold text-xs uppercase">{parada.motivo}</span>
+                                                        {parada.maquina_id && (
+                                                            <span className="text-[8px] text-slate-500 font-black uppercase tracking-widest">
+                                                                Máquina: {maquinasOpcoes.find(m => m.id === parada.maquina_id)?.nome || 'Não Identificada'}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                                 <div className="flex items-center gap-4">
                                                     <span className="text-slate-500 font-bold text-[10px] uppercase tracking-widest">{parada.duracao} min</span>
