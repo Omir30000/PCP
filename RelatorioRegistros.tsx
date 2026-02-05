@@ -651,12 +651,12 @@ const RelatorioRegistros: React.FC = () => {
                                             type="button"
                                             onClick={handleSaveParada}
                                             className={`px-4 py-2 font-black uppercase text-[10px] tracking-wider rounded-lg flex items-center gap-2 ${editingParadaIndex !== null
-                                                ? 'bg-blue-500 hover:bg-blue-400 text-white'
+                                                ? 'bg-emerald-500 hover:bg-emerald-400 text-white'
                                                 : 'bg-amber-500 hover:bg-amber-400 text-black'
                                                 }`}
                                         >
                                             {editingParadaIndex !== null ? (
-                                                <><Save className="w-3 h-3" /> Atualizar</>
+                                                <><Save className="w-3 h-3" /> Confirmar Edição</>
                                             ) : (
                                                 <><Plus className="w-3 h-3" /> Adicionar</>
                                             )}
@@ -708,7 +708,7 @@ const RelatorioRegistros: React.FC = () => {
                             </div>
 
                             {/* Modal Footer */}
-                            <div className="flex items-center justify-between gap-4 pt-6 border-t border-white/5">
+                            <div className="flex items-center justify-between gap-4 pt-6 mt-6 border-t border-white/5 sticky bottom-0 bg-[#1a1a1a] z-50">
                                 <button
                                     type="button"
                                     onClick={handleDeleteRecord}
