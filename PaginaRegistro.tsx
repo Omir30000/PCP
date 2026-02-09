@@ -41,6 +41,9 @@ const PaginaRegistro: React.FC = () => {
   });
 
   const [paradas, setParadas] = useState<Parada[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tempParada, setTempParada] = useState<Parada>({ maquina_id: '', motivo: '', duracao: 0 });
+
 
   useEffect(() => {
     async function loadInitialData() {
@@ -80,8 +83,20 @@ const PaginaRegistro: React.FC = () => {
   }, [formData.linha_producao]);
 
   const handleAddParada = () => {
-    setParadas([...paradas, { maquina_id: '', motivo: '', duracao: 0 }]);
+    if (!formData.linha_producao) return;
+    setTempParada({ maquina_id: '', motivo: '', duracao: 0 });
+    setIsModalOpen(true);
   };
+
+  const handleSaveParada = () => {
+    if (!tempParada.maquina_id || !tempParada.motivo || tempParada.duracao <= 0) {
+      alert("Por favor, preencha todos os campos da parada corretamente.");
+      return;
+    }
+    setParadas([...paradas, tempParada]);
+    setIsModalOpen(false);
+  };
+
 
   const handleRemoveParada = (index: number) => {
     setParadas(paradas.filter((_, i) => i !== index));
@@ -189,9 +204,10 @@ const PaginaRegistro: React.FC = () => {
                 type="date"
                 value={formData.data_registro}
                 onChange={e => setFormData({ ...formData, data_registro: e.target.value })}
-                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-800 transition-all outline-none"
+                className="w-full p-4 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
                 required
               />
+
             </div>
 
             <div className="space-y-3">
@@ -199,11 +215,12 @@ const PaginaRegistro: React.FC = () => {
               <select
                 value={formData.turno}
                 onChange={e => setFormData({ ...formData, turno: e.target.value })}
-                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-800 transition-all outline-none cursor-pointer"
+                className="w-full p-4 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none cursor-pointer"
               >
                 <option value="1º Turno">1º TURNO</option>
                 <option value="2º Turno">2º TURNO</option>
               </select>
+
             </div>
 
             <div className="space-y-3">
@@ -216,9 +233,10 @@ const PaginaRegistro: React.FC = () => {
                 min="0"
                 value={formData.carga_horaria}
                 onChange={e => setFormData({ ...formData, carga_horaria: parseFloat(e.target.value) || 0 })}
-                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-800 transition-all outline-none"
+                className="w-full p-4 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
                 required
               />
+
             </div>
 
             <div className="space-y-3">
@@ -228,8 +246,9 @@ const PaginaRegistro: React.FC = () => {
                 placeholder="REF LOTE"
                 value={formData.lote}
                 onChange={e => setFormData({ ...formData, lote: e.target.value })}
-                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-mono font-black uppercase text-slate-800 transition-all outline-none"
+                className="w-full p-4 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-mono font-black uppercase text-slate-900 transition-all outline-none"
               />
+
             </div>
 
             <div className="space-y-3">
@@ -254,12 +273,13 @@ const PaginaRegistro: React.FC = () => {
               <select
                 value={formData.produto_volume}
                 onChange={e => setFormData({ ...formData, produto_volume: e.target.value })}
-                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-800 transition-all outline-none"
+                className="w-full p-4 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
                 required
               >
                 <option value="">Selecione...</option>
-                {produtos.map(p => (<option key={p.id} value={p.id}>{p.nome}</option>))}
+                {produtos.map(p => (<option key={p.id} value={p.id} className="text-slate-900">{p.nome}</option>))}
               </select>
+
             </div>
           </div>
         </section>
@@ -395,8 +415,90 @@ const PaginaRegistro: React.FC = () => {
           </button>
         </footer>
       </form>
+
+      {/* Modal de Registro de Paradas */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 md:p-10 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-red-50 rounded-2xl">
+                  <Timer className="w-6 h-6 text-red-500" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-800 uppercase tracking-tighter">Registrar Nova Parada</h3>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Insira os detalhes técnicos do downtime</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 md:p-10 space-y-8">
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Máquina Afetada</label>
+                <select
+                  value={tempParada.maquina_id}
+                  onChange={e => setTempParada({ ...tempParada, maquina_id: e.target.value })}
+                  className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
+                  required
+                >
+                  <option value="">Selecione uma máquina...</option>
+                  {maquinasDaLinha.map(m => (
+                    <option key={m.id} value={m.id} className="text-slate-900">{m.nome}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Motivo / Descrição</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Falha no cilindro de envase"
+                  value={tempParada.motivo}
+                  onChange={e => setTempParada({ ...tempParada, motivo: e.target.value })}
+                  className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
+                  required
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tempo de Parada (Minutos)</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="0"
+                    value={tempParada.duracao || ''}
+                    onChange={e => setTempParada({ ...tempParada, duracao: parseInt(e.target.value) || 0 })}
+                    className="w-full p-5 bg-red-50 border-2 border-transparent focus:border-red-500 focus:bg-white rounded-2xl text-2xl font-black text-red-600 transition-all outline-none text-center"
+                    required
+                  />
+                  <Clock className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-red-300" />
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 md:p-10 bg-slate-50 flex flex-col sm:flex-row gap-4">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="flex-1 px-8 py-5 border-2 border-slate-200 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-slate-600 transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveParada}
+                className="flex-1 px-8 py-5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:shadow-xl hover:shadow-blue-200 transition-all flex items-center justify-center gap-3"
+              >
+                <Plus className="w-4 h-4" /> Confirmar Parada
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default PaginaRegistro;
+
