@@ -392,11 +392,17 @@ const PaginaRegistro: React.FC = () => {
                       <select
                         value={parada.maquina_id}
                         onChange={e => updateParada(index, 'maquina_id', e.target.value)}
-                        className="w-full p-4 bg-slate-50 border-none rounded-2xl text-[10px] font-black uppercase text-slate-800 outline-none"
+                        className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-900 outline-none transition-all"
                         required
                       >
-                        <option value="">Selecione Máquina...</option>
-                        {maquinasDaLinha.map(m => (<option key={m.id} value={m.id}>{m.nome}</option>))}
+                        <option value="">Selecione Opção...</option>
+                        {[
+                          'ROTULADORA', 'ENCHEDORA', 'SOPRO', 'DATADORA',
+                          'EMPACOTADORA', 'REUNIAO', 'PARADA PROGRAMADA',
+                          'OUTROS', 'FALTA DE ENERGIA', 'SETUP'
+                        ].map(m => (
+                          <option key={m} value={m}>{m}</option>
+                        ))}
                       </select>
                     </div>
 
@@ -406,11 +412,12 @@ const PaginaRegistro: React.FC = () => {
                         type="text"
                         value={parada.motivo}
                         onChange={e => updateParada(index, 'motivo', e.target.value)}
-                        className="w-full p-4 bg-slate-50 border-none rounded-2xl text-[10px] font-black uppercase text-slate-800 outline-none shadow-inner"
+                        className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-800 outline-none shadow-inner"
                         placeholder="Ex: Falha no sensor"
                         required
                       />
                     </div>
+
 
                     <div className="w-full lg:w-32">
                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 text-center">Minutos</label>
