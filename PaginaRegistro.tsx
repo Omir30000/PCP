@@ -42,7 +42,14 @@ const PaginaRegistro: React.FC = () => {
 
   const [paradas, setParadas] = useState<Parada[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [tempParada, setTempParada] = useState<Parada>({ maquina_id: '', motivo: '', duracao: 0 });
+  const [tempParada, setTempParada] = useState<Parada & { hora_inicio?: string, hora_fim?: string }>({
+    maquina_id: '',
+    motivo: '',
+    duracao: 0,
+    hora_inicio: '',
+    hora_fim: ''
+  });
+
 
 
   useEffect(() => {
@@ -84,8 +91,35 @@ const PaginaRegistro: React.FC = () => {
 
   const handleAddParada = () => {
     if (!formData.linha_producao) return;
-    setTempParada({ maquina_id: '', motivo: '', duracao: 0 });
+    setTempParada({ maquina_id: '', motivo: '', duracao: 0, hora_inicio: '', hora_fim: '' });
     setIsModalOpen(true);
+  };
+
+  const calculateDuration = (start: string, end: string) => {
+    if (!start || !end) return 0;
+    const [h1, m1] = start.split(':').map(Number);
+    const [h2, m2] = end.split(':').map(Number);
+
+    let totalMinutesStart = h1 * 60 + m1;
+    let totalMinutesEnd = h2 * 60 + m2;
+
+    if (totalMinutesEnd < totalMinutesStart) {
+      // Caso a parada atravesse a meia-noite
+      totalMinutesEnd += 24 * 60;
+    }
+
+    return totalMinutesEnd - totalMinutesStart;
+  };
+
+  const updateTempParadaTime = (field: 'hora_inicio' | 'hora_fim', value: string) => {
+    setTempParada(prev => {
+      const updated = { ...prev, [field]: value };
+      const duration = calculateDuration(
+        field === 'hora_inicio' ? value : (prev.hora_inicio || ''),
+        field === 'hora_fim' ? value : (prev.hora_fim || '')
+      );
+      return { ...updated, duracao: duration };
+    });
   };
 
   const handleSaveParada = () => {
@@ -93,9 +127,13 @@ const PaginaRegistro: React.FC = () => {
       alert("Por favor, preencha todos os campos da parada corretamente.");
       return;
     }
-    setParadas([...paradas, tempParada]);
+    // Removemos os campos extras de UI antes de salvar se necessário, 
+    // mas o tipo Parada permite campos extras no banco se for JSONB
+    const { hora_inicio, hora_fim, ...paradaToSave } = tempParada;
+    setParadas([...paradas, paradaToSave]);
     setIsModalOpen(false);
   };
+
 
 
   const handleRemoveParada = (index: number) => {
@@ -434,25 +472,29 @@ const PaginaRegistro: React.FC = () => {
 
             <div className="p-8 md:p-10 space-y-8">
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Máquina Afetada</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Máquina / Motivo Geral</label>
                 <select
                   value={tempParada.maquina_id}
                   onChange={e => setTempParada({ ...tempParada, maquina_id: e.target.value })}
                   className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
                   required
                 >
-                  <option value="">Selecione uma máquina...</option>
-                  {maquinasDaLinha.map(m => (
-                    <option key={m.id} value={m.id} className="text-slate-900">{m.nome}</option>
+                  <option value="">Selecione uma opção...</option>
+                  {[
+                    'ROTULADORA', 'ENCHEDORA', 'SOPRO', 'DATADORA',
+                    'EMPACOTADORA', 'REUNIAO', 'PARADA PROGRAMADA',
+                    'OUTROS', 'FALTA DE ENERGIA', 'SETUP'
+                  ].map(m => (
+                    <option key={m} value={m} className="text-slate-900">{m}</option>
                   ))}
                 </select>
               </div>
 
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Motivo / Descrição</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Detalhes do Motivo</label>
                 <input
                   type="text"
-                  placeholder="Ex: Falha no cilindro de envase"
+                  placeholder="Ex: Quebra do comando elétrico"
                   value={tempParada.motivo}
                   onChange={e => setTempParada({ ...tempParada, motivo: e.target.value })}
                   className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
@@ -460,22 +502,49 @@ const PaginaRegistro: React.FC = () => {
                 />
               </div>
 
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                    <Clock className="w-3 h-3" /> Hora Inicial
+                  </label>
+                  <input
+                    type="time"
+                    value={tempParada.hora_inicio}
+                    onChange={e => updateTempParadaTime('hora_inicio', e.target.value)}
+                    className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xl font-black text-slate-900 outline-none transition-all"
+                    required
+                  />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                    <Clock className="w-3 h-3" /> Hora Final
+                  </label>
+                  <input
+                    type="time"
+                    value={tempParada.hora_fim}
+                    onChange={e => updateTempParadaTime('hora_fim', e.target.value)}
+                    className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xl font-black text-slate-900 outline-none transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tempo de Parada (Minutos)</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tempo Total Calculado (Minutos)</label>
                 <div className="relative">
                   <input
                     type="number"
-                    min="1"
+                    min="0"
                     placeholder="0"
-                    value={tempParada.duracao || ''}
-                    onChange={e => setTempParada({ ...tempParada, duracao: parseInt(e.target.value) || 0 })}
-                    className="w-full p-5 bg-red-50 border-2 border-transparent focus:border-red-500 focus:bg-white rounded-2xl text-2xl font-black text-red-600 transition-all outline-none text-center"
-                    required
+                    value={tempParada.duracao}
+                    readOnly
+                    className="w-full p-5 bg-red-50 border-2 border-transparent rounded-2xl text-2xl font-black text-red-600 outline-none text-center cursor-not-allowed"
                   />
-                  <Clock className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-red-300" />
+                  <Timer className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-red-300" />
                 </div>
               </div>
             </div>
+
 
             <div className="p-8 md:p-10 bg-slate-50 flex flex-col sm:flex-row gap-4">
               <button
