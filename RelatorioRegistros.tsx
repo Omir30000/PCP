@@ -19,9 +19,11 @@ import { RegistroProducao, Linha, Produto } from './types/database';
 // Tipagem estendida para Paradas com horários
 interface ParadaCompleta {
     id?: string; // ID temporário para lista
-    inicio: string; // HH:mm
-    fim: string; // HH:mm
-    duracao: number; // minutos
+    inicio?: string; // HH:mm
+    fim?: string; // HH:mm
+    tipo?: string; // Planejada, Não Planejada, etc.
+    maquina?: string; // Nome da máquina
+    duracao: string | number; // número ou "10min"
     motivo: string;
     maquina_id?: string;
 }
@@ -180,6 +182,12 @@ const RelatorioRegistros: React.FC = () => {
     };
 
     // --- Lógica de Paradas ---
+    const parseMinutos = (val: any): number => {
+        if (val === null || val === undefined) return 0;
+        if (typeof val === 'number') return val;
+        const match = String(val).match(/\d+/);
+        return match ? parseInt(match[0]) : 0;
+    };
 
     const calculateDuration = (inicio: string, fim: string) => {
         if (!inicio || !fim) return 0;
@@ -262,7 +270,7 @@ const RelatorioRegistros: React.FC = () => {
             return `${parada.inicio} - ${parada.fim}`;
         }
         if (parada.inicio && parada.duracao) {
-            const fimCalculado = calculateFim(parada.inicio, parada.duracao);
+            const fimCalculado = calculateFim(parada.inicio, parseMinutos(parada.duracao));
             return `${parada.inicio} - ${fimCalculado}`;
         }
         return '--:--';
@@ -292,7 +300,20 @@ const RelatorioRegistros: React.FC = () => {
                 lote: editingRecord.lote,
                 quantidade_produzida: Number(editingRecord.quantidade_produzida),
                 carga_horaria: Number(editingRecord.carga_horaria),
-                paradas: editingRecord.paradas_detalhadas
+                paradas: (editingRecord.paradas_detalhadas || []).map(p => {
+                    // Resolve o nome da máquina se tiver apenas maquina_id (UUID)
+                    let machineName = p.maquina;
+                    if (!machineName && p.maquina_id) {
+                        machineName = maquinasOpcoes.find(m => m.id === p.maquina_id)?.nome;
+                    }
+
+                    return {
+                        tipo: p.tipo || "Não Planejada",
+                        maquina: machineName || "GERAL",
+                        motivo: p.motivo,
+                        duracao: typeof p.duracao === 'number' ? `${p.duracao}min` : p.duracao
+                    };
+                })
             };
 
             const { data, error } = await supabase
@@ -690,9 +711,9 @@ const RelatorioRegistros: React.FC = () => {
                                                     <span className="text-amber-500 font-mono font-bold text-xs">{getHorariosFormatados(parada)}</span>
                                                     <div className="flex flex-col">
                                                         <span className="text-white font-bold text-xs uppercase">{parada.motivo}</span>
-                                                        {parada.maquina_id && (
+                                                        {(parada.maquina || parada.maquina_id) && (
                                                             <span className="text-[8px] text-slate-500 font-black uppercase tracking-widest">
-                                                                Máquina: {maquinasOpcoes.find(m => m.id === parada.maquina_id)?.nome || 'Não Identificada'}
+                                                                Máquina: {parada.maquina || maquinasOpcoes.find(m => m.id === parada.maquina_id)?.nome || 'Não Identificada'}
                                                             </span>
                                                         )}
                                                     </div>

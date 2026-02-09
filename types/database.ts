@@ -6,6 +6,7 @@ export type Parada = {
   id?: string;
   tipo?: string; // Planejada, Não Planejada, Logística, etc.
   maquina_id?: string;
+  maquina?: string; // Nome da máquina para facilitar filtragem
   motivo: string;
   duracao: string | number; // "120min" ou número
   hora_inicio?: string;

@@ -173,6 +173,7 @@ const PaginaRegistro: React.FC = () => {
         observacoes: formData.observacoes || null,
         paradas: paradas.map(p => ({
           tipo: p.tipo,
+          maquina: p.maquina_id || 'GERAL', // p.maquina_id contém o nome no PaginaRegistro
           motivo: p.motivo,
           duracao: `${p.duracao}min` // Formato solicitado: "120min"
         })) as any

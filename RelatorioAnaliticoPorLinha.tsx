@@ -92,7 +92,7 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                 totalDowntime += dur;
                 totalStopsCount += 1;
 
-                const equipName = p.maquina_id || p.equipamento || 'GERAL';
+                const equipName = p.maquina || p.maquina_id || p.equipamento || 'GERAL';
                 byEquipment[equipName] = (byEquipment[equipName] || 0) + dur;
 
                 const reason = (p.motivo || 'NÃO INFORMADO').toUpperCase();
