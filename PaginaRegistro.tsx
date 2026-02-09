@@ -160,8 +160,10 @@ const PaginaRegistro: React.FC = () => {
       const payload: Database['public']['Tables']['registros_producao']['Insert'] = {
         data_registro: formData.data_registro,
         turno: formData.turno,
-        linha_producao: formData.linha_producao,
-        produto_volume: formData.produto_volume,
+        linha_producao: formData.linha_producao, // ID (mantendo retrocompatibilidade se necessário)
+        linha_id: formData.linha_producao, // UUID
+        produto_volume: formData.produto_volume, // ID (mantendo retrocompatibilidade)
+        produto_id: formData.produto_volume, // UUID
         lote: formData.lote || null,
         carga_horaria: Number(formData.carga_horaria),
         quantidade_produzida: Number(formData.quantidade_produced),
@@ -184,7 +186,9 @@ const PaginaRegistro: React.FC = () => {
       }));
       setParadas([]);
     } catch (err: any) {
-      setMessage({ type: 'error', text: `Falha na publicação: ${err.message}` });
+      console.error("Erro completo do Supabase:", err);
+      const detail = err.details || err.hint || err.message || "Erro desconhecido";
+      setMessage({ type: 'error', text: `Falha na publicação: ${detail} (Código: ${err.code || 'N/A'})` });
     } finally {
       setSaving(false);
     }

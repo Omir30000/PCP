@@ -125,6 +125,11 @@ export type Database = {
           paradas: Parada[] | null;
           carga_horaria: number | null;
           capacidade_producao: number | null;
+          eficiencia_calculada: number | null;
+          linha_id: string | null;
+          produto_id: string | null;
+          operador_id: string | null;
+          observacoes: string | null;
           created_at: string;
         };
         Insert: {
@@ -139,6 +144,11 @@ export type Database = {
           paradas?: Parada[] | null;
           carga_horaria?: number | null;
           capacidade_producao?: number | null;
+          eficiencia_calculada?: number | null;
+          linha_id?: string | null;
+          produto_id?: string | null;
+          operador_id?: string | null;
+          observacoes?: string | null;
           created_at?: string;
         };
         Update: {
@@ -153,6 +163,11 @@ export type Database = {
           paradas?: Parada[] | null;
           carga_horaria?: number | null;
           capacidade_producao?: number | null;
+          eficiencia_calculada?: number | null;
+          linha_id?: string | null;
+          produto_id?: string | null;
+          operador_id?: string | null;
+          observacoes?: string | null;
           created_at?: string;
         };
         Relationships: [
