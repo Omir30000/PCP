@@ -3,11 +3,13 @@
  * Interface representando uma parada de máquina individual dentro de um registro de produção.
  */
 export type Parada = {
-  maquina_id: string;
+  id?: string;
+  tipo?: string; // Planejada, Não Planejada, Logística, etc.
+  maquina_id?: string;
   motivo: string;
-  duracao: number; // Duração em minutos
-  total_min?: number;
-  equipamento?: string;
+  duracao: string | number; // "120min" ou número
+  hora_inicio?: string;
+  hora_fim?: string;
 }
 
 /**

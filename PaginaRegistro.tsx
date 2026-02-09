@@ -36,12 +36,14 @@ const PaginaRegistro: React.FC = () => {
     produto_volume: '',
     lote: '',
     carga_horaria: 8, // Default industrial padrão de 8 horas
-    quantidade_produced: 0
+    quantidade_produced: 0,
+    observacoes: ''
   });
 
   const [paradas, setParadas] = useState<Parada[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [tempParada, setTempParada] = useState<Parada & { hora_inicio?: string, hora_fim?: string }>({
+  const [tempParada, setTempParada] = useState<Parada>({
+    tipo: 'Não Planejada',
     maquina_id: '',
     motivo: '',
     duracao: 0,
@@ -122,14 +124,11 @@ const PaginaRegistro: React.FC = () => {
   };
 
   const handleSaveParada = () => {
-    if (!tempParada.maquina_id || !tempParada.motivo || tempParada.duracao <= 0) {
+    if (!tempParada.motivo || tempParada.duracao <= 0) {
       alert("Por favor, preencha todos os campos da parada corretamente.");
       return;
     }
-    // Removemos os campos extras de UI antes de salvar se necessário, 
-    // mas o tipo Parada permite campos extras no banco se for JSONB
-    const { hora_inicio, hora_fim, ...paradaToSave } = tempParada;
-    setParadas([...paradas, paradaToSave]);
+    setParadas([...paradas, { ...tempParada, id: Math.random().toString(36).substr(2, 9) }]);
     setIsModalOpen(false);
   };
 
@@ -156,17 +155,27 @@ const PaginaRegistro: React.FC = () => {
     setMessage(null);
 
     try {
+      // Lookups
+      const linhaSelecionada = linhas.find(l => l.id === formData.linha_producao);
+      const produtoSelecionado = produtos.find(p => p.id === formData.produto_volume);
+
       const payload: Database['public']['Tables']['registros_producao']['Insert'] = {
         data_registro: formData.data_registro,
         turno: formData.turno,
-        linha_producao: formData.linha_producao, // ID (mantendo retrocompatibilidade se necessário)
-        linha_id: formData.linha_producao, // UUID
-        produto_volume: formData.produto_volume, // ID (mantendo retrocompatibilidade)
-        produto_id: formData.produto_volume, // UUID
+        linha_producao: linhaSelecionada?.nome || formData.linha_producao, // Salva o NOME (ex: Linha 1)
+        linha_id: formData.linha_producao, // Salva o UUID
+        produto_volume: produtoSelecionado?.nome || formData.produto_volume, // Salva o NOME (ex: Gás 510ml)
+        produto_id: formData.produto_volume, // Salva o UUID
         lote: formData.lote || null,
         carga_horaria: Number(formData.carga_horaria),
         quantidade_produzida: Number(formData.quantidade_produced),
-        paradas: paradas.length > 0 ? paradas : null
+        capacidade_producao: produtoSelecionado?.capacidade_nominal || null,
+        observacoes: formData.observacoes || null,
+        paradas: paradas.map(p => ({
+          tipo: p.tipo,
+          motivo: p.motivo,
+          duracao: `${p.duracao}min` // Formato solicitado: "120min"
+        })) as any
       };
 
       const { error } = await supabase.from('registros_producao').insert(payload);
@@ -179,7 +188,8 @@ const PaginaRegistro: React.FC = () => {
         ...prev,
         quantidade_produced: 0,
         lote: '',
-        carga_horaria: 8
+        carga_horaria: 8,
+        observacoes: ''
       }));
       setParadas([]);
     } catch (err: any) {
@@ -432,6 +442,19 @@ const PaginaRegistro: React.FC = () => {
           </div>
         </section>
 
+        <section className="bg-white/80 backdrop-blur-md p-8 md:p-10 rounded-[40px] shadow-xl border border-white/50 w-full">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="p-3 bg-slate-100 rounded-2xl"><ClipboardCheck className="w-5 h-5 text-slate-600" /></div>
+            <h2 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Observações / Ocorrências</h2>
+          </div>
+          <textarea
+            value={formData.observacoes}
+            onChange={e => setFormData({ ...formData, observacoes: e.target.value })}
+            placeholder="Registre aqui observações relevantes, ocorrências ou detalhes adicionais do turno..."
+            className="w-full p-6 bg-slate-50 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-[24px] text-xs font-bold text-slate-700 transition-all outline-none min-h-[150px] shadow-inner"
+          />
+        </section>
+
         <footer className="pt-10 pb-20">
           <button
             type="submit"
@@ -465,23 +488,40 @@ const PaginaRegistro: React.FC = () => {
             </div>
 
             <div className="p-8 md:p-10 space-y-8">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Máquina / Motivo Geral</label>
-                <select
-                  value={tempParada.maquina_id}
-                  onChange={e => setTempParada({ ...tempParada, maquina_id: e.target.value })}
-                  className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
-                  required
-                >
-                  <option value="">Selecione uma opção...</option>
-                  {[
-                    'ROTULADORA', 'ENCHEDORA', 'SOPRO', 'DATADORA',
-                    'EMPACOTADORA', 'REUNIAO', 'PARADA PROGRAMADA',
-                    'OUTROS', 'FALTA DE ENERGIA', 'SETUP'
-                  ].map(m => (
-                    <option key={m} value={m} className="text-slate-900">{m}</option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tipo de Parada</label>
+                  <select
+                    value={tempParada.tipo}
+                    onChange={e => setTempParada({ ...tempParada, tipo: e.target.value })}
+                    className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
+                    required
+                  >
+                    <option value="Não Planejada">Não Planejada (Quebra/Falha)</option>
+                    <option value="Planejada">Planejada (Programada)</option>
+                    <option value="Logística">Logística (Aguardando)</option>
+                    <option value="Troca de Produto">Troca de Produto (Setup)</option>
+                    <option value="Administrativa">Administrativa (Reunião/TREINAMENTO)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Máquina</label>
+                  <select
+                    value={tempParada.maquina_id}
+                    onChange={e => setTempParada({ ...tempParada, maquina_id: e.target.value })}
+                    className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
+                  >
+                    <option value="">Nenhuma / Geral</option>
+                    {[
+                      'ROTULADORA', 'ENCHEDORA', 'SOPRO', 'DATADORA',
+                      'EMPACOTADORA', 'REUNIAO', 'PARADA PROGRAMADA',
+                      'OUTROS', 'FALTA DE ENERGIA', 'SETUP'
+                    ].map(m => (
+                      <option key={m} value={m} className="text-slate-900">{m}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div className="space-y-3">
