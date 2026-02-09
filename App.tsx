@@ -10,6 +10,7 @@ import Relatorios from './Relatorios';
 import RelatoriosProdutos from './RelatoriosProdutos';
 import RelatoriosDowntime from './RelatoriosDowntime';
 import RelatorioRegistros from './RelatorioRegistros';
+import RelatorioAnaliticoPorLinha from './RelatorioAnaliticoPorLinha';
 
 import {
   LayoutDashboard,
@@ -26,7 +27,8 @@ import {
   Scale,
   ZapOff,
   Layers,
-  LayoutGrid
+  LayoutGrid,
+  TrendingDown
 } from 'lucide-react';
 
 type Tab =
@@ -39,7 +41,8 @@ type Tab =
   | 'relatorios'
   | 'relatorios_produtos'
   | 'relatorios_downtime'
-  | 'relatorio_registros';
+  | 'relatorio_registros'
+  | 'analise_gargalos';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -112,6 +115,7 @@ const App: React.FC = () => {
           <NavItem id="relatorios" icon={FileText} label="Boletim" isSubItem={isSidebarExpanded} />
           <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" isSubItem={isSidebarExpanded} />
           <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime" isSubItem={isSidebarExpanded} />
+          <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" isSubItem={isSidebarExpanded} />
         </div>
 
         <div className={`p-4 mt-auto border-t border-white/5 bg-black/40 flex items-center gap-4`}>
@@ -139,6 +143,7 @@ const App: React.FC = () => {
           {activeTab === 'relatorios_produtos' && <RelatoriosProdutos />}
           {activeTab === 'relatorio_registros' && <RelatorioRegistros />}
           {activeTab === 'relatorios_downtime' && <RelatoriosDowntime />}
+          {activeTab === 'analise_gargalos' && <RelatorioAnaliticoPorLinha />}
         </div>
       </main>
 
