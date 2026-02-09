@@ -43,7 +43,7 @@ const PaginaRegistro: React.FC = () => {
   const [paradas, setParadas] = useState<Parada[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tempParada, setTempParada] = useState<Parada>({
-    tipo: 'Não Planejada',
+    tipo: '',
     maquina_id: '',
     motivo: '',
     duracao: 0,
@@ -92,7 +92,7 @@ const PaginaRegistro: React.FC = () => {
 
   const handleAddParada = () => {
     if (!formData.linha_producao) return;
-    setTempParada({ maquina_id: '', motivo: '', duracao: 0, hora_inicio: '', hora_fim: '' });
+    setTempParada({ tipo: '', maquina_id: '', motivo: '', duracao: 0, hora_inicio: '', hora_fim: '' });
     setIsModalOpen(true);
   };
 
@@ -124,8 +124,8 @@ const PaginaRegistro: React.FC = () => {
   };
 
   const handleSaveParada = () => {
-    if (!tempParada.motivo || tempParada.duracao <= 0) {
-      alert("Por favor, preencha todos os campos da parada corretamente.");
+    if (!tempParada.tipo || !tempParada.motivo || tempParada.duracao <= 0) {
+      alert("Por favor, preencha todos os campos da parada corretamente (Tipo, Motivo e Horários).");
       return;
     }
     setParadas([...paradas, { ...tempParada, id: Math.random().toString(36).substr(2, 9) }]);
@@ -172,10 +172,10 @@ const PaginaRegistro: React.FC = () => {
         capacidade_producao: produtoSelecionado?.capacidade_nominal || null,
         observacoes: formData.observacoes || null,
         paradas: paradas.map(p => ({
-          tipo: p.tipo,
-          maquina: p.maquina_id || 'GERAL', // p.maquina_id contém o nome no PaginaRegistro
-          motivo: p.motivo,
-          duracao: `${p.duracao}min` // Formato solicitado: "120min"
+          tipo: p.tipo || 'Não Planejada',
+          maquina: p.maquina_id || 'GERAL',
+          motivo: p.motivo || 'NÃO INFORMADO',
+          duracao: typeof p.duracao === 'number' ? `${p.duracao}min` : (p.duracao || '0min')
         })) as any
       };
 
@@ -417,6 +417,23 @@ const PaginaRegistro: React.FC = () => {
                     </div>
 
 
+                    <div className="w-full lg:w-48">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Tipo</label>
+                      <select
+                        value={parada.tipo}
+                        onChange={e => updateParada(index, 'tipo', e.target.value)}
+                        className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-900 outline-none transition-all"
+                        required
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="Não Planejada">Não Planejada</option>
+                        <option value="Planejada">Planejada</option>
+                        <option value="Logística">Logística</option>
+                        <option value="Troca de Produto">Troca de Produto</option>
+                        <option value="Administrativa">Administrativa</option>
+                      </select>
+                    </div>
+
                     <div className="w-full lg:w-32">
                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 text-center">Minutos</label>
                       <input
@@ -498,11 +515,12 @@ const PaginaRegistro: React.FC = () => {
                     className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
                     required
                   >
-                    <option value="Não Planejada">Não Planejada (Quebra/Falha)</option>
-                    <option value="Planejada">Planejada (Programada)</option>
-                    <option value="Logística">Logística (Aguardando)</option>
-                    <option value="Troca de Produto">Troca de Produto (Setup)</option>
-                    <option value="Administrativa">Administrativa (Reunião/TREINAMENTO)</option>
+                    <option value="">Selecione o Tipo...</option>
+                    <option value="Não Planejada">Não Planejada</option>
+                    <option value="Planejada">Planejada</option>
+                    <option value="Logística">Logística</option>
+                    <option value="Troca de Produto">Troca de Produto</option>
+                    <option value="Administrativa">Administrativa</option>
                   </select>
                 </div>
 

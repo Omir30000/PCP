@@ -57,7 +57,7 @@ const RelatorioRegistros: React.FC = () => {
     const [isSaving, setIsSaving] = useState(false);
 
     // Estado para Nova Parada no Modal
-    const [novaParada, setNovaParada] = useState<ParadaCompleta>({ inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
+    const [novaParada, setNovaParada] = useState<ParadaCompleta>({ tipo: '', inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
     const [editingParadaIndex, setEditingParadaIndex] = useState<number | null>(null);
 
     useEffect(() => {
@@ -171,13 +171,13 @@ const RelatorioRegistros: React.FC = () => {
             produto_volume: findValueForSelect(record.produto_volume, produtosOpcoes) || record.produto_volume,
             paradas_detalhadas: (paradasIniciais as unknown) as ParadaCompleta[]
         });
-        setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
+        setNovaParada({ tipo: '', inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
     };
 
     const handleCloseModal = () => {
         setEditingRecord(null);
         setIsSaving(false);
-        setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
+        setNovaParada({ tipo: '', inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
         setEditingParadaIndex(null);
     };
 
@@ -213,8 +213,8 @@ const RelatorioRegistros: React.FC = () => {
     };
 
     const handleSaveParada = () => {
-        if (!novaParada.inicio || !novaParada.fim || !novaParada.motivo) {
-            alert("Preencha Início, Fim e Motivo");
+        if (!novaParada.tipo || !novaParada.inicio || !novaParada.fim || !novaParada.motivo) {
+            alert("Preencha Tipo, Início, Fim e Motivo");
             return;
         }
 
@@ -234,7 +234,7 @@ const RelatorioRegistros: React.FC = () => {
         }
 
         setEditingRecord({ ...editingRecord, paradas_detalhadas: novasParadas });
-        setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
+        setNovaParada({ tipo: '', inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
         setEditingParadaIndex(null);
     };
 
@@ -243,6 +243,7 @@ const RelatorioRegistros: React.FC = () => {
 
         const parada = editingRecord.paradas_detalhadas[index];
         setNovaParada({
+            tipo: parada.tipo || '',
             inicio: parada.inicio || '',
             fim: parada.fim || '',
             duracao: parada.duracao || 0,
@@ -260,7 +261,7 @@ const RelatorioRegistros: React.FC = () => {
 
         // Se estava editando o item removido, cancela edição
         if (editingParadaIndex === index) {
-            setNovaParada({ inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
+            setNovaParada({ tipo: '', inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
             setEditingParadaIndex(null);
         }
     };
@@ -310,8 +311,8 @@ const RelatorioRegistros: React.FC = () => {
                     return {
                         tipo: p.tipo || "Não Planejada",
                         maquina: machineName || "GERAL",
-                        motivo: p.motivo,
-                        duracao: typeof p.duracao === 'number' ? `${p.duracao}min` : p.duracao
+                        motivo: p.motivo || "NÃO INFORMADO",
+                        duracao: typeof p.duracao === 'number' ? `${p.duracao}min` : (p.duracao || "0min")
                     };
                 })
             };
@@ -635,7 +636,7 @@ const RelatorioRegistros: React.FC = () => {
 
                                 {/* Formulário de Nova Parada */}
                                 <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Máquina</label>
                                             <select
@@ -648,6 +649,21 @@ const RelatorioRegistros: React.FC = () => {
                                                     .filter(m => m.linha_id === editingRecord.linha_producao)
                                                     .map(m => <option key={m.id} value={m.id}>{m.nome}</option>)
                                                 }
+                                            </select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Tipo</label>
+                                            <select
+                                                value={novaParada.tipo}
+                                                onChange={e => setNovaParada(p => ({ ...p, tipo: e.target.value }))}
+                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold outline-none"
+                                            >
+                                                <option value="">Selecione...</option>
+                                                <option value="Não Planejada">Não Planejada</option>
+                                                <option value="Planejada">Planejada</option>
+                                                <option value="Logística">Logística</option>
+                                                <option value="Troca de Produto">Troca de Produto</option>
+                                                <option value="Administrativa">Administrativa</option>
                                             </select>
                                         </div>
                                         <div className="space-y-1">
@@ -672,7 +688,7 @@ const RelatorioRegistros: React.FC = () => {
                                             <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Duração</label>
                                             <div className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400 uppercase font-bold flex items-center gap-2">
                                                 <Clock className="w-3 h-3" />
-                                                {calculateDuration(novaParada.inicio, novaParada.fim)} min
+                                                {calculateDuration(novaParada.inicio || '', novaParada.fim || '')} min
                                             </div>
                                         </div>
                                     </div>
@@ -784,10 +800,10 @@ const RelatorioRegistros: React.FC = () => {
 
                         </form>
                     </div>
-                </div>
+                </div >
             )}
 
-        </div>
+        </div >
     );
 };
 
