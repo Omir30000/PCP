@@ -121,7 +121,6 @@ export type Database = {
           produto_volume: string;
           lote: string | null;
           quantidade_produzida: number;
-          quantidade_perda: number;
           paradas: Parada[] | null;
           carga_horaria: number | null;
           capacidade_producao: number | null;
@@ -140,7 +139,6 @@ export type Database = {
           produto_volume: string;
           lote?: string | null;
           quantidade_produzida: number;
-          quantidade_perda: number;
           paradas?: Parada[] | null;
           carga_horaria?: number | null;
           capacidade_producao?: number | null;
@@ -159,7 +157,6 @@ export type Database = {
           produto_volume?: string;
           lote?: string | null;
           quantidade_produzida?: number;
-          quantidade_perda?: number;
           paradas?: Parada[] | null;
           carga_horaria?: number | null;
           capacidade_producao?: number | null;

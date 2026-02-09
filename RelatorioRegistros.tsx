@@ -291,7 +291,6 @@ const RelatorioRegistros: React.FC = () => {
                 produto_id: editingRecord.produto_volume,
                 lote: editingRecord.lote,
                 quantidade_produzida: Number(editingRecord.quantidade_produzida),
-                quantidade_perda: editingRecord.quantidade_perda !== undefined ? Number(editingRecord.quantidade_perda) : 0,
                 carga_horaria: Number(editingRecord.carga_horaria),
                 paradas: editingRecord.paradas_detalhadas
             };
@@ -431,7 +430,6 @@ const RelatorioRegistros: React.FC = () => {
                                 <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Produto</th>
                                 <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Lote</th>
                                 <th className="p-4 text-[10px] font-black text-blue-400 uppercase tracking-widest text-right whitespace-nowrap">Produzido</th>
-                                <th className="p-4 text-[10px] font-black text-red-400 uppercase tracking-widest text-right whitespace-nowrap">Perdas</th>
                                 <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right whitespace-nowrap">Eficiência</th>
                             </tr>
                         </thead>
@@ -444,8 +442,9 @@ const RelatorioRegistros: React.FC = () => {
                                 </tr>
                             ) : (
                                 registros.map((reg) => {
-                                    const total = (reg.quantidade_produzida || 0) + (reg.quantidade_perda || 0);
-                                    const eficiencia = total > 0 ? ((reg.quantidade_produzida || 0) / total) * 100 : 0;
+                                    const eficiencia = reg.capacidade_producao && reg.capacidade_producao > 0
+                                        ? ((reg.quantidade_produzida || 0) / reg.capacidade_producao) * 100
+                                        : 0;
 
                                     return (
                                         <tr
@@ -471,9 +470,6 @@ const RelatorioRegistros: React.FC = () => {
                                             </td>
                                             <td className="p-4 text-sm font-black text-blue-400 text-right whitespace-nowrap group-hover:text-blue-300">
                                                 {reg.quantidade_produzida?.toLocaleString()}
-                                            </td>
-                                            <td className="p-4 text-sm font-black text-red-400 text-right whitespace-nowrap group-hover:text-red-300">
-                                                {reg.quantidade_perda?.toLocaleString()}
                                             </td>
                                             <td className="p-4 text-xs font-bold text-right whitespace-nowrap">
                                                 <span className={`px-2 py-1 rounded-full text-[10px] ${eficiencia >= 90 ? 'bg-emerald-500/20 text-emerald-400' :
@@ -595,7 +591,7 @@ const RelatorioRegistros: React.FC = () => {
                             </div>
 
                             {/* Seção Produção e Perdas */}
-                            <div className="grid grid-cols-2 gap-6 pt-4 border-t border-white/5">
+                            <div className="grid grid-cols-1 gap-6 pt-4 border-t border-white/5">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Produzido (UN)</label>
                                     <input
@@ -603,15 +599,6 @@ const RelatorioRegistros: React.FC = () => {
                                         value={editingRecord.quantidade_produzida}
                                         onChange={e => setEditingRecord({ ...editingRecord, quantidade_produzida: Number(e.target.value) })}
                                         className="w-full bg-blue-500/10 border border-blue-500/30 rounded-xl px-4 py-4 text-xl font-black text-blue-400 focus:border-blue-500 outline-none transition-all text-center"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-red-400 uppercase tracking-widest">Perdas (UN)</label>
-                                    <input
-                                        type="number"
-                                        value={editingRecord.quantidade_perda}
-                                        onChange={e => setEditingRecord({ ...editingRecord, quantidade_perda: Number(e.target.value) })}
-                                        className="w-full bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-4 text-xl font-black text-red-400 focus:border-red-500 outline-none transition-all text-center"
                                     />
                                 </div>
                             </div>

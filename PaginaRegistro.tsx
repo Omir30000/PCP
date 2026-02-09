@@ -36,8 +36,7 @@ const PaginaRegistro: React.FC = () => {
     produto_volume: '',
     lote: '',
     carga_horaria: 8, // Default industrial padrão de 8 horas
-    quantidade_produced: 0,
-    quantidade_perda: 0
+    quantidade_produced: 0
   });
 
   const [paradas, setParadas] = useState<Parada[]>([]);
@@ -167,7 +166,6 @@ const PaginaRegistro: React.FC = () => {
         lote: formData.lote || null,
         carga_horaria: Number(formData.carga_horaria),
         quantidade_produzida: Number(formData.quantidade_produced),
-        quantidade_perda: Number(formData.quantidade_perda),
         paradas: paradas.length > 0 ? paradas : null
       };
 
@@ -180,7 +178,6 @@ const PaginaRegistro: React.FC = () => {
       setFormData(prev => ({
         ...prev,
         quantidade_produced: 0,
-        quantidade_perda: 0,
         lote: '',
         carga_horaria: 8
       }));
@@ -332,7 +329,7 @@ const PaginaRegistro: React.FC = () => {
             <h2 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Fluxo de Volumes</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-10 w-full">
             <div className="space-y-4">
               <label className="text-[11px] font-black text-blue-600 uppercase tracking-[0.3em] ml-2">Produção Total (UN)</label>
               <div className="relative">
@@ -342,20 +339,6 @@ const PaginaRegistro: React.FC = () => {
                   value={formData.quantidade_produced}
                   onChange={e => setFormData({ ...formData, quantidade_produced: parseInt(e.target.value) || 0 })}
                   className="w-full p-10 text-6xl md:text-8xl font-black border-4 border-transparent bg-blue-50/50 text-blue-700 rounded-[48px] text-center focus:border-blue-500 focus:bg-white transition-all outline-none"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <label className="text-[11px] font-black text-red-500 uppercase tracking-[0.3em] ml-2">Refugo / Perdas (UN)</label>
-              <div className="relative">
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.quantidade_perda}
-                  onChange={e => setFormData({ ...formData, quantidade_perda: parseInt(e.target.value) || 0 })}
-                  className="w-full p-10 text-6xl md:text-8xl font-black border-4 border-transparent bg-red-50/50 text-red-700 rounded-[48px] text-center focus:border-red-500 focus:bg-white transition-all outline-none"
                   required
                 />
               </div>
