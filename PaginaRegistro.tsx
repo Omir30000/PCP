@@ -140,7 +140,16 @@ const PaginaRegistro: React.FC = () => {
 
   const updateParada = (index: number, field: keyof Parada, value: any) => {
     const newParadas = [...paradas];
-    newParadas[index] = { ...newParadas[index], [field]: value };
+    const updatedParada = { ...newParadas[index], [field]: value };
+
+    if (field === 'hora_inicio' || field === 'hora_fim') {
+      updatedParada.duracao = calculateDuration(
+        updatedParada.hora_inicio || '',
+        updatedParada.hora_fim || ''
+      );
+    }
+
+    newParadas[index] = updatedParada;
     setParadas(newParadas);
   };
 
@@ -175,7 +184,9 @@ const PaginaRegistro: React.FC = () => {
           tipo: p.tipo || 'Não Planejada',
           maquina: p.maquina_id || 'GERAL',
           motivo: p.motivo || 'NÃO INFORMADO',
-          duracao: typeof p.duracao === 'number' ? `${p.duracao}min` : (p.duracao || '0min')
+          duracao: typeof p.duracao === 'number' ? `${p.duracao}min` : (p.duracao || '0min'),
+          hora_inicio: p.hora_inicio || null,
+          hora_fim: p.hora_fim || null
         })) as any
       };
 
@@ -383,9 +394,9 @@ const PaginaRegistro: React.FC = () => {
                 {paradas.map((parada, index) => (
                   <div
                     key={index}
-                    className="bg-white p-6 md:p-8 rounded-[32px] border border-slate-100 shadow-sm flex flex-col lg:flex-row items-center gap-8 relative group hover:border-red-200 transition-all"
+                    className="bg-white p-6 md:p-8 rounded-[32px] border border-slate-100 shadow-sm flex flex-col lg:flex-row items-center gap-6 relative group hover:border-red-200 transition-all"
                   >
-                    <div className="w-full lg:w-1/4">
+                    <div className="w-full lg:w-40">
                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Máquina</label>
                       <select
                         value={parada.maquina_id}
@@ -417,7 +428,7 @@ const PaginaRegistro: React.FC = () => {
                     </div>
 
 
-                    <div className="w-full lg:w-48">
+                    <div className="w-full lg:w-40">
                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Tipo</label>
                       <select
                         value={parada.tipo}
@@ -434,14 +445,36 @@ const PaginaRegistro: React.FC = () => {
                       </select>
                     </div>
 
-                    <div className="w-full lg:w-32">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 text-center">Minutos</label>
+                    <div className="w-full lg:w-28">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Início</label>
+                      <input
+                        type="time"
+                        value={parada.hora_inicio}
+                        onChange={e => updateParada(index, 'hora_inicio', e.target.value)}
+                        className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-900 outline-none transition-all"
+                        required
+                      />
+                    </div>
+
+                    <div className="w-full lg:w-28">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Fim</label>
+                      <input
+                        type="time"
+                        value={parada.hora_fim}
+                        onChange={e => updateParada(index, 'hora_fim', e.target.value)}
+                        className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-900 outline-none transition-all"
+                        required
+                      />
+                    </div>
+
+                    <div className="w-full lg:w-20">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 text-center">Min</label>
                       <input
                         type="number"
                         min="1"
                         value={parada.duracao}
                         onChange={e => updateParada(index, 'duracao', parseInt(e.target.value) || 0)}
-                        className="w-full p-4 bg-red-50 text-red-600 border-none rounded-2xl text-lg font-black text-center outline-none shadow-sm"
+                        className="w-full p-4 bg-red-50 text-red-600 border-none rounded-2xl text-base font-black text-center outline-none shadow-sm"
                         required
                       />
                     </div>
@@ -449,9 +482,9 @@ const PaginaRegistro: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleRemoveParada(index)}
-                      className="p-4 text-slate-300 hover:text-red-500 transition-all"
+                      className="p-3 text-slate-300 hover:text-red-500 transition-all shrink-0"
                     >
-                      <Trash2 className="w-6 h-6" />
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
                 ))}
