@@ -408,7 +408,7 @@ const PaginaRegistro: React.FC = () => {
                         {[
                           'ROTULADORA', 'ENCHEDORA', 'SOPRO', 'DATADORA',
                           'EMPACOTADORA', 'REUNIAO', 'PARADA PROGRAMADA',
-                          'OUTROS', 'FALTA DE ENERGIA', 'SETUP'
+                          'OUTROS', 'FALTA DE ENERGIA', 'SETUP', 'MANUTENÇÃO'
                         ].map(m => (
                           <option key={m} value={m}>{m}</option>
                         ))}
@@ -442,6 +442,7 @@ const PaginaRegistro: React.FC = () => {
                         <option value="Logística">Logística</option>
                         <option value="Troca de Produto">Troca de Produto</option>
                         <option value="Administrativa">Administrativa</option>
+                        <option value="Manutenção">Manutenção</option>
                       </select>
                     </div>
 
@@ -554,6 +555,7 @@ const PaginaRegistro: React.FC = () => {
                     <option value="Logística">Logística</option>
                     <option value="Troca de Produto">Troca de Produto</option>
                     <option value="Administrativa">Administrativa</option>
+                    <option value="Manutenção">Manutenção</option>
                   </select>
                 </div>
 
@@ -568,7 +570,7 @@ const PaginaRegistro: React.FC = () => {
                     {[
                       'ROTULADORA', 'ENCHEDORA', 'SOPRO', 'DATADORA',
                       'EMPACOTADORA', 'REUNIAO', 'PARADA PROGRAMADA',
-                      'OUTROS', 'FALTA DE ENERGIA', 'SETUP'
+                      'OUTROS', 'FALTA DE ENERGIA', 'SETUP', 'MANUTENÇÃO'
                     ].map(m => (
                       <option key={m} value={m} className="text-slate-900">{m}</option>
                     ))}
