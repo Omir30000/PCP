@@ -446,12 +446,20 @@ const PaginaRegistro: React.FC = () => {
                         required
                       >
                         <option value="">Selecione...</option>
-                        <option value="Não Planejada">Não Planejada</option>
-                        <option value="Planejada">Planejada</option>
-                        <option value="Logística">Logística</option>
-                        <option value="Troca de Produto">Troca de Produto</option>
-                        <option value="Administrativa">Administrativa</option>
-                        <option value="Manutenção">Manutenção</option>
+                        {[
+                          'FALHA DE ENERGIA',
+                          'FALTA DE COLABORADOR',
+                          'FALTA DE MATERIA PRIMA',
+                          'LIMPEZA DE MÁQUINA',
+                          'MANUTENÇÃO',
+                          'PALESTRA/REUNIÃO',
+                          'SETUP (Preparação de máquina)',
+                          'PARADA PROGRAMADA',
+                          'OUTROS',
+                          'ASSISTENCIA TÉCNICA'
+                        ].map(t => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
                       </select>
                     </div>
 
@@ -559,12 +567,20 @@ const PaginaRegistro: React.FC = () => {
                     required
                   >
                     <option value="">Selecione o Tipo...</option>
-                    <option value="Não Planejada">Não Planejada</option>
-                    <option value="Planejada">Planejada</option>
-                    <option value="Logística">Logística</option>
-                    <option value="Troca de Produto">Troca de Produto</option>
-                    <option value="Administrativa">Administrativa</option>
-                    <option value="Manutenção">Manutenção</option>
+                    {[
+                      'FALHA DE ENERGIA',
+                      'FALTA DE COLABORADOR',
+                      'FALTA DE MATERIA PRIMA',
+                      'LIMPEZA DE MÁQUINA',
+                      'MANUTENÇÃO',
+                      'PALESTRA/REUNIÃO',
+                      'SETUP (Preparação de máquina)',
+                      'PARADA PROGRAMADA',
+                      'OUTROS',
+                      'ASSISTENCIA TÉCNICA'
+                    ].map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
                   </select>
                 </div>
 
