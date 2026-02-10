@@ -289,20 +289,33 @@ const RelatorioRegistros: React.FC = () => {
 
     const handleSaveRecord = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!editingRecord) return;
+        console.log('🔵 handleSaveRecord INICIADO');
 
+        if (!editingRecord) {
+            console.log('❌ Nenhum registro em edição');
+            return;
+        }
+
+        console.log('📝 Registro em edição:', editingRecord.id);
         setIsSaving(true);
+
         try {
+            // Helper para validar UUID
+            const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
+
             const selectedLinha = linhasOpcoes.find(l => l.id === editingRecord.linha_producao);
             const selectedProduto = produtosOpcoes.find(p => p.id === editingRecord.produto_volume);
+
+            console.log('🔍 Linha selecionada:', selectedLinha);
+            console.log('🔍 Produto selecionado:', selectedProduto);
 
             const payload = {
                 data_registro: editingRecord.data_registro,
                 turno: editingRecord.turno,
                 linha_producao: selectedLinha?.nome || editingRecord.linha_producao,
-                linha_id: editingRecord.linha_producao,
+                linha_id: selectedLinha?.id || (isUUID(editingRecord.linha_producao) ? editingRecord.linha_producao : null),
                 produto_volume: selectedProduto?.nome || editingRecord.produto_volume,
-                produto_id: editingRecord.produto_volume,
+                produto_id: selectedProduto?.id || (isUUID(editingRecord.produto_volume) ? editingRecord.produto_volume : null),
                 lote: editingRecord.lote,
                 quantidade_produzida: Number(editingRecord.quantidade_produzida),
                 carga_horaria: Number(editingRecord.carga_horaria),
@@ -320,11 +333,17 @@ const RelatorioRegistros: React.FC = () => {
                 })
             };
 
+            console.log('📦 Payload preparado:', payload);
+            console.log('🚀 Enviando para Supabase...');
+
             const { data, error } = await supabase
                 .from('registros_producao')
                 .update(payload)
                 .eq('id', editingRecord.id)
                 .select();
+
+            console.log('📥 Resposta do Supabase - Data:', data);
+            console.log('📥 Resposta do Supabase - Error:', error);
 
             if (error) throw error;
 
@@ -538,307 +557,309 @@ const RelatorioRegistros: React.FC = () => {
                         </div>
 
                         {/* Modal Body */}
-                        <form onSubmit={handleSaveRecord} className="p-6 md:p-8 space-y-8">
+                        <form onSubmit={handleSaveRecord} className="flex flex-col max-h-full">
+                            <div className="p-6 md:p-8 space-y-8 overflow-y-auto">
 
-                            {/* Seção Principal */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Data</label>
-                                    <input
-                                        type="date"
-                                        required
-                                        value={editingRecord.data_registro}
-                                        onChange={e => setEditingRecord({ ...editingRecord, data_registro: e.target.value })}
-                                        className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Turno</label>
-                                    <select
-                                        value={editingRecord.turno}
-                                        onChange={e => setEditingRecord({ ...editingRecord, turno: e.target.value })}
-                                        className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
-                                    >
-                                        <option value="1º Turno" className="text-slate-900">1º TURNO</option>
-                                        <option value="2º Turno" className="text-slate-900">2º TURNO</option>
-                                    </select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Linha</label>
-                                    <select
-                                        value={editingRecord.linha_producao}
-                                        onChange={e => setEditingRecord({ ...editingRecord, linha_producao: e.target.value })}
-                                        className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
-                                    >
-                                        <option value="" className="text-slate-900">Selecione...</option>
-                                        {linhasOpcoes.map(l => (
-                                            <option key={l.id} value={l.id} className="text-slate-900">{l.nome}</option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Produto</label>
-                                    <select
-                                        value={editingRecord.produto_volume}
-                                        onChange={e => setEditingRecord({ ...editingRecord, produto_volume: e.target.value })}
-                                        className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
-                                    >
-                                        <option value="" className="text-slate-900">Selecione...</option>
-                                        {produtosOpcoes.map(p => (
-                                            <option key={p.id} value={p.id} className="text-slate-900">{p.nome}</option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lote</label>
-                                    <input
-                                        type="text"
-                                        value={editingRecord.lote || ''}
-                                        onChange={e => setEditingRecord({ ...editingRecord, lote: e.target.value })}
-                                        className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold font-mono"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Carga Horária (h)</label>
-                                    <input
-                                        type="number"
-                                        step="0.1"
-                                        value={editingRecord.carga_horaria || 0}
-                                        onChange={e => setEditingRecord({ ...editingRecord, carga_horaria: Number(e.target.value) })}
-                                        className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Seção Produção e Perdas */}
-                            <div className="grid grid-cols-1 gap-6 pt-4 border-t border-white/5">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Produzido (UN)</label>
-                                    <input
-                                        type="number"
-                                        value={editingRecord.quantidade_produzida}
-                                        onChange={e => setEditingRecord({ ...editingRecord, quantidade_produzida: Number(e.target.value) })}
-                                        className="w-full bg-blue-500/10 border border-blue-500/30 rounded-xl px-4 py-4 text-xl font-black text-blue-400 focus:border-blue-500 outline-none transition-all text-center"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Seção de Paradas (Downtime) */}
-                            <div className="space-y-6 pt-4 border-t border-white/5">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                                        <AlertOctagon className="w-4 h-4 text-amber-500" />
-                                        Paradas / Downtime
-                                    </h3>
-                                </div>
-
-                                {/* Formulário de Nova Parada */}
-                                <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                                        <div className="space-y-1">
-                                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Máquina</label>
-                                            <select
-                                                value={novaParada.maquina_id}
-                                                onChange={e => setNovaParada(p => ({ ...p, maquina_id: e.target.value }))}
-                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold outline-none"
-                                            >
-                                                <option value="" className="text-slate-900">Geral</option>
-                                                {[
-                                                    'ENCHEDORA',
-                                                    'DATADORA',
-                                                    'ROTULADORA',
-                                                    'EMPACOTADORA',
-                                                    'ESTEIRAS',
-                                                    'PAVAN',
-                                                    'UNIPLAS',
-                                                    'MULTIPET',
-                                                    'AEREO',
-                                                    'HALMMER',
-                                                    'CALDEIRA',
-                                                    'DESPALETIZADOR',
-                                                    'INTERVALO',
-                                                    'INJETOR DE ESSENCIA'
-                                                ].map(m => (
-                                                    <option key={m} value={m} className="text-slate-900">{m}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Tipo</label>
-                                            <select
-                                                value={novaParada.tipo}
-                                                onChange={e => setNovaParada(p => ({ ...p, tipo: e.target.value }))}
-                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold outline-none"
-                                            >
-                                                <option value="" className="text-slate-900">Selecione...</option>
-                                                {[
-                                                    'FALHA DE ENERGIA',
-                                                    'FALTA DE COLABORADOR',
-                                                    'FALTA DE MATERIA PRIMA',
-                                                    'LIMPEZA DE MÁQUINA',
-                                                    'MANUTENÇÃO',
-                                                    'PALESTRA/REUNIÃO',
-                                                    'SETUP (Preparação de máquina)',
-                                                    'PARADA PROGRAMADA',
-                                                    'OUTROS',
-                                                    'ASSISTENCIA TÉCNICA'
-                                                ].map(t => (
-                                                    <option key={t} value={t} className="text-slate-900">{t}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Início</label>
-                                            <input
-                                                type="time"
-                                                value={novaParada.hora_inicio}
-                                                onChange={e => setNovaParada(p => ({ ...p, hora_inicio: e.target.value }))}
-                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
-                                            />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Fim</label>
-                                            <input
-                                                type="time"
-                                                value={novaParada.hora_fim}
-                                                onChange={e => setNovaParada(p => ({ ...p, hora_fim: e.target.value }))}
-                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
-                                            />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Duração</label>
-                                            <div className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400 uppercase font-bold flex items-center gap-2">
-                                                <Clock className="w-3 h-3" />
-                                                {calculateDuration(novaParada.hora_inicio || '', novaParada.hora_fim || '')} min
-                                            </div>
-                                        </div>
+                                {/* Seção Principal */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Data</label>
+                                        <input
+                                            type="date"
+                                            required
+                                            value={editingRecord.data_registro}
+                                            onChange={e => setEditingRecord({ ...editingRecord, data_registro: e.target.value })}
+                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                        />
                                     </div>
-                                    <div className="flex gap-4">
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Turno</label>
+                                        <select
+                                            value={editingRecord.turno}
+                                            onChange={e => setEditingRecord({ ...editingRecord, turno: e.target.value })}
+                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                        >
+                                            <option value="1º Turno" className="text-slate-900">1º TURNO</option>
+                                            <option value="2º Turno" className="text-slate-900">2º TURNO</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Linha</label>
+                                        <select
+                                            value={editingRecord.linha_producao}
+                                            onChange={e => setEditingRecord({ ...editingRecord, linha_producao: e.target.value })}
+                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                        >
+                                            <option value="" className="text-slate-900">Selecione...</option>
+                                            {linhasOpcoes.map(l => (
+                                                <option key={l.id} value={l.id} className="text-slate-900">{l.nome}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Produto</label>
+                                        <select
+                                            value={editingRecord.produto_volume}
+                                            onChange={e => setEditingRecord({ ...editingRecord, produto_volume: e.target.value })}
+                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                        >
+                                            <option value="" className="text-slate-900">Selecione...</option>
+                                            {produtosOpcoes.map(p => (
+                                                <option key={p.id} value={p.id} className="text-slate-900">{p.nome}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lote</label>
                                         <input
                                             type="text"
-                                            placeholder="MOTIVO DA PARADA..."
-                                            value={novaParada.motivo}
-                                            onChange={e => setNovaParada(p => ({ ...p, motivo: e.target.value }))}
-                                            className="flex-1 bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 uppercase font-bold"
+                                            value={editingRecord.lote || ''}
+                                            onChange={e => setEditingRecord({ ...editingRecord, lote: e.target.value })}
+                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold font-mono"
                                         />
-                                        <button
-                                            type="button"
-                                            onClick={handleSaveParada}
-                                            className={`px-4 py-2 font-black uppercase text-[10px] tracking-wider rounded-lg flex items-center gap-2 ${editingParadaIndex !== null
-                                                ? 'bg-emerald-500 hover:bg-emerald-400 text-white'
-                                                : 'bg-amber-500 hover:bg-amber-400 text-black'
-                                                }`}
-                                        >
-                                            {editingParadaIndex !== null ? (
-                                                <><Save className="w-3 h-3" /> Confirmar Edição</>
-                                            ) : (
-                                                <><Plus className="w-3 h-3" /> Adicionar</>
-                                            )}
-                                        </button>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Carga Horária (h)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={editingRecord.carga_horaria || 0}
+                                            onChange={e => setEditingRecord({ ...editingRecord, carga_horaria: Number(e.target.value) })}
+                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                        />
                                     </div>
                                 </div>
 
-                                {/* Lista de Paradas */}
-                                <div className="space-y-2">
-                                    {editingRecord.paradas_detalhadas && editingRecord.paradas_detalhadas.length > 0 ? (
-                                        editingRecord.paradas_detalhadas.map((parada, idx) => (
-                                            <div key={idx} className={`flex items-center justify-between p-3 rounded-lg border hover:bg-white/10 group transition-all ${editingParadaIndex === idx ? 'bg-white/10 border-blue-500/50' : 'bg-white/5 border-white/5'
-                                                }`}>
-                                                <div className="flex items-center gap-4">
-                                                    <span className="text-amber-500 font-mono font-bold text-xs">{getHorariosFormatados(parada)}</span>
-                                                    <div className="flex flex-col">
-                                                        <span className="text-white font-bold text-xs uppercase">{parada.motivo}</span>
-                                                        {(parada.maquina || parada.maquina_id) && (
-                                                            <span className="text-[8px] text-slate-500 font-black uppercase tracking-widest">
-                                                                Máquina: {parada.maquina || maquinasOpcoes.find(m => m.id === parada.maquina_id)?.nome || 'Não Identificada'}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-4">
-                                                    <span className="text-slate-500 font-bold text-[10px] uppercase tracking-widest">{parada.duracao} min</span>
+                                {/* Seção Produção e Perdas */}
+                                <div className="grid grid-cols-1 gap-6 pt-4 border-t border-white/5">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Produzido (UN)</label>
+                                        <input
+                                            type="number"
+                                            value={editingRecord.quantidade_produzida}
+                                            onChange={e => setEditingRecord({ ...editingRecord, quantidade_produzida: Number(e.target.value) })}
+                                            className="w-full bg-blue-500/10 border border-blue-500/30 rounded-xl px-4 py-4 text-xl font-black text-blue-400 focus:border-blue-500 outline-none transition-all text-center"
+                                        />
+                                    </div>
+                                </div>
 
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleEditParada(idx)}
-                                                            className="text-slate-600 hover:text-blue-500 transition-colors"
-                                                            title="Editar Parada"
-                                                        >
-                                                            <FileText className="w-3 h-3" />
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleRemoveParada(idx)}
-                                                            className="text-slate-600 hover:text-red-500 transition-colors"
-                                                            title="Remover Parada"
-                                                        >
-                                                            <Trash2 className="w-3 h-3" />
-                                                        </button>
-                                                    </div>
+                                {/* Seção de Paradas (Downtime) */}
+                                <div className="space-y-6 pt-4 border-t border-white/5">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                                            <AlertOctagon className="w-4 h-4 text-amber-500" />
+                                            Paradas / Downtime
+                                        </h3>
+                                    </div>
+
+                                    {/* Formulário de Nova Parada */}
+                                    <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                                            <div className="space-y-1">
+                                                <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Máquina</label>
+                                                <select
+                                                    value={novaParada.maquina_id}
+                                                    onChange={e => setNovaParada(p => ({ ...p, maquina_id: e.target.value }))}
+                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold outline-none"
+                                                >
+                                                    <option value="" className="text-slate-900">Geral</option>
+                                                    {[
+                                                        'ENCHEDORA',
+                                                        'DATADORA',
+                                                        'ROTULADORA',
+                                                        'EMPACOTADORA',
+                                                        'ESTEIRAS',
+                                                        'PAVAN',
+                                                        'UNIPLAS',
+                                                        'MULTIPET',
+                                                        'AEREO',
+                                                        'HALMMER',
+                                                        'CALDEIRA',
+                                                        'DESPALETIZADOR',
+                                                        'INTERVALO',
+                                                        'INJETOR DE ESSENCIA'
+                                                    ].map(m => (
+                                                        <option key={m} value={m} className="text-slate-900">{m}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Tipo</label>
+                                                <select
+                                                    value={novaParada.tipo}
+                                                    onChange={e => setNovaParada(p => ({ ...p, tipo: e.target.value }))}
+                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold outline-none"
+                                                >
+                                                    <option value="" className="text-slate-900">Selecione...</option>
+                                                    {[
+                                                        'FALHA DE ENERGIA',
+                                                        'FALTA DE COLABORADOR',
+                                                        'FALTA DE MATERIA PRIMA',
+                                                        'LIMPEZA DE MÁQUINA',
+                                                        'MANUTENÇÃO',
+                                                        'PALESTRA/REUNIÃO',
+                                                        'SETUP (Preparação de máquina)',
+                                                        'PARADA PROGRAMADA',
+                                                        'OUTROS',
+                                                        'ASSISTENCIA TÉCNICA'
+                                                    ].map(t => (
+                                                        <option key={t} value={t} className="text-slate-900">{t}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Início</label>
+                                                <input
+                                                    type="time"
+                                                    value={novaParada.hora_inicio}
+                                                    onChange={e => setNovaParada(p => ({ ...p, hora_inicio: e.target.value }))}
+                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Fim</label>
+                                                <input
+                                                    type="time"
+                                                    value={novaParada.hora_fim}
+                                                    onChange={e => setNovaParada(p => ({ ...p, hora_fim: e.target.value }))}
+                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Duração</label>
+                                                <div className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400 uppercase font-bold flex items-center gap-2">
+                                                    <Clock className="w-3 h-3" />
+                                                    {calculateDuration(novaParada.hora_inicio || '', novaParada.hora_fim || '')} min
                                                 </div>
                                             </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-center text-slate-600 text-[10px] font-bold uppercase tracking-widest py-4 bg-white/5 rounded-lg border-2 border-dashed border-white/5">
-                                            Nenhuma parada registrada
-                                        </p>
-                                    )}
+                                        </div>
+                                        <div className="flex gap-4">
+                                            <input
+                                                type="text"
+                                                placeholder="MOTIVO DA PARADA..."
+                                                value={novaParada.motivo}
+                                                onChange={e => setNovaParada(p => ({ ...p, motivo: e.target.value }))}
+                                                className="flex-1 bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 uppercase font-bold"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleSaveParada}
+                                                className={`px-4 py-2 font-black uppercase text-[10px] tracking-wider rounded-lg flex items-center gap-2 ${editingParadaIndex !== null
+                                                    ? 'bg-emerald-500 hover:bg-emerald-400 text-white'
+                                                    : 'bg-amber-500 hover:bg-amber-400 text-black'
+                                                    }`}
+                                            >
+                                                {editingParadaIndex !== null ? (
+                                                    <><Save className="w-3 h-3" /> Confirmar Edição</>
+                                                ) : (
+                                                    <><Plus className="w-3 h-3" /> Adicionar</>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Lista de Paradas */}
+                                    <div className="space-y-2">
+                                        {editingRecord.paradas_detalhadas && editingRecord.paradas_detalhadas.length > 0 ? (
+                                            editingRecord.paradas_detalhadas.map((parada, idx) => (
+                                                <div key={idx} className={`flex items-center justify-between p-3 rounded-lg border hover:bg-white/10 group transition-all ${editingParadaIndex === idx ? 'bg-white/10 border-blue-500/50' : 'bg-white/5 border-white/5'
+                                                    }`}>
+                                                    <div className="flex items-center gap-4">
+                                                        <span className="text-amber-500 font-mono font-bold text-xs">{getHorariosFormatados(parada)}</span>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-white font-bold text-xs uppercase">{parada.motivo}</span>
+                                                            {(parada.maquina || parada.maquina_id) && (
+                                                                <span className="text-[8px] text-slate-500 font-black uppercase tracking-widest">
+                                                                    Máquina: {parada.maquina || maquinasOpcoes.find(m => m.id === parada.maquina_id)?.nome || 'Não Identificada'}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-4">
+                                                        <span className="text-slate-500 font-bold text-[10px] uppercase tracking-widest">{parada.duracao} min</span>
+
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleEditParada(idx)}
+                                                                className="text-slate-600 hover:text-blue-500 transition-colors"
+                                                                title="Editar Parada"
+                                                            >
+                                                                <FileText className="w-3 h-3" />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleRemoveParada(idx)}
+                                                                className="text-slate-600 hover:text-red-500 transition-colors"
+                                                                title="Remover Parada"
+                                                            >
+                                                                <Trash2 className="w-3 h-3" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-center text-slate-600 text-[10px] font-bold uppercase tracking-widest py-4 bg-white/5 rounded-lg border-2 border-dashed border-white/5">
+                                                Nenhuma parada registrada
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Seção de Observações */}
-                            <div className="space-y-4 pt-4 border-t border-white/5">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                    <FileText className="w-3 h-3 text-blue-500" /> Observações / Ocorrências
-                                </label>
-                                <textarea
-                                    value={editingRecord.observacoes || ''}
-                                    onChange={e => setEditingRecord({ ...editingRecord, observacoes: e.target.value })}
-                                    placeholder="Registre aqui observações relevantes..."
-                                    className="w-full p-4 bg-black/20 border border-white/10 rounded-xl text-xs font-bold text-slate-300 transition-all outline-none min-h-[100px] focus:border-blue-500"
-                                />
-                            </div>
+                                {/* Seção de Observações */}
+                                <div className="space-y-4 pt-4 border-t border-white/5">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                        <FileText className="w-3 h-3 text-blue-500" /> Observações / Ocorrências
+                                    </label>
+                                    <textarea
+                                        value={editingRecord.observacoes || ''}
+                                        onChange={e => setEditingRecord({ ...editingRecord, observacoes: e.target.value })}
+                                        placeholder="Registre aqui observações relevantes..."
+                                        className="w-full p-4 bg-black/20 border border-white/10 rounded-xl text-xs font-bold text-slate-300 transition-all outline-none min-h-[100px] focus:border-blue-500"
+                                    />
+                                </div>
 
-                            {/* Modal Footer */}
-                            <div className="flex items-center justify-between gap-4 pt-6 mt-6 border-t border-white/5 sticky bottom-0 bg-[#1a1a1a] z-50">
-                                <button
-                                    type="button"
-                                    onClick={handleDeleteRecord}
-                                    disabled={isSaving}
-                                    className="px-6 py-3 rounded-xl bg-red-500/10 text-red-500 font-bold uppercase tracking-widest text-xs hover:bg-red-500 hover:text-white transition-all flex items-center gap-2"
-                                >
-                                    <Trash2 className="w-4 h-4" /> Excluir
-                                </button>
-
-                                <div className="flex items-center gap-3">
+                                {/* Modal Footer */}
+                                <div className="flex items-center justify-between gap-4 pt-6 mt-6 border-t border-white/5 sticky bottom-0 bg-[#1a1a1a] z-50">
                                     <button
                                         type="button"
-                                        onClick={handleCloseModal}
+                                        onClick={handleDeleteRecord}
                                         disabled={isSaving}
-                                        className="px-6 py-3 rounded-xl bg-white/5 text-slate-400 font-bold uppercase tracking-widest text-xs hover:bg-white/10 hover:text-white transition-all"
+                                        className="px-6 py-3 rounded-xl bg-red-500/10 text-red-500 font-bold uppercase tracking-widest text-xs hover:bg-red-500 hover:text-white transition-all flex items-center gap-2"
                                     >
-                                        Cancelar
+                                        <Trash2 className="w-4 h-4" /> Excluir
                                     </button>
-                                    <button
-                                        type="submit"
-                                        disabled={isSaving}
-                                        className="px-8 py-3 rounded-xl bg-blue-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-blue-500 transition-all flex items-center gap-2 shadow-lg shadow-blue-900/20"
-                                    >
-                                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                                        Salvar Alterações
-                                    </button>
+
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={handleCloseModal}
+                                            disabled={isSaving}
+                                            className="px-6 py-3 rounded-xl bg-white/5 text-slate-400 font-bold uppercase tracking-widest text-xs hover:bg-white/10 hover:text-white transition-all"
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={isSaving}
+                                            className="px-8 py-3 rounded-xl bg-blue-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-blue-500 transition-all flex items-center gap-2 shadow-lg shadow-blue-900/20"
+                                        >
+                                            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                            Salvar Alterações
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
                         </form>
-                    </div >
-                </div >
+                    </div>
+                </div>
             )}
 
         </div >
