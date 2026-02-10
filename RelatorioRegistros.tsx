@@ -19,8 +19,8 @@ import { RegistroProducao, Linha, Produto } from './types/database';
 // Tipagem estendida para Paradas com horários
 interface ParadaCompleta {
     id?: string; // ID temporário para lista
-    inicio?: string; // HH:mm
-    fim?: string; // HH:mm
+    hora_inicio?: string; // HH:mm
+    hora_fim?: string; // HH:mm
     tipo?: string; // Planejada, Não Planejada, etc.
     maquina?: string; // Nome da máquina
     duracao: string | number; // número ou "10min"
@@ -57,7 +57,7 @@ const RelatorioRegistros: React.FC = () => {
     const [isSaving, setIsSaving] = useState(false);
 
     // Estado para Nova Parada no Modal
-    const [novaParada, setNovaParada] = useState<ParadaCompleta>({ tipo: '', inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
+    const [novaParada, setNovaParada] = useState<ParadaCompleta>({ tipo: '', hora_inicio: '', hora_fim: '', duracao: 0, motivo: '', maquina_id: '' });
     const [editingParadaIndex, setEditingParadaIndex] = useState<number | null>(null);
 
     useEffect(() => {
@@ -163,7 +163,14 @@ const RelatorioRegistros: React.FC = () => {
 
     const handleEditClick = (record: RegistroExpandido) => {
         // Prepara paradas
-        const paradasIniciais = Array.isArray(record.paradas) ? record.paradas : [];
+        const paradasIniciais = Array.isArray(record.paradas) ? record.paradas.map((p: any) => ({
+            ...p,
+            // Normaliza nomes de campos se necessário
+            hora_inicio: p.hora_inicio || p.inicio || '',
+            hora_fim: p.hora_fim || p.fim || '',
+            id: p.id || Math.random().toString(36).substr(2, 9)
+        })) : [];
+
         setEditingRecord({
             ...record,
             // Ajusta referencias para os selects funcionarem
@@ -171,13 +178,13 @@ const RelatorioRegistros: React.FC = () => {
             produto_volume: findValueForSelect(record.produto_volume, produtosOpcoes) || record.produto_volume,
             paradas_detalhadas: (paradasIniciais as unknown) as ParadaCompleta[]
         });
-        setNovaParada({ tipo: '', inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
+        setNovaParada({ tipo: '', hora_inicio: '', hora_fim: '', duracao: 0, motivo: '', maquina_id: '' });
     };
 
     const handleCloseModal = () => {
         setEditingRecord(null);
         setIsSaving(false);
-        setNovaParada({ tipo: '', inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
+        setNovaParada({ tipo: '', hora_inicio: '', hora_fim: '', duracao: 0, motivo: '', maquina_id: '' });
         setEditingParadaIndex(null);
     };
 
@@ -213,14 +220,14 @@ const RelatorioRegistros: React.FC = () => {
     };
 
     const handleSaveParada = () => {
-        if (!novaParada.tipo || !novaParada.inicio || !novaParada.fim || !novaParada.motivo) {
+        if (!novaParada.tipo || !novaParada.hora_inicio || !novaParada.hora_fim || !novaParada.motivo) {
             alert("Preencha Tipo, Início, Fim e Motivo");
             return;
         }
 
         if (!editingRecord) return;
 
-        const duracao = calculateDuration(novaParada.inicio, novaParada.fim);
+        const duracao = calculateDuration(novaParada.hora_inicio, novaParada.hora_fim);
         const paradaToSave = { ...novaParada, duracao };
 
         let novasParadas = [...(editingRecord.paradas_detalhadas || [])];
@@ -234,7 +241,7 @@ const RelatorioRegistros: React.FC = () => {
         }
 
         setEditingRecord({ ...editingRecord, paradas_detalhadas: novasParadas });
-        setNovaParada({ tipo: '', inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
+        setNovaParada({ tipo: '', hora_inicio: '', hora_fim: '', duracao: 0, motivo: '', maquina_id: '' });
         setEditingParadaIndex(null);
     };
 
@@ -244,8 +251,8 @@ const RelatorioRegistros: React.FC = () => {
         const parada = editingRecord.paradas_detalhadas[index];
         setNovaParada({
             tipo: parada.tipo || '',
-            inicio: parada.inicio || '',
-            fim: parada.fim || '',
+            hora_inicio: parada.hora_inicio || '',
+            hora_fim: parada.hora_fim || '',
             duracao: parada.duracao || 0,
             motivo: parada.motivo || '',
             maquina_id: parada.maquina_id || ''
@@ -261,18 +268,18 @@ const RelatorioRegistros: React.FC = () => {
 
         // Se estava editando o item removido, cancela edição
         if (editingParadaIndex === index) {
-            setNovaParada({ tipo: '', inicio: '', fim: '', duracao: 0, motivo: '', maquina_id: '' });
+            setNovaParada({ tipo: '', hora_inicio: '', hora_fim: '', duracao: 0, motivo: '', maquina_id: '' });
             setEditingParadaIndex(null);
         }
     };
 
     const getHorariosFormatados = (parada: ParadaCompleta) => {
-        if (parada.inicio && parada.fim) {
-            return `${parada.inicio} - ${parada.fim}`;
+        if (parada.hora_inicio && parada.hora_fim) {
+            return `${parada.hora_inicio} - ${parada.hora_fim}`;
         }
-        if (parada.inicio && parada.duracao) {
-            const fimCalculado = calculateFim(parada.inicio, parseMinutos(parada.duracao));
-            return `${parada.inicio} - ${fimCalculado}`;
+        if (parada.hora_inicio && parada.duracao) {
+            const fimCalculado = calculateFim(parada.hora_inicio, parseMinutos(parada.duracao));
+            return `${parada.hora_inicio} - ${fimCalculado}`;
         }
         return '--:--';
     };
@@ -301,6 +308,8 @@ const RelatorioRegistros: React.FC = () => {
                 lote: editingRecord.lote,
                 quantidade_produzida: Number(editingRecord.quantidade_produzida),
                 carga_horaria: Number(editingRecord.carga_horaria),
+                observacoes: editingRecord.observacoes,
+                capacidade_producao: editingRecord.capacidade_producao,
                 paradas: (editingRecord.paradas_detalhadas || []).map(p => {
                     // Resolve o nome da máquina se tiver apenas maquina_id (UUID)
                     let machineName = p.maquina;
@@ -312,7 +321,9 @@ const RelatorioRegistros: React.FC = () => {
                         tipo: p.tipo || "Não Planejada",
                         maquina: machineName || "GERAL",
                         motivo: p.motivo || "NÃO INFORMADO",
-                        duracao: typeof p.duracao === 'number' ? `${p.duracao}min` : (p.duracao || "0min")
+                        duracao: typeof p.duracao === 'number' ? `${p.duracao}min` : (p.duracao || "0min"),
+                        hora_inicio: p.hora_inicio || null,
+                        hora_fim: p.hora_fim || null
                     };
                 })
             };
@@ -645,10 +656,24 @@ const RelatorioRegistros: React.FC = () => {
                                                 className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold outline-none"
                                             >
                                                 <option value="">Geral</option>
-                                                {maquinasOpcoes
-                                                    .filter(m => m.linha_id === editingRecord.linha_producao)
-                                                    .map(m => <option key={m.id} value={m.id}>{m.nome}</option>)
-                                                }
+                                                {[
+                                                    'ENCHEDORA',
+                                                    'DATADORA',
+                                                    'ROTULADORA',
+                                                    'EMPACOTADORA',
+                                                    'ESTEIRAS',
+                                                    'PAVAN',
+                                                    'UNIPLAS',
+                                                    'MULTIPET',
+                                                    'AEREO',
+                                                    'HALMMER',
+                                                    'CALDEIRA',
+                                                    'DESPALETIZADOR',
+                                                    'INTERVALO',
+                                                    'INJETOR DE ESSENCIA'
+                                                ].map(m => (
+                                                    <option key={m} value={m}>{m}</option>
+                                                ))}
                                             </select>
                                         </div>
                                         <div className="space-y-1">
@@ -659,19 +684,28 @@ const RelatorioRegistros: React.FC = () => {
                                                 className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold outline-none"
                                             >
                                                 <option value="">Selecione...</option>
-                                                <option value="Não Planejada">Não Planejada</option>
-                                                <option value="Planejada">Planejada</option>
-                                                <option value="Logística">Logística</option>
-                                                <option value="Troca de Produto">Troca de Produto</option>
-                                                <option value="Administrativa">Administrativa</option>
+                                                {[
+                                                    'FALHA DE ENERGIA',
+                                                    'FALTA DE COLABORADOR',
+                                                    'FALTA DE MATERIA PRIMA',
+                                                    'LIMPEZA DE MÁQUINA',
+                                                    'MANUTENÇÃO',
+                                                    'PALESTRA/REUNIÃO',
+                                                    'SETUP (Preparação de máquina)',
+                                                    'PARADA PROGRAMADA',
+                                                    'OUTROS',
+                                                    'ASSISTENCIA TÉCNICA'
+                                                ].map(t => (
+                                                    <option key={t} value={t}>{t}</option>
+                                                ))}
                                             </select>
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Início</label>
                                             <input
                                                 type="time"
-                                                value={novaParada.inicio}
-                                                onChange={e => setNovaParada(p => ({ ...p, inicio: e.target.value }))}
+                                                value={novaParada.hora_inicio}
+                                                onChange={e => setNovaParada(p => ({ ...p, hora_inicio: e.target.value }))}
                                                 className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
                                             />
                                         </div>
@@ -679,8 +713,8 @@ const RelatorioRegistros: React.FC = () => {
                                             <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Fim</label>
                                             <input
                                                 type="time"
-                                                value={novaParada.fim}
-                                                onChange={e => setNovaParada(p => ({ ...p, fim: e.target.value }))}
+                                                value={novaParada.hora_fim}
+                                                onChange={e => setNovaParada(p => ({ ...p, hora_fim: e.target.value }))}
                                                 className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
                                             />
                                         </div>
@@ -688,7 +722,7 @@ const RelatorioRegistros: React.FC = () => {
                                             <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Duração</label>
                                             <div className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400 uppercase font-bold flex items-center gap-2">
                                                 <Clock className="w-3 h-3" />
-                                                {calculateDuration(novaParada.inicio || '', novaParada.fim || '')} min
+                                                {calculateDuration(novaParada.hora_inicio || '', novaParada.hora_fim || '')} min
                                             </div>
                                         </div>
                                     </div>
@@ -764,7 +798,19 @@ const RelatorioRegistros: React.FC = () => {
                                         </p>
                                     )}
                                 </div>
+                            </div>
 
+                            {/* Seção de Observações */}
+                            <div className="space-y-4 pt-4 border-t border-white/5">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <FileText className="w-3 h-3 text-blue-500" /> Observações / Ocorrências
+                                </label>
+                                <textarea
+                                    value={editingRecord.observacoes || ''}
+                                    onChange={e => setEditingRecord({ ...editingRecord, observacoes: e.target.value })}
+                                    placeholder="Registre aqui observações relevantes..."
+                                    className="w-full p-4 bg-black/20 border border-white/10 rounded-xl text-xs font-bold text-slate-300 transition-all outline-none min-h-[100px] focus:border-blue-500"
+                                />
                             </div>
 
                             {/* Modal Footer */}
@@ -799,7 +845,7 @@ const RelatorioRegistros: React.FC = () => {
                             </div>
 
                         </form>
-                    </div>
+                    </div >
                 </div >
             )}
 
