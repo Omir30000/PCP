@@ -255,7 +255,8 @@ const RelatorioRegistros: React.FC = () => {
             hora_fim: parada.hora_fim || '',
             duracao: parada.duracao || 0,
             motivo: parada.motivo || '',
-            maquina_id: parada.maquina_id || ''
+            // Tenta maquina_id primeiro, se não houver usa maquina (que pode ser o nome/id salvo)
+            maquina_id: parada.maquina_id || parada.maquina || ''
         });
         setEditingParadaIndex(index);
     };
@@ -559,8 +560,8 @@ const RelatorioRegistros: React.FC = () => {
                                         onChange={e => setEditingRecord({ ...editingRecord, turno: e.target.value })}
                                         className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
                                     >
-                                        <option value="1º Turno">1º TURNO</option>
-                                        <option value="2º Turno">2º TURNO</option>
+                                        <option value="1º Turno" className="text-slate-900">1º TURNO</option>
+                                        <option value="2º Turno" className="text-slate-900">2º TURNO</option>
                                     </select>
                                 </div>
 
@@ -571,9 +572,9 @@ const RelatorioRegistros: React.FC = () => {
                                         onChange={e => setEditingRecord({ ...editingRecord, linha_producao: e.target.value })}
                                         className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
                                     >
-                                        <option value="">Selecione...</option>
+                                        <option value="" className="text-slate-900">Selecione...</option>
                                         {linhasOpcoes.map(l => (
-                                            <option key={l.id} value={l.id}>{l.nome}</option>
+                                            <option key={l.id} value={l.id} className="text-slate-900">{l.nome}</option>
                                         ))}
                                     </select>
                                 </div>
@@ -585,9 +586,9 @@ const RelatorioRegistros: React.FC = () => {
                                         onChange={e => setEditingRecord({ ...editingRecord, produto_volume: e.target.value })}
                                         className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
                                     >
-                                        <option value="">Selecione...</option>
+                                        <option value="" className="text-slate-900">Selecione...</option>
                                         {produtosOpcoes.map(p => (
-                                            <option key={p.id} value={p.id}>{p.nome}</option>
+                                            <option key={p.id} value={p.id} className="text-slate-900">{p.nome}</option>
                                         ))}
                                     </select>
                                 </div>
@@ -646,7 +647,7 @@ const RelatorioRegistros: React.FC = () => {
                                                 onChange={e => setNovaParada(p => ({ ...p, maquina_id: e.target.value }))}
                                                 className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold outline-none"
                                             >
-                                                <option value="">Geral</option>
+                                                <option value="" className="text-slate-900">Geral</option>
                                                 {[
                                                     'ENCHEDORA',
                                                     'DATADORA',
@@ -663,7 +664,7 @@ const RelatorioRegistros: React.FC = () => {
                                                     'INTERVALO',
                                                     'INJETOR DE ESSENCIA'
                                                 ].map(m => (
-                                                    <option key={m} value={m}>{m}</option>
+                                                    <option key={m} value={m} className="text-slate-900">{m}</option>
                                                 ))}
                                             </select>
                                         </div>
@@ -674,7 +675,7 @@ const RelatorioRegistros: React.FC = () => {
                                                 onChange={e => setNovaParada(p => ({ ...p, tipo: e.target.value }))}
                                                 className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold outline-none"
                                             >
-                                                <option value="">Selecione...</option>
+                                                <option value="" className="text-slate-900">Selecione...</option>
                                                 {[
                                                     'FALHA DE ENERGIA',
                                                     'FALTA DE COLABORADOR',
@@ -687,7 +688,7 @@ const RelatorioRegistros: React.FC = () => {
                                                     'OUTROS',
                                                     'ASSISTENCIA TÉCNICA'
                                                 ].map(t => (
-                                                    <option key={t} value={t}>{t}</option>
+                                                    <option key={t} value={t} className="text-slate-900">{t}</option>
                                                 ))}
                                             </select>
                                         </div>
