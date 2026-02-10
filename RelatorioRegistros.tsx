@@ -292,34 +292,25 @@ const RelatorioRegistros: React.FC = () => {
 
         setIsSaving(true);
         try {
-            // Recupera o nome correto para salvar no banco caso o sistema use nomes em vez de IDs
-            // (Mantendo lógica original híbrida ou forçando ID se o banco mudou, 
-            //  aqui vamos salvar o ID do select, mas cuidado se o banco espera Nome)
-            //  Se o banco espera Nome e mandarmos ID, vai quebrar visualização antiga.
-            //  Vou assumir ID pois é o padrão correto, mas se falhar voltamos.
+            const selectedLinha = linhasOpcoes.find(l => l.id === editingRecord.linha_producao);
+            const selectedProduto = produtosOpcoes.find(p => p.id === editingRecord.produto_volume);
 
             const payload = {
                 data_registro: editingRecord.data_registro,
                 turno: editingRecord.turno,
-                linha_producao: editingRecord.linha_producao,
+                linha_producao: selectedLinha?.nome || editingRecord.linha_producao,
                 linha_id: editingRecord.linha_producao,
-                produto_volume: editingRecord.produto_volume,
+                produto_volume: selectedProduto?.nome || editingRecord.produto_volume,
                 produto_id: editingRecord.produto_volume,
                 lote: editingRecord.lote,
                 quantidade_produzida: Number(editingRecord.quantidade_produzida),
                 carga_horaria: Number(editingRecord.carga_horaria),
                 observacoes: editingRecord.observacoes,
-                capacidade_producao: editingRecord.capacidade_producao,
+                capacidade_producao: selectedProduto?.capacidade_nominal || editingRecord.capacidade_producao,
                 paradas: (editingRecord.paradas_detalhadas || []).map(p => {
-                    // Resolve o nome da máquina se tiver apenas maquina_id (UUID)
-                    let machineName = p.maquina;
-                    if (!machineName && p.maquina_id) {
-                        machineName = maquinasOpcoes.find(m => m.id === p.maquina_id)?.nome;
-                    }
-
                     return {
                         tipo: p.tipo || "Não Planejada",
-                        maquina: machineName || "GERAL",
+                        maquina: p.maquina_id || p.maquina || "GERAL",
                         motivo: p.motivo || "NÃO INFORMADO",
                         duracao: typeof p.duracao === 'number' ? `${p.duracao}min` : (p.duracao || "0min"),
                         hora_inicio: p.hora_inicio || null,
@@ -350,10 +341,10 @@ const RelatorioRegistros: React.FC = () => {
             } : r));
 
             handleCloseModal();
-            alert('Registro salvo com sucesso no banco de dados!');
+            alert('Registro salvo com sucesso!');
         } catch (err: any) {
             console.error('Erro ao atualizar registro:', err);
-            alert(`Falha ao atualizar: ${err.message}`);
+            alert(`Falha ao salvar: ${err.message}`);
         } finally {
             setIsSaving(false);
         }
