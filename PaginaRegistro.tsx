@@ -90,6 +90,15 @@ const PaginaRegistro: React.FC = () => {
     setParadas([]);
   }, [formData.linha_producao]);
 
+  // Sincroniza o campo lote com a data do registro (formato DDMMYYYY)
+  useEffect(() => {
+    if (formData.data_registro) {
+      const [year, month, day] = formData.data_registro.split('-');
+      const formattedDate = `${day}${month}${year}`;
+      setFormData(prev => ({ ...prev, lote: formattedDate }));
+    }
+  }, [formData.data_registro]);
+
   const handleAddParada = () => {
     if (!formData.linha_producao) return;
     setTempParada({ tipo: '', maquina_id: '', motivo: '', duracao: 0, hora_inicio: '', hora_fim: '' });
