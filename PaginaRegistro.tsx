@@ -415,9 +415,20 @@ const PaginaRegistro: React.FC = () => {
                       >
                         <option value="">Selecione Opção...</option>
                         {[
-                          'ROTULADORA', 'ENCHEDORA', 'SOPRO', 'DATADORA',
-                          'EMPACOTADORA', 'REUNIAO', 'PARADA PROGRAMADA',
-                          'OUTROS', 'FALTA DE ENERGIA', 'SETUP', 'MANUTENÇÃO'
+                          'ENCHEDORA',
+                          'DATADORA',
+                          'ROTULADORA',
+                          'EMPACOTADORA',
+                          'ESTEIRAS',
+                          'PAVAN',
+                          'UNIPLAS',
+                          'MULTIPET',
+                          'AEREO',
+                          'HALMMER',
+                          'CALDEIRA',
+                          'DESPALETIZADOR',
+                          'INTERVALO',
+                          'INJETOR DE ESSENCIA'
                         ].map(m => (
                           <option key={m} value={m}>{m}</option>
                         ))}
@@ -593,9 +604,20 @@ const PaginaRegistro: React.FC = () => {
                   >
                     <option value="">Nenhuma / Geral</option>
                     {[
-                      'ROTULADORA', 'ENCHEDORA', 'SOPRO', 'DATADORA',
-                      'EMPACOTADORA', 'REUNIAO', 'PARADA PROGRAMADA',
-                      'OUTROS', 'FALTA DE ENERGIA', 'SETUP', 'MANUTENÇÃO'
+                      'ENCHEDORA',
+                      'DATADORA',
+                      'ROTULADORA',
+                      'EMPACOTADORA',
+                      'ESTEIRAS',
+                      'PAVAN',
+                      'UNIPLAS',
+                      'MULTIPET',
+                      'AEREO',
+                      'HALMMER',
+                      'CALDEIRA',
+                      'DESPALETIZADOR',
+                      'INTERVALO',
+                      'INJETOR DE ESSENCIA'
                     ].map(m => (
                       <option key={m} value={m} className="text-slate-900">{m}</option>
                     ))}
