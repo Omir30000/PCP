@@ -342,8 +342,17 @@ const RelatorioRegistros: React.FC = () => {
 
             (payload as any).eficiencia_calculada = Number(eficiencia.toFixed(2));
 
-            console.log('📦 Payload preparado:', payload);
+            console.log('📦 Payload preparado:', JSON.stringify(payload, null, 2));
             console.log('🚀 Enviando para Supabase...');
+
+            // Diagnóstico Prévio: Verificar se o registro existe e é acessível
+            const { count, error: checkError } = await supabase
+                .from('registros_producao')
+                .select('id', { count: 'exact', head: true })
+                .eq('id', editingRecord.id);
+
+            console.log(`🔍 Check pré-update: Encontrados ${count} registros com ID ${editingRecord.id}`);
+            if (checkError) console.error('❌ Erro no check pré-update:', checkError);
 
             const { data, error } = await supabase
                 .from('registros_producao')
