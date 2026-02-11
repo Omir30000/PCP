@@ -186,10 +186,10 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                         <select
                             value={linhaId}
                             onChange={e => setLinhaId(e.target.value)}
-                            className="bg-transparent text-xs font-black uppercase outline-none cursor-pointer text-slate-700"
+                            className="bg-transparent text-xs font-black uppercase outline-none cursor-pointer text-slate-900"
                         >
-                            <option value="">Selecionar Linha...</option>
-                            {linhas.map(l => <option key={l.id} value={l.id}>{l.nome}</option>)}
+                            <option value="" className="text-slate-900 bg-white">Selecionar Linha...</option>
+                            {linhas.map(l => <option key={l.id} value={l.id} className="text-slate-900 bg-white">{l.nome}</option>)}
                         </select>
                     </div>
 
@@ -199,14 +199,14 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                             type="date"
                             value={dataInicio}
                             onChange={e => setDataInicio(e.target.value)}
-                            className="bg-transparent text-xs font-black uppercase outline-none"
+                            className="bg-transparent text-xs font-black uppercase outline-none text-slate-900"
                         />
                         <ArrowRight className="w-3 h-3 text-slate-300" />
                         <input
                             type="date"
                             value={dataFim}
                             onChange={e => setDataFim(e.target.value)}
-                            className="bg-transparent text-xs font-black uppercase outline-none"
+                            className="bg-transparent text-xs font-black uppercase outline-none text-slate-900"
                         />
                     </div>
 
