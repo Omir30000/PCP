@@ -2,16 +2,16 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from './lib/supabase';
 import { Produto, Linha, RegistroProducao } from './types/database';
-import { 
-  Printer, 
-  Calendar, 
-  Search, 
-  Loader2, 
-  TrendingUp, 
-  AlertCircle, 
+import {
+  Printer,
+  Calendar,
+  Search,
+  Loader2,
+  TrendingUp,
+  AlertCircle,
   Activity,
   ShieldCheck,
-  Package, 
+  Package,
   Layers,
   Factory,
   MessageSquare as MessageSquareIcon,
@@ -32,7 +32,7 @@ const Relatorios: React.FC = () => {
 
   // Helper técnico para extração segura de minutos do JSONB
   const parseMinutos = (val: any): number => {
-    if (val === null || val === undefined || isNaN(Number(val))) return 0;
+    if (val === null || val === undefined) return 0;
     if (typeof val === 'number') return val;
     const match = String(val).match(/\d+/);
     return match ? parseInt(match[0]) : 0;
@@ -50,8 +50,8 @@ const Relatorios: React.FC = () => {
         .order('data_registro', { ascending: false });
 
       if (error) throw error;
-      
-      const filtrados = (data || []).filter(r => 
+
+      const filtrados = (data || []).filter(r =>
         r.data_registro >= dataInicio && r.data_registro <= dataFim
       );
 
@@ -118,12 +118,12 @@ const Relatorios: React.FC = () => {
     const bottlenecksMap: Record<string, number> = {};
 
     const linesSummary = idsLinhas.map(num => {
-      const regsDaLinha = registros.filter(r => 
-        String(r.linha_producao).includes(num) || 
+      const regsDaLinha = registros.filter(r =>
+        String(r.linha_producao).includes(num) ||
         String(r.linha_producao).toUpperCase().includes(`LINHA ${num}`) ||
         String(r.linha_producao).toUpperCase().includes(`LINHA 0${num}`)
       );
-      
+
       let totalQty = 0;
       let totalDowntimeLinha = 0;
       let totalEfficiencyLinha = 0;
@@ -132,14 +132,14 @@ const Relatorios: React.FC = () => {
       if (regsDaLinha.length > 0) {
         status = 'active';
         totalQty = regsDaLinha.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
-        
+
         // Cálculo Realista de OEE e Disponibilidade
         const sumEff = regsDaLinha.reduce((acc, r) => {
           const metaNominal = Number(r.produtos?.capacidade_nominal) || 7200;
           const cargaHoras = Number(r.carga_horaria) || 8;
           const tempoDispMin = cargaHoras * 60;
           totalCargaHorariaGlobalMin += tempoDispMin;
-          
+
           const paradas = Array.isArray(r.paradas) ? r.paradas : [];
           const downtimeRegMin = paradas.reduce((a, b: any) => {
             const min = parseMinutos(b.duracao || b.tempo || b.total_min || 0);
@@ -148,17 +148,17 @@ const Relatorios: React.FC = () => {
             bottlenecksMap[motivo] = (bottlenecksMap[motivo] || 0) + min;
             return a + min;
           }, 0);
-          
+
           totalDowntimeLinha += downtimeRegMin;
 
           const disponibilidade = tempoDispMin > 0 ? (tempoDispMin - downtimeRegMin) / tempoDispMin : 0;
           const metaAjustada = (metaNominal / 8) * cargaHoras;
           const performance = metaAjustada > 0 ? (Number(r.quantidade_produzida) / metaAjustada) : 0;
-          
+
           // OEE Simplificado (Performance * Disponibilidade)
           return acc + (performance * disponibilidade * 100);
         }, 0);
-        
+
         totalEfficiencyLinha = sumEff / regsDaLinha.length;
       }
 
@@ -190,10 +190,10 @@ const Relatorios: React.FC = () => {
 
     // Matriz de Gargalos Formatada
     const bottlenecks = Object.entries(bottlenecksMap)
-      .map(([name, value]) => ({ 
-        name, 
+      .map(([name, value]) => ({
+        name,
         value,
-        impacto: totalCargaHorariaGlobalMin > 0 ? (value / totalCargaHorariaGlobalMin) * 100 : 0 
+        impacto: totalCargaHorariaGlobalMin > 0 ? (value / totalCargaHorariaGlobalMin) * 100 : 0
       }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 5);
@@ -212,7 +212,7 @@ const Relatorios: React.FC = () => {
 
   return (
     <div className="w-full max-w-[98%] mx-auto space-y-8 animate-in fade-in duration-500 pb-12 font-sans text-slate-900 print:text-black">
-      
+
       {/* Controles do Relatório */}
       <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm print:hidden">
         <div className="flex items-center gap-4">
@@ -228,22 +228,22 @@ const Relatorios: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
           <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
             <Calendar className="ml-2 w-4 h-4 text-slate-400" />
-            <input 
-              type="date" 
-              value={dataInicio} 
+            <input
+              type="date"
+              value={dataInicio}
               onChange={e => setDataInicio(e.target.value)}
               className="bg-transparent px-2 py-1.5 text-xs font-bold outline-none uppercase"
             />
             <span className="text-slate-300">|</span>
-            <input 
-              type="date" 
-              value={dataFim} 
+            <input
+              type="date"
+              value={dataFim}
               onChange={e => setDataFim(e.target.value)}
               className="bg-transparent px-2 py-1.5 text-xs font-bold outline-none uppercase"
             />
           </div>
 
-          <button 
+          <button
             onClick={fetchRelatorioData}
             className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center gap-2"
           >
@@ -251,7 +251,7 @@ const Relatorios: React.FC = () => {
             Sincronizar
           </button>
 
-          <button 
+          <button
             onClick={handlePrint}
             className="px-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg shadow-slate-200"
           >
@@ -262,7 +262,7 @@ const Relatorios: React.FC = () => {
       </div>
 
       <div ref={reportRef} className="bg-white p-0 space-y-8 print:p-0">
-        
+
         {/* Cabeçalho Institucional */}
         <header className="flex justify-between items-start border-b-2 border-slate-900 pb-6 break-inside-avoid">
           <div className="flex items-center gap-4">
@@ -272,7 +272,7 @@ const Relatorios: React.FC = () => {
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">Boletim Diário de Operações Industriais</p>
             </div>
           </div>
-          
+
           <div className="flex gap-4">
             <div className="border border-slate-200 rounded-lg px-4 py-2 text-right bg-slate-50">
               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Data de Emissão</p>
@@ -292,14 +292,13 @@ const Relatorios: React.FC = () => {
           <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] flex items-center gap-2">
             <Activity className="w-3.5 h-3.5 text-blue-600" /> I. Desempenho Isolado por Centro de Trabalho
           </h3>
-          
+
           <div className="grid grid-cols-2 gap-4">
             {analytics.linesSummary.map(line => (
-              <div 
-                key={line.id} 
-                className={`p-4 border rounded-xl space-y-3 break-inside-avoid ${
-                  line.status === 'active' ? 'border-slate-200 bg-white shadow-sm' : 'border-slate-100 bg-slate-50 opacity-60 grayscale'
-                }`}
+              <div
+                key={line.id}
+                className={`p-4 border rounded-xl space-y-3 break-inside-avoid ${line.status === 'active' ? 'border-slate-200 bg-white shadow-sm' : 'border-slate-100 bg-slate-50 opacity-60 grayscale'
+                  }`}
               >
                 <div className="flex justify-between items-center border-b border-slate-100 pb-2">
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{line.nome}</span>
@@ -340,9 +339,9 @@ const Relatorios: React.FC = () => {
                     </span>
                   </div>
                   <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full transition-all duration-1000 ${line.eficiencia >= 80 ? 'bg-emerald-500' : 'bg-blue-600'}`} 
-                      style={{ width: `${Math.min(100, line.eficiencia)}%` }} 
+                    <div
+                      className={`h-full rounded-full transition-all duration-1000 ${line.eficiencia >= 80 ? 'bg-emerald-500' : 'bg-blue-600'}`}
+                      style={{ width: `${Math.min(100, line.eficiencia)}%` }}
                     />
                   </div>
                 </div>
@@ -397,7 +396,7 @@ const Relatorios: React.FC = () => {
                   <p className="text-2xl font-bold text-emerald-400 leading-none">{analytics.factoryTotals.avgEfficiency.toFixed(1)}%</p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-4 border border-slate-200 rounded-xl bg-slate-50">
                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Média Industrial</p>
