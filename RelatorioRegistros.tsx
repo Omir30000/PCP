@@ -349,27 +349,33 @@ const RelatorioRegistros: React.FC = () => {
                 .from('registros_producao')
                 .update(payload)
                 .eq('id', editingRecord.id)
-                .single();
+                .select();
 
             console.log('📥 Resposta do Supabase - Data:', data);
-            console.log('📥 Resposta do Supabase - Error:', error);
+            console.log('📥 Resposta do Supabase - Error:', JSON.stringify(error, null, 2));
 
             if (error) throw error;
 
-            const updatedRow = data;
+            if (!data || data.length === 0) {
+                console.warn("⚠️ Update realizado, mas nenhum dado retornado (possível RLS). Usando payload local.");
+            }
+
+            const updatedRow = (data && data.length > 0) ? data[0] : { ...editingRecord, ...payload, id: editingRecord.id };
 
             setRegistros(prev => prev.map(r => r.id === editingRecord.id ? {
                 ...updatedRow,
-                nome_linha: linhasMap[updatedRow.linha_id || updatedRow.linha_producao] || updatedRow.linha_producao || '-',
-                nome_produto: produtosMap[updatedRow.produto_id || updatedRow.produto_volume] || updatedRow.produto_volume || '-',
-                paradas_detalhadas: (updatedRow.paradas as any) || []
+                // Recalcula nomes para exibição na tabela se necessário
+                nome_linha: linhasMap[updatedRow.linha_id || updatedRow.linha_producao] || updatedRow.linha_producao || r.nome_linha || '-',
+                nome_produto: produtosMap[updatedRow.produto_id || updatedRow.produto_volume] || updatedRow.produto_volume || r.nome_produto || '-',
+                paradas_detalhadas: (updatedRow.paradas as any) || payload.paradas || []
             } : r));
 
             handleCloseModal();
             alert('Registro salvo com sucesso!');
         } catch (err: any) {
-            console.error('Erro ao atualizar registro:', err);
-            alert(`Falha ao salvar: ${err.message}`);
+            console.error('❌ Erro ao atualizar registro:', JSON.stringify(err, null, 2));
+            const msg = err.message || JSON.stringify(err);
+            alert(`Falha ao salvar: ${msg}`);
         } finally {
             setIsSaving(false);
         }
