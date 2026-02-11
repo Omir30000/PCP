@@ -116,6 +116,7 @@ const RelatoriosDowntime: React.FC = () => {
     let totalStopsCount = 0;
     let volumeLost = 0;
     const byEquipment: Record<string, number> = {};
+    const byEquipmentCount: Record<string, number> = {};
     const byType: Record<string, number> = {};
     const detailedFailures: any[] = [];
 
@@ -148,6 +149,7 @@ const RelatoriosDowntime: React.FC = () => {
         const equipName = mObj ? mObj.nome : (p.equipamento || 'GERAL');
 
         byEquipment[equipName] = (byEquipment[equipName] || 0) + dur;
+        byEquipmentCount[equipName] = (byEquipmentCount[equipName] || 0) + 1;
 
         const type = (p.tipo || 'NÃO PLANEJADA').toUpperCase();
         byType[type] = (byType[type] || 0) + dur;
@@ -156,6 +158,7 @@ const RelatoriosDowntime: React.FC = () => {
           data: reg.data_registro,
           linha: reg.linhas?.nome || 'LINHA DESCONHECIDA',
           equipamento: equipName,
+          tipo: type,
           motivo: p.motivo || 'GERAL',
           duracao: dur,
           obs: reg.observacoes,
@@ -172,8 +175,8 @@ const RelatoriosDowntime: React.FC = () => {
     // Indicadores de Manutenção
     const mttr = totalStopsCount > 0 ? totalDowntime / totalStopsCount : 0;
 
-    // Detecção de Gargalo Crítico
-    const critEquipEntry = Object.entries(byEquipment).sort((a, b) => b[1] - a[1])[0];
+    // Detecção de Gargalo Crítico (Por Frequência)
+    const critEquipEntry = Object.entries(byEquipmentCount).sort((a, b) => b[1] - a[1])[0];
     const critEquip = critEquipEntry ? critEquipEntry[0] : '--';
 
     return {
@@ -286,7 +289,7 @@ const RelatoriosDowntime: React.FC = () => {
             <div className="absolute top-0 right-0 p-2"><AlertCircle className="w-8 h-8 text-slate-200/50" /></div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Equipamento Crítico</p>
             <h4 className="text-xl font-black text-red-600 leading-tight uppercase truncate">{analytics.critEquip}</h4>
-            <p className="text-[9px] text-slate-400 mt-2">Maior Tempo em Reparo</p>
+            <p className="text-[9px] text-slate-400 mt-2">Maior Frequência de Falhas</p>
           </div>
           <div className="border border-slate-200 rounded-2xl p-6 bg-slate-50 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-2"><Activity className="w-8 h-8 text-slate-200/50" /></div>
@@ -358,8 +361,9 @@ const RelatoriosDowntime: React.FC = () => {
                 <tr>
                   <th className="px-5 py-4">Data Registro</th>
                   <th className="px-5 py-4">Centro de Trabalho</th>
-                  <th className="px-5 py-4">Ponto de Falha</th>
-                  <th className="px-5 py-4">Natureza / Motivo</th>
+                  <th className="px-5 py-4">Tipo de Parada</th>
+                  <th className="px-5 py-4">Máquina</th>
+                  <th className="px-5 py-4">Motivo</th>
                   <th className="px-5 py-4 text-right">Duração</th>
                   <th className="px-5 py-4 text-right">Perda Est.</th>
                 </tr>
@@ -369,6 +373,7 @@ const RelatoriosDowntime: React.FC = () => {
                   <tr key={idx} className={`hover:bg-slate-50 ${fail.duracao > 30 ? 'bg-red-50/30' : 'bg-white'}`}>
                     <td className="px-5 py-3 font-bold text-slate-500">{formatarDataBR(fail.data)}</td>
                     <td className="px-5 py-3 text-blue-600 font-black">{fail.linha}</td>
+                    <td className="px-5 py-3 font-bold text-slate-700 uppercase text-[9px]">{fail.tipo}</td>
                     <td className="px-5 py-3 font-bold text-slate-800 uppercase">{fail.equipamento}</td>
                     <td className="px-5 py-3 text-slate-600">
                       <p className="font-bold">{fail.motivo}</p>
