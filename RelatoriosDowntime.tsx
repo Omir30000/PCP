@@ -146,7 +146,7 @@ const RelatoriosDowntime: React.FC = () => {
 
         // Identificação técnica do equipamento
         const mObj = maquinas.find(m => m.id === p.maquina_id);
-        const equipName = mObj ? mObj.nome : (p.equipamento || 'GERAL');
+        const equipName = p.maquina || (mObj ? mObj.nome : (p.equipamento || 'GERAL'));
 
         byEquipment[equipName] = (byEquipment[equipName] || 0) + dur;
         byEquipmentCount[equipName] = (byEquipmentCount[equipName] || 0) + 1;
