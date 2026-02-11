@@ -2,11 +2,11 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from './lib/supabase';
 import { Linha, Maquina, RegistroProducao, Produto } from './types/database';
-import { 
-  Printer, 
-  Calendar, 
-  Search, 
-  Loader2, 
+import {
+  Printer,
+  Calendar,
+  Search,
+  Loader2,
   Activity,
   Timer,
   Settings,
@@ -28,7 +28,7 @@ const RelatoriosDowntime: React.FC = () => {
   const [dataInicio, setDataInicio] = useState(getHoje());
   const [dataFim, setDataFim] = useState(getHoje());
   const [linhaId, setLinhaId] = useState<string>('todos');
-  
+
   const [loading, setLoading] = useState(false);
   const [registros, setRegistros] = useState<any[]>([]);
   const [linhas, setLinhas] = useState<Linha[]>([]);
@@ -55,7 +55,7 @@ const RelatoriosDowntime: React.FC = () => {
 
       if (linesRes.data) setLinhas(linesRes.data);
       if (machRes.data) setMaquinas(machRes.data);
-      
+
       const filtrados = (regsRes.data || []).filter(r => {
         const dMatch = r.data_registro >= dataInicio && r.data_registro <= dataFim;
         const lMatch = linhaId === 'todos' || r.linha_producao === linhaId;
@@ -116,29 +116,29 @@ const RelatoriosDowntime: React.FC = () => {
     let totalStopsCount = 0;
     let volumeLost = 0;
     const byEquipment: Record<string, number> = {};
-    const byReason: Record<string, number> = {};
+    const byType: Record<string, number> = {};
     const detailedFailures: any[] = [];
 
     registros.forEach(reg => {
       // Extração segura do JSONB de paradas
       const paradasRaw = reg.paradas;
       const paradas = Array.isArray(paradasRaw) ? paradasRaw : [];
-      
+
       // Prioriza a capacidade registrada no registro de produção, fallback para o produto
       const nominalCap = Number(reg.capacidade_producao) || Number(reg.produtos?.capacidade_nominal) || 7200;
-      
+
       // Cálculo de eficiência: nominalCap é baseada em 8 horas (480 minutos)
       const capPerMin = nominalCap / 480;
 
       paradas.forEach((p: any) => {
         // Suporte a múltiplos nomes de campos no JSON (duracao, tempo, total_min)
         const dur = parseMinutos(p.duracao || p.tempo || p.total_min || 0);
-        
+
         if (dur <= 0) return;
 
         totalDowntime += dur;
         totalStopsCount += 1;
-        
+
         // Impacto produtivo calculado por minuto de indisponibilidade
         const lostInThisStop = dur * capPerMin;
         volumeLost += lostInThisStop;
@@ -146,11 +146,11 @@ const RelatoriosDowntime: React.FC = () => {
         // Identificação técnica do equipamento
         const mObj = maquinas.find(m => m.id === p.maquina_id);
         const equipName = mObj ? mObj.nome : (p.equipamento || 'GERAL');
-        
+
         byEquipment[equipName] = (byEquipment[equipName] || 0) + dur;
-        
-        const reason = (p.motivo || 'NATUREZA NÃO IDENTIFICADA').toUpperCase();
-        byReason[reason] = (byReason[reason] || 0) + dur;
+
+        const type = (p.tipo || 'NÃO PLANEJADA').toUpperCase();
+        byType[type] = (byType[type] || 0) + dur;
 
         detailedFailures.push({
           data: reg.data_registro,
@@ -164,24 +164,24 @@ const RelatoriosDowntime: React.FC = () => {
       });
     });
 
-    // Construção do Pareto de Motivos
-    const paretoData = Object.entries(byReason)
+    // Construção do Pareto de Tipos de Parada
+    const paretoData = Object.entries(byType)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
 
     // Indicadores de Manutenção
     const mttr = totalStopsCount > 0 ? totalDowntime / totalStopsCount : 0;
-    
+
     // Detecção de Gargalo Crítico
     const critEquipEntry = Object.entries(byEquipment).sort((a, b) => b[1] - a[1])[0];
     const critEquip = critEquipEntry ? critEquipEntry[0] : '--';
 
-    return { 
-      totalDowntime: totalDowntime || 0, 
-      totalStopsCount: totalStopsCount || 0, 
-      volumeLost: Math.round(volumeLost) || 0, 
-      mttr: mttr || 0, 
-      paretoData, 
+    return {
+      totalDowntime: totalDowntime || 0,
+      totalStopsCount: totalStopsCount || 0,
+      volumeLost: Math.round(volumeLost) || 0,
+      mttr: mttr || 0,
+      paretoData,
       critEquip,
       detailedFailures: detailedFailures.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
     };
@@ -195,7 +195,7 @@ const RelatoriosDowntime: React.FC = () => {
 
   return (
     <div className="w-full max-w-[98%] mx-auto space-y-8 animate-in fade-in duration-500 pb-12 font-sans text-slate-900 print:text-black">
-      
+
       {/* Controles Nexus */}
       <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm print:hidden">
         <div className="flex items-center gap-4">
@@ -211,23 +211,23 @@ const RelatoriosDowntime: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
           <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
             <Calendar className="ml-2 w-4 h-4 text-slate-400" />
-            <input 
-              type="date" 
-              value={dataInicio} 
+            <input
+              type="date"
+              value={dataInicio}
               onChange={e => setDataInicio(e.target.value)}
               className="bg-transparent px-2 py-1.5 text-xs font-bold outline-none uppercase"
             />
             <span className="text-slate-300">|</span>
-            <input 
-              type="date" 
-              value={dataFim} 
+            <input
+              type="date"
+              value={dataFim}
               onChange={e => setDataFim(e.target.value)}
               className="bg-transparent px-2 py-1.5 text-xs font-bold outline-none uppercase"
             />
           </div>
 
-          <select 
-            value={linhaId} 
+          <select
+            value={linhaId}
             onChange={e => setLinhaId(e.target.value)}
             className="bg-slate-50 border border-slate-200 p-2 rounded-xl text-xs font-bold uppercase outline-none cursor-pointer"
           >
@@ -235,7 +235,7 @@ const RelatoriosDowntime: React.FC = () => {
             {linhas.map(l => <option key={l.id} value={l.id}>{l.nome}</option>)}
           </select>
 
-          <button 
+          <button
             onClick={fetchData}
             className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-200"
           >
@@ -243,7 +243,7 @@ const RelatoriosDowntime: React.FC = () => {
             Consolidar
           </button>
 
-          <button 
+          <button
             onClick={handlePrint}
             className="px-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg shadow-slate-200"
           >
@@ -255,7 +255,7 @@ const RelatoriosDowntime: React.FC = () => {
 
       {/* Relatório A4 Core */}
       <div ref={reportRef} className="bg-white p-0 space-y-10 print:p-0">
-        
+
         {/* Cabeçalho de Auditoria */}
         <header className="flex justify-between items-start border-b-2 border-slate-900 pb-6 break-inside-avoid">
           <div className="flex items-center gap-4">
@@ -265,7 +265,7 @@ const RelatoriosDowntime: React.FC = () => {
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">Monitoramento de Inatividade e Confiabilidade Industrial</p>
             </div>
           </div>
-          
+
           <div className="text-right">
             <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-1">RELATÓRIO TÉCNICO DE DOWNTIME</h2>
             <p className="text-[10px] font-bold text-slate-400 uppercase">
@@ -277,57 +277,57 @@ const RelatoriosDowntime: React.FC = () => {
         {/* KPIs Consolidados */}
         <section className="grid grid-cols-4 gap-4 break-inside-avoid">
           <div className="border border-slate-200 rounded-2xl p-6 bg-slate-50 relative overflow-hidden">
-             <div className="absolute top-0 right-0 p-2"><Timer className="w-8 h-8 text-slate-200/50" /></div>
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Inatividade Total</p>
-             <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.totalDowntime} <span className="text-xs">min</span></h4>
-             <p className="text-[9px] text-slate-400 mt-2">Duração Bruta Acumulada</p>
+            <div className="absolute top-0 right-0 p-2"><Timer className="w-8 h-8 text-slate-200/50" /></div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Inatividade Total</p>
+            <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.totalDowntime} <span className="text-xs">min</span></h4>
+            <p className="text-[9px] text-slate-400 mt-2">Duração Bruta Acumulada</p>
           </div>
           <div className="border border-slate-200 rounded-2xl p-6 bg-slate-50 relative overflow-hidden">
-             <div className="absolute top-0 right-0 p-2"><AlertCircle className="w-8 h-8 text-slate-200/50" /></div>
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Equipamento Crítico</p>
-             <h4 className="text-xl font-black text-red-600 leading-tight uppercase truncate">{analytics.critEquip}</h4>
-             <p className="text-[9px] text-slate-400 mt-2">Maior Tempo em Reparo</p>
+            <div className="absolute top-0 right-0 p-2"><AlertCircle className="w-8 h-8 text-slate-200/50" /></div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Equipamento Crítico</p>
+            <h4 className="text-xl font-black text-red-600 leading-tight uppercase truncate">{analytics.critEquip}</h4>
+            <p className="text-[9px] text-slate-400 mt-2">Maior Tempo em Reparo</p>
           </div>
           <div className="border border-slate-200 rounded-2xl p-6 bg-slate-50 relative overflow-hidden">
-             <div className="absolute top-0 right-0 p-2"><Activity className="w-8 h-8 text-slate-200/50" /></div>
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">MTTR (Média)</p>
-             <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.mttr.toFixed(1)} <span className="text-xs">min</span></h4>
-             <p className="text-[9px] text-slate-400 mt-2">Recuperação Média de Falha</p>
+            <div className="absolute top-0 right-0 p-2"><Activity className="w-8 h-8 text-slate-200/50" /></div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">MTTR (Média)</p>
+            <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.mttr.toFixed(1)} <span className="text-xs">min</span></h4>
+            <p className="text-[9px] text-slate-400 mt-2">Recuperação Média de Falha</p>
           </div>
           <div className="border border-slate-200 rounded-2xl p-6 bg-slate-900 text-white relative overflow-hidden">
-             <div className="absolute top-0 right-0 p-2"><TrendingDown className="w-8 h-8 text-white/10" /></div>
-             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Impacto Produtivo</p>
-             <h4 className="text-2xl font-black text-emerald-400 leading-none">{analytics.volumeLost.toLocaleString()} <span className="text-xs">un</span></h4>
-             <p className="text-[9px] text-slate-500 mt-2">Estimativa de Perda Volumétrica</p>
+            <div className="absolute top-0 right-0 p-2"><TrendingDown className="w-8 h-8 text-white/10" /></div>
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Impacto Produtivo</p>
+            <h4 className="text-2xl font-black text-emerald-400 leading-none">{analytics.volumeLost.toLocaleString()} <span className="text-xs">un</span></h4>
+            <p className="text-[9px] text-slate-500 mt-2">Estimativa de Perda Volumétrica</p>
           </div>
         </section>
 
         {/* Pareto Chart */}
         <section className="space-y-4 break-inside-avoid">
-           <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] flex items-center gap-2">
-            <BarChart2 className="w-3.5 h-3.5 text-blue-600" /> II. Pareto de Motivos (Análise de Causa Raiz)
+          <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] flex items-center gap-2">
+            <BarChart2 className="w-3.5 h-3.5 text-blue-600" /> II. Pareto de Tipos de Parada (Análise de Causa Raiz)
           </h3>
           <div className="border border-slate-200 rounded-2xl p-6 h-[350px] bg-white shadow-sm">
             {analytics.paretoData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={analytics.paretoData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis 
-                    dataKey="name" 
-                    fontSize={8} 
-                    fontWeight="bold" 
-                    axisLine={false} 
-                    tickLine={false} 
+                  <XAxis
+                    dataKey="name"
+                    fontSize={8}
+                    fontWeight="bold"
+                    axisLine={false}
+                    tickLine={false}
                     interval={0}
                   />
-                  <YAxis 
-                    fontSize={8} 
-                    fontWeight="bold" 
-                    axisLine={false} 
+                  <YAxis
+                    fontSize={8}
+                    fontWeight="bold"
+                    axisLine={false}
                     tickLine={false}
                     label={{ value: 'Minutos', angle: -90, position: 'insideLeft', fontSize: 10, fontWeight: 'bold' }}
                   />
-                  <RechartsTooltip 
+                  <RechartsTooltip
                     cursor={{ fill: '#f8fafc' }}
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px' }}
                   />
@@ -349,7 +349,7 @@ const RelatoriosDowntime: React.FC = () => {
 
         {/* Tabela de Detalhamento Cronológico */}
         <section className="space-y-4 break-inside-avoid">
-           <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] flex items-center gap-2">
+          <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] flex items-center gap-2">
             <History className="w-3.5 h-3.5 text-slate-400" /> III. Registro Histórico de Eventos de Inatividade
           </h3>
           <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
