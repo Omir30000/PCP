@@ -205,10 +205,13 @@ const PaginaRegistro: React.FC = () => {
       setMessage({ type: 'success', text: 'Registro industrial publicado com sucesso!' });
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
+      const [year, month, day] = formData.data_registro.split('-');
+      const defaultLote = `${day}${month}${year}`;
+
       setFormData(prev => ({
         ...prev,
         quantidade_produced: 0,
-        lote: '',
+        lote: defaultLote,
         carga_horaria: 8,
         observacoes: ''
       }));
@@ -257,7 +260,15 @@ const PaginaRegistro: React.FC = () => {
         )}
       </header>
 
-      <form onSubmit={handleSubmit} className="space-y-8 w-full">
+      <form
+        onSubmit={handleSubmit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+            e.preventDefault();
+          }
+        }}
+        className="space-y-8 w-full"
+      >
 
         <section className="bg-white/80 backdrop-blur-md p-8 md:p-10 rounded-[40px] shadow-xl border border-white/50 w-full relative">
           <div className="flex items-center gap-4 mb-10 border-b border-slate-100/50 pb-6">
