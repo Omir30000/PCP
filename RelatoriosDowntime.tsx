@@ -275,7 +275,7 @@ const RelatoriosDowntime: React.FC = () => {
         </header>
 
         {/* KPIs Consolidados */}
-        <section className="grid grid-cols-4 gap-4 break-inside-avoid">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 break-inside-avoid">
           <div className="border border-slate-200 rounded-2xl p-6 bg-slate-50 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-2"><Timer className="w-8 h-8 text-slate-200/50" /></div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Inatividade Total</p>
@@ -352,7 +352,7 @@ const RelatoriosDowntime: React.FC = () => {
           <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] flex items-center gap-2">
             <History className="w-3.5 h-3.5 text-slate-400" /> III. Registro Histórico de Eventos de Inatividade
           </h3>
-          <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm overflow-x-auto">
             <table className="w-full text-left">
               <thead className="bg-slate-900 text-white text-[8px] font-black uppercase tracking-widest">
                 <tr>

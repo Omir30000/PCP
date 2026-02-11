@@ -558,7 +558,7 @@ const RelatorioRegistros: React.FC = () => {
                     <div className="bg-[#1a1a1a] border border-white/10 rounded-[32px] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
 
                         {/* Modal Header */}
-                        <div className="p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#1a1a1a] z-10">
+                        <div className="p-5 md:p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#1a1a1a] z-10">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
                                     <FileText className="w-5 h-5" />
@@ -578,7 +578,7 @@ const RelatorioRegistros: React.FC = () => {
 
                         {/* Modal Body */}
                         <form onSubmit={handleSaveRecord} className="flex flex-col max-h-full">
-                            <div className="p-6 md:p-8 space-y-8 overflow-y-auto">
+                            <div className="p-5 md:p-8 space-y-8 overflow-y-auto">
 
                                 {/* Seção Principal */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

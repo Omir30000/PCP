@@ -369,7 +369,7 @@ const PaginaRegistro: React.FC = () => {
                   min="0"
                   value={formData.quantidade_produced}
                   onChange={e => setFormData({ ...formData, quantidade_produced: parseInt(e.target.value) || 0 })}
-                  className="w-full p-10 text-6xl md:text-8xl font-black border-4 border-transparent bg-blue-50/50 text-blue-700 rounded-[48px] text-center focus:border-blue-500 focus:bg-white transition-all outline-none"
+                  className="w-full p-6 md:p-10 text-4xl md:text-8xl font-black border-4 border-transparent bg-blue-50/50 text-blue-700 rounded-[32px] md:rounded-[48px] text-center focus:border-blue-500 focus:bg-white transition-all outline-none placeholder-blue-300/50"
                   required
                 />
               </div>
