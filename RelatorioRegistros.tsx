@@ -308,21 +308,23 @@ const RelatorioRegistros: React.FC = () => {
 
             console.log('🔍 Linha selecionada:', selectedLinha);
             console.log('🔍 Produto selecionado:', selectedProduto);
-
             const payload = {
                 data_registro: editingRecord.data_registro,
                 turno: editingRecord.turno,
                 linha_producao: selectedLinha?.nome || editingRecord.linha_producao,
-                linha_id: selectedLinha?.id || (isUUID(editingRecord.linha_producao) ? editingRecord.linha_producao : null),
+                linha_id: selectedLinha?.id || editingRecord.linha_id,
                 produto_volume: selectedProduto?.nome || editingRecord.produto_volume,
-                produto_id: selectedProduto?.id || (isUUID(editingRecord.produto_volume) ? editingRecord.produto_volume : null),
-                lote: editingRecord.lote,
-                quantidade_produzida: Number(editingRecord.quantidade_produzida),
-                carga_horaria: Number(editingRecord.carga_horaria),
-                observacoes: editingRecord.observacoes,
-                capacidade_producao: selectedProduto?.capacidade_nominal || editingRecord.capacidade_producao,
+                produto_id: selectedProduto?.id || editingRecord.produto_id,
+                lote: editingRecord.lote || null,
+                quantidade_produzida: Number(editingRecord.quantidade_produzida) || 0,
+                carga_horaria: Number(editingRecord.carga_horaria) || 8,
+                observacoes: editingRecord.observacoes || null,
+                capacidade_producao: Number(selectedProduto?.capacidade_nominal || editingRecord.capacidade_producao) || null,
                 paradas: (editingRecord.paradas_detalhadas || []).map(p => {
+                    // Remove o ID temporário antes de salvar no banco de dados (JSONB)
+                    const { id, ...rest } = p;
                     return {
+                        ...rest,
                         tipo: p.tipo || "Não Planejada",
                         maquina: p.maquina_id || p.maquina || "GERAL",
                         motivo: p.motivo || "NÃO INFORMADO",
@@ -333,6 +335,13 @@ const RelatorioRegistros: React.FC = () => {
                 })
             };
 
+            // Calcula eficiência para persistência (coluna eficiencia_calculada numeric)
+            const eficiencia = (payload.capacidade_producao && payload.capacidade_producao > 0)
+                ? (payload.quantidade_produzida / payload.capacidade_producao) * 100
+                : 0;
+
+            (payload as any).eficiencia_calculada = Number(eficiencia.toFixed(2));
+
             console.log('📦 Payload preparado:', payload);
             console.log('🚀 Enviando para Supabase...');
 
@@ -340,18 +349,14 @@ const RelatorioRegistros: React.FC = () => {
                 .from('registros_producao')
                 .update(payload)
                 .eq('id', editingRecord.id)
-                .select();
+                .single();
 
             console.log('📥 Resposta do Supabase - Data:', data);
             console.log('📥 Resposta do Supabase - Error:', error);
 
             if (error) throw error;
 
-            if (!data || data.length === 0) {
-                throw new Error("Nenhum registro foi atualizado. Verifique se o ID ainda existe ou se há restrições de acesso (RLS).");
-            }
-
-            const updatedRow = data[0];
+            const updatedRow = data;
 
             setRegistros(prev => prev.map(r => r.id === editingRecord.id ? {
                 ...updatedRow,
