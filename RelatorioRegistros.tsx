@@ -716,7 +716,7 @@ const RelatorioRegistros: React.FC = () => {
                                                         'PALESTRA/REUNIÃO',
                                                         'SETUP (Preparação de máquina)',
                                                         'PARADA PROGRAMADA',
-                                                        'OUTROS',
+                                                        'OPERACIONAL',
                                                         'ASSISTENCIA TÉCNICA'
                                                     ].map(t => (
                                                         <option key={t} value={t} className="text-slate-900">{t}</option>

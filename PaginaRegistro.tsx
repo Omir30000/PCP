@@ -466,7 +466,7 @@ const PaginaRegistro: React.FC = () => {
                           'PALESTRA/REUNIÃO',
                           'SETUP (Preparação de máquina)',
                           'PARADA PROGRAMADA',
-                          'OUTROS',
+                          'OPERACIONAL',
                           'ASSISTENCIA TÉCNICA'
                         ].map(t => (
                           <option key={t} value={t}>{t}</option>
@@ -587,7 +587,7 @@ const PaginaRegistro: React.FC = () => {
                       'PALESTRA/REUNIÃO',
                       'SETUP (Preparação de máquina)',
                       'PARADA PROGRAMADA',
-                      'OUTROS',
+                      'OPERACIONAL',
                       'ASSISTENCIA TÉCNICA'
                     ].map(t => (
                       <option key={t} value={t}>{t}</option>
