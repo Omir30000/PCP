@@ -20,6 +20,17 @@ import {
   ArrowRight
 } from 'lucide-react';
 
+const MOTIVOS_COMUNS: Record<string, string[]> = {
+  'OPERACIONAL': ['FALTA DE OPERADOR', 'TROCA DE ETIQUETA', 'AJUSTE DE PROCESSO', 'REFUGO EXCESSIVO', 'LIMPEZA SETORIAL', 'TROCA DE BOBINA'],
+  'MANUTENÇÃO': ['QUEBRA MECÂNICA', 'FALHA ELÉTRICA', 'TROCA DE SENSOR', 'AJUSTE DE CORRENTE', 'LUBRIFICAÇÃO', 'TROCA DE PEÇA', 'REPARO NA ESTEIRA'],
+  'SETUP (Preparação de máquina)': ['TROCA DE FORMATO', 'AJUSTE DE GUIA', 'AQUECIMENTO', 'TROCA DE PRODUTO', 'INÍCIO DE PRODUÇÃO', 'REGULAGEM TERMICA'],
+  'LIMPEZA DE MÁQUINA': ['LIMPEZA DE TANQUE', 'SANITIZAÇÃO', 'TROCA DE COR', 'LIMPEZA DE FIM DE TURNO'],
+  'FALTA DE MATERIA PRIMA': ['FALTA DE VASILHAME', 'FALTA DE TAMPA', 'FALTA DE RÓTULO', 'FALTA DE FILME', 'FALTA DE CAIXA'],
+  'FALHA DE ENERGIA': ['PICO DE TENSÃO', 'QUEDA GERAL', 'ACIONAMENTO DE GERADOR'],
+  'PARADA PROGRAMADA': ['PREVENTIVA', 'TREINAMENTO', 'REUNIÃO DE TURNO', 'INVENTÁRIO', 'INTERVALO REFEIÇÃO'],
+  'ASSISTENCIA TÉCNICA': ['ACESSO REMOTO', 'VISITA TÉCNICA EXTERNA', 'SUPORTE TÉCNICO FABRICANTE']
+};
+
 const PaginaRegistro: React.FC = () => {
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -642,10 +653,29 @@ const PaginaRegistro: React.FC = () => {
                   type="text"
                   placeholder="Ex: Quebra do comando elétrico"
                   value={tempParada.motivo}
-                  onChange={e => setTempParada({ ...tempParada, motivo: e.target.value })}
+                  onChange={e => setTempParada({ ...tempParada, motivo: e.target.value.toUpperCase() })}
                   className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
                   required
                 />
+
+                {/* Sugestões Rápidas (Pills) */}
+                {tempParada.tipo && MOTIVOS_COMUNS[tempParada.tipo] && (
+                  <div className="space-y-2 mt-2">
+                    <p className="text-[8px] font-black text-blue-500 uppercase tracking-widest ml-1">Sugestões Rápidas:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {MOTIVOS_COMUNS[tempParada.tipo].map((motivo) => (
+                        <button
+                          key={motivo}
+                          type="button"
+                          onClick={() => setTempParada({ ...tempParada, motivo })}
+                          className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-tight transition-all border border-blue-100"
+                        >
+                          {motivo}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-6">
