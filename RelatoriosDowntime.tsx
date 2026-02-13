@@ -65,7 +65,7 @@ const RelatoriosDowntime: React.FC = () => {
 
       const filtrados = (regsRes.data || []).filter(r => {
         const dMatch = r.data_registro >= dataInicio && r.data_registro <= dataFim;
-        const lMatch = linhaId === 'todos' || r.linha_producao === linhaId;
+        const lMatch = linhaId === 'todos' || r.linha_id === linhaId;
         return dMatch && lMatch;
       });
 
