@@ -100,10 +100,9 @@ const RelatoriosDowntime: React.FC = () => {
             @media print {
               @page { size: A4 portrait; margin: 1cm; }
               body { zoom: 0.95; -webkit-print-color-adjust: exact; }
-              .print\\:hidden { display: none !important; }
-              .break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
-              .bg-slate-900 { background-color: #0f172a !important; color: white !important; }
               .bg-red-500 { background-color: #ef4444 !important; color: white !important; }
+              .print-force-page-1 { height: auto; min-height: 270mm; position: relative; }
+              .print-break-before { page-break-before: always; break-before: page; }
             }
           </style>
       </head>
@@ -399,7 +398,6 @@ const RelatoriosDowntime: React.FC = () => {
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px' }}
                       formatter={(value: any, name: string, props: any) => [`${value} min (${props.payload.percentage}%)`, name]}
                     />
-                    <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
@@ -437,7 +435,6 @@ const RelatoriosDowntime: React.FC = () => {
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px' }}
                       formatter={(value: any, name: string, props: any) => [`${value} min (${props.payload.percentage}%)`, name]}
                     />
-                    <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
@@ -448,7 +445,7 @@ const RelatoriosDowntime: React.FC = () => {
         </section>
 
         {/* Tabela de Detalhamento Cronológico */}
-        <section className="space-y-4 break-inside-avoid">
+        <section className="space-y-4 print-break-before pt-6">
           <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] flex items-center gap-2">
             <History className="w-3.5 h-3.5 text-slate-400" /> III. Registro Histórico de Eventos de Inatividade
           </h3>
