@@ -21,7 +21,14 @@ import {
   Box,
   X
 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
+
+const EmptyChartState = () => (
+  <div className="h-full flex flex-col items-center justify-center text-slate-300">
+    <AlertCircle className="w-12 h-12 mb-4 opacity-20" />
+    <p className="text-[11px] font-black uppercase tracking-widest text-center">Aguardando Lançamentos<br />Operacionais</p>
+  </div>
+);
 
 const RelatoriosDowntime: React.FC = () => {
   const getHoje = () => new Date().toISOString().split('T')[0];
@@ -167,25 +174,55 @@ const RelatoriosDowntime: React.FC = () => {
       });
     });
 
-    // Construção do Pareto de Tipos de Parada
-    const paretoData = Object.entries(byType)
-      .map(([name, value]) => ({ name, value }))
+    // Construção do Pareto de Tipos de Parada -> Agora para Pizza
+    const totalDowntimeValue = Object.values(byType).reduce((a, b) => a + b, 0);
+    const typePieData = Object.entries(byType)
+      .map(([name, value]) => ({
+        name,
+        value,
+        percentage: totalDowntimeValue > 0 ? ((value / totalDowntimeValue) * 100).toFixed(1) : 0
+      }))
+      .sort((a, b) => b.value - a.value);
+
+    // Identificar o tipo mais crítico para o segundo gráfico
+    const mostCriticalType = typePieData[0]?.name || null;
+
+    // Filtrar máquinas que contribuíram para o tipo mais crítico
+    const machineByCriticalType: Record<string, number> = {};
+    if (mostCriticalType) {
+      detailedFailures.forEach(fail => {
+        if (fail.tipo === mostCriticalType) {
+          machineByCriticalType[fail.equipamento] = (machineByCriticalType[fail.equipamento] || 0) + fail.duracao;
+        }
+      });
+    }
+
+    const machinePieData = Object.entries(machineByCriticalType)
+      .map(([name, value]) => ({
+        name,
+        value,
+        percentage: byType[mostCriticalType] > 0 ? ((value / byType[mostCriticalType]) * 100).toFixed(1) : 0
+      }))
       .sort((a, b) => b.value - a.value);
 
     // Indicadores de Manutenção
     const mttr = totalStopsCount > 0 ? totalDowntime / totalStopsCount : 0;
 
-    // Detecção de Gargalo Crítico (Por Frequência)
-    const critEquipEntry = Object.entries(byEquipmentCount).sort((a, b) => b[1] - a[1])[0];
-    const critEquip = critEquipEntry ? critEquipEntry[0] : '--';
+    // Detecção de Top 3 Equipamentos Críticos (Por Frequência)
+    const topEquipments = Object.entries(byEquipmentCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([name, count]) => ({ name, count }));
 
     return {
       totalDowntime: totalDowntime || 0,
       totalStopsCount: totalStopsCount || 0,
       volumeLost: Math.round(volumeLost) || 0,
       mttr: mttr || 0,
-      paretoData,
-      critEquip,
+      typePieData,
+      machinePieData,
+      mostCriticalType,
+      topEquipments,
       detailedFailures: detailedFailures.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
     };
   }, [registros, maquinas]);
@@ -285,11 +322,34 @@ const RelatoriosDowntime: React.FC = () => {
             <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.totalDowntime} <span className="text-xs">min</span></h4>
             <p className="text-[9px] text-slate-400 mt-2">Duração Bruta Acumulada</p>
           </div>
-          <div className="border border-slate-200 rounded-2xl p-6 bg-slate-50 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-2"><AlertCircle className="w-8 h-8 text-slate-200/50" /></div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Equipamento Crítico</p>
-            <h4 className="text-xl font-black text-red-600 leading-tight uppercase truncate">{analytics.critEquip}</h4>
-            <p className="text-[9px] text-slate-400 mt-2">Maior Frequência de Falhas</p>
+          <div className="border border-slate-200 rounded-2xl p-6 bg-slate-50 relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+            <div className="absolute top-0 right-0 p-2"><AlertCircle className="w-8 h-8 text-red-100" /></div>
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Top 3 Equipamentos Críticos</p>
+              <div className="space-y-2">
+                {analytics.topEquipments.length > 0 ? (
+                  analytics.topEquipments.map((equip, idx) => (
+                    <div key={idx} className="flex items-center justify-between group">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${idx === 0 ? 'bg-red-600 text-white' : 'bg-slate-200 text-slate-600'
+                          }`}>
+                          {idx + 1}
+                        </span>
+                        <span className={`text-[11px] font-bold uppercase truncate max-w-[120px] ${idx === 0 ? 'text-red-700' : 'text-slate-600'
+                          }`}>
+                          {equip.name}
+                        </span>
+                      </div>
+                      <span className="text-[9px] font-black text-slate-400 group-hover:text-slate-600 transition-colors">
+                        {equip.count} paradas
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xl font-black text-slate-300">--</p>
+                )}
+              </div>
+            </div>
           </div>
           <div className="border border-slate-200 rounded-2xl p-6 bg-slate-50 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-2"><Activity className="w-8 h-8 text-slate-200/50" /></div>
@@ -305,48 +365,81 @@ const RelatoriosDowntime: React.FC = () => {
           </div>
         </section>
 
-        {/* Pareto Chart */}
+        {/* Gráficos de Pizza Interligados */}
         <section className="space-y-4 break-inside-avoid">
-          <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] flex items-center gap-2">
-            <BarChart2 className="w-3.5 h-3.5 text-blue-600" /> II. Pareto de Tipos de Parada (Análise de Causa Raiz)
-          </h3>
-          <div className="border border-slate-200 rounded-2xl p-6 h-[350px] bg-white shadow-sm">
-            {analytics.paretoData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={analytics.paretoData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis
-                    dataKey="name"
-                    fontSize={8}
-                    fontWeight="bold"
-                    axisLine={false}
-                    tickLine={false}
-                    interval={0}
-                  />
-                  <YAxis
-                    fontSize={8}
-                    fontWeight="bold"
-                    axisLine={false}
-                    tickLine={false}
-                    label={{ value: 'Minutos', angle: -90, position: 'insideLeft', fontSize: 10, fontWeight: 'bold' }}
-                  />
-                  <RechartsTooltip
-                    cursor={{ fill: '#f8fafc' }}
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px' }}
-                  />
-                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                    {analytics.paretoData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={index === 0 ? '#ef4444' : '#0f172a'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-slate-300">
-                <AlertCircle className="w-12 h-12 mb-4 opacity-20" />
-                <p className="text-[11px] font-black uppercase tracking-widest">Aguardando Lançamentos Operacionais</p>
+          <div className="flex items-center justify-between">
+            <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] flex items-center gap-2">
+              <BarChart2 className="w-3.5 h-3.5 text-blue-600" /> II. Análise de Causa Raiz e Impacto por Máquina
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Gráfico 1: Tipos de Parada */}
+            <div className="border border-slate-200 rounded-2xl p-6 h-[400px] bg-white shadow-sm flex flex-col">
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-4">Distribuição por Tipo de Parada (%)</p>
+              {analytics.typePieData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={analytics.typePieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {analytics.typePieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={index === 0 ? '#ef4444' : index === 1 ? '#0f172a' : '#334155'} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px' }}
+                      formatter={(value: any, name: string, props: any) => [`${value} min (${props.payload.percentage}%)`, name]}
+                    />
+                    <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyChartState />
+              )}
+            </div>
+
+            {/* Gráfico 2: Máquinas do Tipo Crítico */}
+            <div className="border border-slate-200 rounded-2xl p-6 h-[400px] bg-white shadow-sm flex flex-col">
+              <div className="mb-4">
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Impacto por Máquina</p>
+                <p className="text-[10px] font-black text-red-600 uppercase truncate">
+                  Filtro: {analytics.mostCriticalType || 'N/A'}
+                </p>
               </div>
-            )}
+              {analytics.machinePieData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={analytics.machinePieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {analytics.machinePieData.map((entry, index) => (
+                        <Cell key={`cell-m-${index}`} fill={['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316'][index % 5]} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px' }}
+                      formatter={(value: any, name: string, props: any) => [`${value} min (${props.payload.percentage}%)`, name]}
+                    />
+                    <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyChartState />
+              )}
+            </div>
           </div>
         </section>
 
