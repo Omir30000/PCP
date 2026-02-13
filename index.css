@@ -1,0 +1,31 @@
+
+:root {
+  /* Light Theme */
+  --bg-app: #f8fafc;
+  --bg-sidebar: #0d0d0d; /* Keep sidebar dark even in light mode? Or make it light? User usually expects professional dark sidebar */
+  --bg-card: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-primary: rgba(0, 0, 0, 0.05);
+  --accent-color: #facc15;
+}
+
+.dark {
+  /* Dark Theme */
+  --bg-app: #0a0a0a;
+  --bg-sidebar: #0d0d0d;
+  --bg-card: #141414;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-primary: rgba(255, 255, 255, 0.05);
+}
+
+/* Custom Utilities */
+.bg-theme-app { background-color: var(--bg-app); }
+.bg-theme-card { background-color: var(--bg-card); }
+.text-theme-main { color: var(--text-main); }
+.text-theme-muted { color: var(--text-muted); }
+.border-theme { border-color: var(--border-primary); }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

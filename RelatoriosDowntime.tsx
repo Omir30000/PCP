@@ -12,6 +12,7 @@ import {
   Settings,
   AlertCircle,
   TrendingDown,
+  TrendingUp,
   ChevronRight,
   ShieldCheck,
   Factory,
@@ -19,6 +20,7 @@ import {
   AlertTriangle,
   History,
   Box,
+  Package,
   X
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
@@ -233,10 +235,10 @@ const RelatoriosDowntime: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-[98%] mx-auto space-y-8 animate-in fade-in duration-500 pb-12 font-sans text-slate-900 print:text-black">
+    <div className="w-full max-w-[98%] mx-auto space-y-8 animate-in fade-in duration-500 pb-12 font-sans text-slate-900 dark:text-slate-100 print:text-black">
 
       {/* Controles Nexus */}
-      <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-white p-4 lg:p-6 rounded-2xl border border-slate-200 shadow-sm print:hidden">
+      <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-white dark:bg-slate-900/50 p-4 lg:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm print:hidden">
         <div className="flex items-center gap-4 w-full xl:w-auto">
           <div className="p-3 bg-red-600 rounded-xl text-white shadow-lg shadow-red-200">
             <Timer className="w-6 h-6" />
@@ -248,7 +250,7 @@ const RelatoriosDowntime: React.FC = () => {
         </div>
 
         <div className="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
-          <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+          <div className="flex items-center gap-2 bg-slate-50 dark:bg-black/20 p-1.5 rounded-xl border border-slate-200 dark:border-white/10">
             <Calendar className="ml-2 w-4 h-4 text-slate-400" />
             <input
               type="date"
@@ -315,7 +317,7 @@ const RelatoriosDowntime: React.FC = () => {
 
         {/* KPIs Consolidados */}
         <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 break-inside-avoid">
-          <div className="border border-slate-200 rounded-2xl p-6 bg-slate-50 relative overflow-hidden">
+          <div className="border border-slate-200 dark:border-white/10 rounded-2xl p-6 bg-slate-50 dark:bg-slate-900/40 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-2"><Timer className="w-8 h-8 text-slate-200/50" /></div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Inatividade Total</p>
             <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.totalDowntime} <span className="text-xs">min</span></h4>
@@ -356,26 +358,31 @@ const RelatoriosDowntime: React.FC = () => {
             <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.mttr.toFixed(1)} <span className="text-xs">min</span></h4>
             <p className="text-[9px] text-slate-400 mt-2">Recuperação Média de Falha</p>
           </div>
-          <div className="border border-slate-200 rounded-2xl p-6 bg-slate-900 text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-2"><TrendingDown className="w-8 h-8 text-white/10" /></div>
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Impacto Produtivo</p>
-            <h4 className="text-2xl font-black text-emerald-400 leading-none">{analytics.volumeLost.toLocaleString()} <span className="text-xs">un</span></h4>
-            <p className="text-[9px] text-slate-500 mt-2">Estimativa de Perda Volumétrica</p>
+          <div className="border border-slate-200 dark:border-white/10 rounded-2xl p-6 bg-slate-900 dark:bg-slate-800 text-white relative overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none">
+            <div className="absolute top-0 right-0 p-2"><Package className="w-8 h-8 text-white/10" /></div>
+            <p className="text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Impacto Produtivo</p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-2xl font-black tracking-tighter">{(analytics.volumeLost).toLocaleString('pt-BR')} <span className="text-[10px] font-bold opacity-60">un</span></p>
+            </div>
+            <p className="text-[8px] font-medium text-white/40 uppercase tracking-widest mt-1">Estimativa de Perda Volumétrica</p>
           </div>
         </section>
 
-        {/* Gráficos de Pizza Interligados */}
-        <section className="space-y-4 break-inside-avoid">
-          <div className="flex items-center justify-between">
-            <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] flex items-center gap-2">
-              <BarChart2 className="w-3.5 h-3.5 text-blue-600" /> II. Análise de Causa Raiz e Impacto por Máquina
+        {/* II. Análise Visual e Comparativa */}
+        <section className="space-y-4 break-inside-avoid px-2">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
+              <TrendingUp className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+            </div>
+            <h3 className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-[0.3em] flex items-center gap-2">
+              II. Análise de Causa Raiz e Impacto por Máquina
             </h3>
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             {/* Gráfico 1: Tipos de Parada */}
-            <div className="border border-slate-200 rounded-2xl p-4 lg:p-6 h-[350px] lg:h-[400px] bg-white shadow-sm flex flex-col">
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-4">Distribuição por Tipo de Parada (%)</p>
+            <div className="border border-slate-200 dark:border-white/10 rounded-2xl p-4 lg:p-6 h-[350px] lg:h-[400px] bg-white dark:bg-slate-900/50 shadow-sm flex flex-col">
+              <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">Distribuição por Tipo de Parada (%)</p>
               {analytics.typePieData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -406,7 +413,7 @@ const RelatoriosDowntime: React.FC = () => {
             </div>
 
             {/* Gráfico 2: Máquinas do Tipo Crítico */}
-            <div className="border border-slate-200 rounded-2xl p-4 lg:p-6 h-[350px] lg:h-[400px] bg-white shadow-sm flex flex-col">
+            <div className="border border-slate-200 dark:border-white/10 rounded-2xl p-4 lg:p-6 h-[350px] lg:h-[400px] bg-white dark:bg-slate-900/50 shadow-sm flex flex-col">
               <div className="mb-4">
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Impacto por Máquina</p>
                 <p className="text-[10px] font-black text-red-600 uppercase truncate">
@@ -446,74 +453,78 @@ const RelatoriosDowntime: React.FC = () => {
 
         {/* Tabela de Detalhamento Cronológico */}
         <section className="space-y-4 print-break-before pt-6">
-          <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] flex items-center gap-2">
-            <History className="w-3.5 h-3.5 text-slate-400" /> III. Registro Histórico de Eventos de Inatividade
+          <h3 className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-[0.3em] flex items-center gap-2">
+            <History className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" /> III. Registro Histórico de Eventos de Inatividade
           </h3>
-          <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-slate-900 text-white text-[8px] font-black uppercase tracking-widest">
-                <tr>
-                  <th className="px-5 py-4">Data Registro</th>
-                  <th className="px-5 py-4">Centro de Trabalho</th>
-                  <th className="px-5 py-4">Tipo de Parada</th>
-                  <th className="px-5 py-4">Máquina</th>
-                  <th className="px-5 py-4">Motivo</th>
-                  <th className="px-5 py-4 text-right">Duração</th>
-                  <th className="px-5 py-4 text-right">Perda Est.</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-[10px]">
-                {analytics.detailedFailures.map((fail, idx) => (
-                  <tr key={idx} className={`hover:bg-slate-50 ${fail.duracao > 30 ? 'bg-red-50/30' : 'bg-white'}`}>
-                    <td className="px-5 py-3 font-bold text-slate-500">{formatarDataBR(fail.data)}</td>
-                    <td className="px-5 py-3 text-blue-600 font-black">{fail.linha}</td>
-                    <td className="px-5 py-3 font-bold text-slate-700 uppercase text-[9px]">{fail.tipo}</td>
-                    <td className="px-5 py-3 font-bold text-slate-800 uppercase">{fail.equipamento}</td>
-                    <td className="px-5 py-3 text-slate-600">
-                      <p className="font-bold">{fail.motivo}</p>
-                      {fail.obs && <p className="text-[8px] text-slate-400 italic truncate max-w-[200px]">Obs: {fail.obs}</p>}
-                    </td>
-                    <td className={`px-5 py-3 text-right font-black ${fail.duracao > 30 ? 'text-red-600' : 'text-slate-800'}`}>
-                      {fail.duracao}m
-                      {fail.duracao > 30 && <AlertTriangle className="w-3 h-3 inline ml-1 align-middle" />}
-                    </td>
-                    <td className="px-5 py-3 text-right text-emerald-600 font-bold">{fail.volumePerdido.toLocaleString()} un</td>
+          <div className="bg-white dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[800px]">
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-white/10">
+                    <th className="px-5 py-4 text-[8px] font-black text-slate-400 uppercase tracking-widest">Data Registro</th>
+                    <th className="px-5 py-4 text-[8px] font-black text-slate-400 uppercase tracking-widest">Linha</th>
+                    <th className="px-5 py-4 text-[8px] font-black text-slate-400 uppercase tracking-widest">Tipo</th>
+                    <th className="px-5 py-4 text-[8px] font-black text-slate-400 uppercase tracking-widest">Máquina</th>
+                    <th className="px-5 py-4 text-[8px] font-black text-slate-400 uppercase tracking-widest">Motivo</th>
+                    <th className="px-5 py-4 text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">Duração</th>
+                    <th className="px-5 py-4 text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">Perda Est.</th>
                   </tr>
-                ))}
-                {analytics.detailedFailures.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-5 py-12 text-center text-slate-300 uppercase font-bold tracking-widest italic">Sem inatividade reportada no período selecionado</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-[10px]">
+                  {analytics.detailedFailures.map((fail, idx) => (
+                    <tr key={idx} className={`hover:bg-slate-50 dark:hover:bg-white/5 transition-colors ${fail.duracao > 30 ? 'bg-red-50/30 dark:bg-red-500/5' : ''}`}>
+                      <td className="px-5 py-3 font-bold text-slate-500 dark:text-slate-400">{formatarDataBR(fail.data)}</td>
+                      <td className="px-5 py-3 text-blue-600 dark:text-blue-400 font-black">{fail.linha}</td>
+                      <td className="px-5 py-3 font-bold text-slate-700 dark:text-slate-300 uppercase text-[9px]">{fail.tipo}</td>
+                      <td className="px-5 py-3 font-bold text-slate-800 dark:text-slate-200 uppercase">{fail.equipamento}</td>
+                      <td className="px-5 py-3 text-slate-600 dark:text-slate-400">
+                        <p className="font-bold">{fail.motivo}</p>
+                        {fail.obs && <p className="text-[8px] text-slate-400 dark:text-slate-500 italic truncate max-w-[200px]">Obs: {fail.obs}</p>}
+                      </td>
+                      <td className={`px-5 py-3 text-right font-black ${fail.duracao > 30 ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-slate-200'}`}>
+                        {fail.duracao}m
+                        {fail.duracao > 30 && <AlertTriangle className="w-3 h-3 inline ml-1 align-middle" />}
+                      </td>
+                      <td className="px-5 py-3 text-right text-emerald-600 dark:text-emerald-400 font-bold">{fail.volumePerdido.toLocaleString('pt-BR')} un</td>
+                    </tr>
+                  ))}
+                  {analytics.detailedFailures.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="px-5 py-12 text-center text-slate-300 dark:text-slate-700 uppercase font-bold tracking-widest italic">
+                        Sem inatividade reportada no período selecionado
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
         {/* Rodapé Nexus */}
-        <footer className="pt-12 border-t-2 border-slate-900 break-inside-avoid">
-          <div className="flex justify-between items-end mb-16">
+        <footer className="pt-12 border-t-2 border-slate-900 dark:border-white/20 break-inside-avoid">
+          <div className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 mb-16">
             <div className="flex items-center gap-4">
-              <ShieldCheck className="w-8 h-8 text-slate-400" />
+              <ShieldCheck className="w-8 h-8 text-slate-400 dark:text-slate-500" />
               <div>
-                <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Documento Técnico Nexus PCP - v2.1</p>
-                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em]">Autenticação de Dados Industrial: {Math.random().toString(36).substring(7).toUpperCase()}</p>
+                <p className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest">Documento Técnico Nexus PCP - v2.1</p>
+                <p className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em]">Autenticação de Dados Industrial: {Math.random().toString(36).substring(7).toUpperCase()}</p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-[9px] font-black text-slate-800 uppercase tracking-widest">Emitido em: {new Date().toLocaleString('pt-BR')}</p>
-              <p className="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Validação de Disponibilidade Operacional</p>
+              <p className="text-[9px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest">Emitido em: {new Date().toLocaleString('pt-BR')}</p>
+              <p className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase mt-1 tracking-widest">Validação de Disponibilidade Operacional</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20">
             <div className="text-center">
-              <div className="border-t border-slate-900 pt-3"></div>
-              <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Engenharia de Manutenção / PCP</p>
+              <div className="border-t border-slate-900 dark:border-white/20 pt-3"></div>
+              <p className="text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase tracking-widest">Engenharia de Manutenção / PCP</p>
             </div>
             <div className="text-center">
-              <div className="border-t border-slate-900 pt-3"></div>
-              <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Coordenação de Operações Industriais</p>
+              <div className="border-t border-slate-900 dark:border-white/20 pt-3"></div>
+              <p className="text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase tracking-widest">Coordenação de Operações Industriais</p>
             </div>
           </div>
         </footer>

@@ -246,19 +246,29 @@ const PaginaRegistro: React.FC = () => {
   }
 
   return (
-    <div className="max-w-[98%] mx-auto space-y-8 w-full animate-in fade-in duration-700 pb-20 font-sans">
+    <div className="max-w-[98%] mx-auto space-y-8 w-full animate-in fade-in duration-700 pb-20 font-sans text-slate-900 dark:text-slate-100">
 
-      <header className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-white/70 backdrop-blur-xl p-6 lg:p-8 rounded-[32px] border border-white/20 shadow-2xl w-full relative overflow-hidden">
+      <header className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-white/70 dark:bg-slate-900/50 backdrop-blur-xl p-6 lg:p-8 rounded-[32px] border border-white/20 dark:border-white/5 shadow-2xl w-full relative overflow-hidden">
         <div className="absolute top-0 left-0 w-64 h-64 bg-blue-100/20 rounded-full -ml-32 -mt-32 blur-3xl pointer-events-none" />
         <div className="flex items-center gap-6 relative z-10">
-          <div className="bg-slate-900 p-4 rounded-[24px] shadow-2xl shadow-slate-400/20 shrink-0">
-            <ClipboardCheck className="text-blue-400 w-8 h-8 shrink-0" />
+          <div className="bg-slate-900 dark:bg-[#facc15] p-4 rounded-[24px] shadow-2xl shadow-slate-400/20 dark:shadow-nexus/10 shrink-0">
+            <Activity className="w-8 h-8 text-[#facc15] dark:text-black" />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tighter leading-none uppercase">Apontamento Industrial</h1>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-2 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-500" /> Registro de Turno v2.5
+            <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">Apontamento Industrial</h1>
+            <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+              <Layers className="w-3 h-3 text-[#facc15]" /> Nexus Production Intelligence
             </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 relative z-10 w-full xl:w-auto overflow-x-auto no-scrollbar pb-2 xl:pb-0">
+          <div className="flex items-center gap-3 bg-white/50 dark:bg-black/20 px-6 py-4 rounded-2xl border border-white dark:border-white/5 shadow-sm min-w-fit">
+            <User className="w-4 h-4 text-[#facc15]" />
+            <div className="flex flex-col leading-none">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Colaborador</span>
+              <span className="text-xs font-black text-slate-800 dark:text-slate-200">OPERADOR NEXUS</span>
+            </div>
           </div>
         </div>
 
@@ -281,161 +291,353 @@ const PaginaRegistro: React.FC = () => {
         className="space-y-8 w-full"
       >
 
-        <section className="bg-white/80 backdrop-blur-md p-8 md:p-10 rounded-[40px] shadow-xl border border-white/50 w-full relative">
-          <div className="flex items-center gap-4 mb-10 border-b border-slate-100/50 pb-6">
-            <div className="p-3 bg-slate-900 rounded-2xl"><Settings className="w-5 h-5 text-blue-400" /></div>
-            <h2 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Contexto da Operação</h2>
-          </div>
+        <section className="bg-white/80 dark:bg-slate-900/40 backdrop-blur-md p-8 lg:p-12 rounded-[40px] border border-white dark:border-white/5 shadow-xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-50/50 dark:bg-blue-900/10 rounded-full -mr-48 -mt-48 blur-3xl pointer-events-none group-hover:bg-blue-100/30 transition-all duration-700" />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6 lg:gap-8 w-full">
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                <Calendar className="w-3 h-3" /> Data
-              </label>
-              <input
-                type="date"
-                value={formData.data_registro}
-                onChange={e => setFormData({ ...formData, data_registro: e.target.value })}
-                className="w-full p-4 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
-                required
-              />
-
+          <div className="relative z-10 space-y-12">
+            <div className="flex items-center gap-4 border-l-4 border-[#facc15] pl-6">
+              <h2 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-[0.2em]">Contexto da Operação</h2>
             </div>
 
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Turno</label>
-              <select
-                value={formData.turno}
-                onChange={e => setFormData({ ...formData, turno: e.target.value })}
-                className="w-full p-4 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none cursor-pointer"
-              >
-                <option value="1º Turno">1º TURNO</option>
-                <option value="2º Turno">2º TURNO</option>
-              </select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6 lg:gap-8 w-full">
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <Calendar className="w-3 h-3" /> Data
+                </label>
+                <input
+                  type="date"
+                  value={formData.data_registro}
+                  onChange={e => setFormData({ ...formData, data_registro: e.target.value })}
+                  className="w-full p-4 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
+                  required
+                />
 
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Turno</label>
+                <select
+                  value={formData.turno}
+                  onChange={e => setFormData({ ...formData, turno: e.target.value })}
+                  className="w-full p-4 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none cursor-pointer"
+                >
+                  <option value="1º Turno">1º TURNO</option>
+                  <option value="2º Turno">2º TURNO</option>
+                </select>
+
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <Clock className="w-3 h-3 text-blue-500" /> Carga Horária (h)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={formData.carga_horaria}
+                  onChange={e => setFormData({ ...formData, carga_horaria: parseFloat(e.target.value) || 0 })}
+                  className="w-full p-4 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
+                  required
+                />
+
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Lote</label>
+                <input
+                  type="text"
+                  placeholder="REF LOTE"
+                  value={formData.lote}
+                  onChange={e => setFormData({ ...formData, lote: e.target.value })}
+                  className="w-full p-4 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-mono font-black uppercase text-slate-900 transition-all outline-none"
+                />
+
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <Activity className="w-3 h-3 text-blue-500" /> Linha
+                </label>
+                <select
+                  value={formData.linha_producao}
+                  onChange={e => setFormData({ ...formData, linha_producao: e.target.value })}
+                  className="w-full bg-slate-50 dark:bg-black/20 border-2 border-slate-100 dark:border-white/5 p-4 rounded-2xl text-xs font-bold uppercase focus:border-[#facc15] focus:bg-white dark:focus:bg-slate-800 transition-all outline-none"
+                >
+                  <option value="">Selecione a Linha</option>
+                  {linhas.map(l => <option key={l.id} value={l.id} className="dark:bg-slate-900">{l.nome}</option>)}
+                </select>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <Box className="w-3 h-3" /> SKU / Produto
+                </label>
+                <select
+                  value={formData.produto_volume}
+                  onChange={e => setFormData({ ...formData, produto_volume: e.target.value })}
+                  className="w-full bg-slate-50 dark:bg-black/20 border-2 border-slate-100 dark:border-white/5 p-4 rounded-2xl text-xs font-bold uppercase focus:border-[#facc15] focus:bg-white dark:focus:bg-slate-800 transition-all outline-none"
+                >
+                  <option value="">Selecione o Produto</option>
+                  {produtos.map(p => <option key={p.id} value={p.id} className="dark:bg-slate-900">{p.nome}</option>)}
+                </select>
+
+              </div>
             </div>
-
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                <Clock className="w-3 h-3 text-blue-500" /> Carga Horária (h)
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                min="0"
-                value={formData.carga_horaria}
-                onChange={e => setFormData({ ...formData, carga_horaria: parseFloat(e.target.value) || 0 })}
-                className="w-full p-4 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
-                required
-              />
-
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Lote</label>
-              <input
-                type="text"
-                placeholder="REF LOTE"
-                value={formData.lote}
-                onChange={e => setFormData({ ...formData, lote: e.target.value })}
-                className="w-full p-4 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-mono font-black uppercase text-slate-900 transition-all outline-none"
-              />
-
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                <Activity className="w-3 h-3 text-blue-500" /> Linha
-              </label>
-              <select
-                value={formData.linha_producao}
-                onChange={e => setFormData({ ...formData, linha_producao: e.target.value })}
-                className="w-full p-4 bg-blue-600 text-white border-2 border-blue-600 rounded-2xl text-xs font-black uppercase transition-all outline-none"
-                required
-              >
-                <option value="">Selecione...</option>
-                {linhas.map(l => (<option key={l.id} value={l.id}>{l.nome}</option>))}
-              </select>
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                <Layers className="w-3 h-3 text-emerald-500" /> SKU
-              </label>
-              <select
-                value={formData.produto_volume}
-                onChange={e => setFormData({ ...formData, produto_volume: e.target.value })}
-                className="w-full p-4 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
-                required
-              >
-                <option value="">Selecione...</option>
-                {produtos.map(p => (<option key={p.id} value={p.id} className="text-slate-900">{p.nome}</option>))}
-              </select>
-
-            </div>
-          </div>
         </section>
 
         <section className="bg-white/80 backdrop-blur-md p-8 md:p-10 rounded-[40px] shadow-xl border border-white/50 w-full">
           <div className="flex items-center gap-4 mb-10 border-b border-slate-100/50 pb-6">
-            <div className="p-3 bg-blue-50 rounded-2xl"><Droplets className="w-5 h-5 text-blue-600" /></div>
-            <h2 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Fluxo de Volumes</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-10 w-full">
-            <div className="space-y-4">
-              <label className="text-[11px] font-black text-blue-600 uppercase tracking-[0.3em] ml-2">Produção Total (UN)</label>
-              <div className="relative">
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.quantidade_produced}
-                  onChange={e => setFormData({ ...formData, quantidade_produced: parseInt(e.target.value) || 0 })}
-                  className="w-full p-4 md:p-6 lg:p-10 text-4xl md:text-6xl lg:text-8xl font-black border-4 border-transparent bg-blue-50/50 text-blue-700 rounded-[32px] md:rounded-[48px] text-center focus:border-blue-500 focus:bg-white transition-all outline-none placeholder-blue-300/50"
-                  required
-                />
+            <div className="space-y-6">
+              <div className="flex items-center gap-4 border-l-4 border-blue-500 pl-6">
+                <h2 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-[0.2em]">Volume Produzido</h2>
+              </div>
+              <div className="bg-blue-500/5 dark:bg-blue-500/10 p-4 lg:p-8 rounded-[40px] border border-blue-100 dark:border-blue-900/30">
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-blue-400/20 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-all duration-1000" />
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.quantidade_produced}
+                    onChange={e => setFormData({ ...formData, quantidade_produced: parseInt(e.target.value) || 0 })}
+                    className="w-full p-4 md:p-6 lg:p-10 text-4xl md:text-6xl lg:text-8xl font-black border-4 border-transparent bg-blue-50/50 dark:bg-black/40 text-blue-700 dark:text-blue-400 rounded-[32px] md:rounded-[48px] text-center focus:border-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all outline-none placeholder-blue-300/50"
+                    required
+                  />
+                </div>
               </div>
             </div>
-          </div>
         </section>
 
         <section className="bg-white/80 backdrop-blur-md p-8 md:p-10 rounded-[40px] shadow-xl border border-white/50 w-full">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-10 border-b border-slate-100/50 pb-8">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-red-50 rounded-2xl"><Timer className="w-5 h-5 text-red-500" /></div>
-              <h2 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Registro de Paradas</h2>
-            </div>
-            <button
-              type="button"
-              onClick={handleAddParada}
-              disabled={!formData.linha_producao}
-              className="px-8 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] disabled:opacity-20 hover:scale-[1.05] transition-all flex items-center gap-3"
-            >
-              <Plus className="w-4 h-4" /> Adicionar Parada
-            </button>
-          </div>
-
-          <div className="space-y-6">
-            {paradas.length === 0 ? (
-              <div className="py-20 text-center border-4 border-dashed border-slate-50 rounded-[48px]">
-                <p className="text-slate-300 font-black uppercase tracking-[0.3em] text-[10px]">Sem registros de inatividade neste turno</p>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-l-4 border-red-500 pl-6">
+                <h2 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-[0.2em]">Registro de Inatividade</h2>
+                <button
+                  type="button"
+                  onClick={handleAddParada}
+                  className="bg-slate-900 dark:bg-[#facc15] text-white dark:text-black px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-slate-200 dark:shadow-nexus/10"
+                >
+                  + Adicionar Parada
+                </button>
               </div>
-            ) : (
+
               <div className="space-y-6">
-                {paradas.map((parada, index) => (
-                  <div
-                    key={index}
-                    className="bg-white p-4 lg:p-8 rounded-[32px] border border-slate-100 shadow-sm flex flex-col xl:flex-row items-center gap-6 relative group hover:border-red-200 transition-all font-sans"
-                  >
-                    <div className="w-full lg:w-40">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Máquina</label>
-                      <select
-                        value={parada.maquina_id}
-                        onChange={e => updateParada(index, 'maquina_id', e.target.value)}
-                        className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-900 outline-none transition-all"
-                        required
+                {paradas.length === 0 ? (
+                  <div className="bg-slate-50 dark:bg-black/20 border-2 border-dashed border-slate-200 dark:border-white/5 rounded-[32px] p-20 text-center group hover:border-[#facc15] transition-colors">
+                    <ZapOff className="w-16 h-16 text-slate-200 dark:text-slate-800 mx-auto mb-6 group-hover:scale-110 transition-transform" />
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Nenhuma parada registrada para este turno</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-6">
+                    {paradas.map((parada, index) => (
+                      <div
+                        key={index}
+                        className="bg-white dark:bg-slate-900/60 p-4 lg:p-8 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-sm flex flex-col xl:flex-row items-center gap-6 relative group hover:border-red-200 dark:hover:border-red-900/30 transition-all font-sans"
                       >
-                        <option value="">Selecione Opção...</option>
+                        <div className="w-full lg:w-40">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Máquina</label>
+                          <select
+                            value={parada.maquina_id}
+                            onChange={e => updateParada(index, 'maquina_id', e.target.value)}
+                            className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-900 outline-none transition-all"
+                            required
+                          >
+                            <option value="">Selecione Opção...</option>
+                            {[
+                              'ENCHEDORA',
+                              'DATADORA',
+                              'ROTULADORA',
+                              'EMPACOTADORA',
+                              'ESTEIRAS',
+                              'PAVAN',
+                              'UNIPLAS',
+                              'MULTIPET',
+                              'AEREO',
+                              'HALMMER',
+                              'CALDEIRA',
+                              'DESPALETIZADOR',
+                              'INTERVALO',
+                              'INJETOR DE ESSENCIA'
+                            ].map(m => (
+                              <option key={m} value={m}>{m}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="w-full lg:flex-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Motivo</label>
+                          <input
+                            type="text"
+                            value={parada.motivo}
+                            onChange={e => updateParada(index, 'motivo', e.target.value)}
+                            className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-800 outline-none shadow-inner"
+                            placeholder="Ex: Falha no sensor"
+                            required
+                          />
+                        </div>
+
+
+                        <div className="w-full lg:w-40">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Tipo</label>
+                          <select
+                            value={parada.tipo}
+                            onChange={e => updateParada(index, 'tipo', e.target.value)}
+                            className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-900 outline-none transition-all"
+                            required
+                          >
+                            <option value="">Selecione...</option>
+                            {[
+                              'FALHA DE ENERGIA',
+                              'FALTA DE COLABORADOR',
+                              'FALTA DE MATERIA PRIMA',
+                              'LIMPEZA DE MÁQUINA',
+                              'MANUTENÇÃO',
+                              'PALESTRA/REUNIÃO',
+                              'SETUP (Preparação de máquina)',
+                              'PARADA PROGRAMADA',
+                              'OPERACIONAL',
+                              'ASSISTENCIA TÉCNICA'
+                            ].map(t => (
+                              <option key={t} value={t}>{t}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="w-full lg:w-28">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Início</label>
+                          <input
+                            type="time"
+                            value={parada.hora_inicio}
+                            onChange={e => updateParada(index, 'hora_inicio', e.target.value)}
+                            className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-900 outline-none transition-all"
+                            required
+                          />
+                        </div>
+
+                        <div className="w-full lg:w-28">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Fim</label>
+                          <input
+                            type="time"
+                            value={parada.hora_fim}
+                            onChange={e => updateParada(index, 'hora_fim', e.target.value)}
+                            className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-900 outline-none transition-all"
+                            required
+                          />
+                        </div>
+
+                        <div className="w-full lg:w-20">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 text-center">Min</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={parada.duracao}
+                            onChange={e => updateParada(index, 'duracao', parseInt(e.target.value) || 0)}
+                            className="w-full p-4 bg-red-50 text-red-600 border-none rounded-2xl text-base font-black text-center outline-none shadow-sm"
+                            required
+                          />
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveParada(index)}
+                          className="p-3 text-slate-300 hover:text-red-500 transition-all shrink-0"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="bg-white/80 backdrop-blur-md p-8 md:p-10 rounded-[40px] shadow-xl border border-white/50 w-full">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-3 bg-slate-100 rounded-2xl"><ClipboardCheck className="w-5 h-5 text-slate-600" /></div>
+                <h2 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Observações / Ocorrências</h2>
+              </div>
+              <textarea
+                value={formData.observacoes}
+                onChange={e => setFormData({ ...formData, observacoes: e.target.value })}
+                placeholder="Registre aqui observações relevantes, ocorrências ou detalhes adicionais do turno..."
+                className="w-full p-6 bg-slate-50 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-[24px] text-xs font-bold text-slate-700 transition-all outline-none min-h-[150px] shadow-inner"
+              />
+            </section>
+
+            <footer className="pt-10 pb-20">
+              <button
+                type="submit"
+                disabled={saving}
+                className="w-full relative group overflow-hidden bg-slate-900 text-white font-black py-8 md:py-10 rounded-[40px] shadow-2xl hover:bg-blue-600 transition-all flex items-center justify-center gap-6 disabled:opacity-50"
+              >
+                <div className="relative z-10 flex items-center gap-6">
+                  {saving ? <Loader2 className="animate-spin w-10 h-10 text-blue-400" /> : <Save className="w-10 h-10 text-blue-400" />}
+                  <span className="text-sm md:text-lg tracking-[0.5em] uppercase font-black">
+                    {saving ? 'Publicando...' : 'Gravar Apontamento Industrial'}
+                  </span>
+                </div>
+              </button>
+            </footer>
+          </form>
+
+          {/* Modal de Registro de Paradas */}
+          {isModalOpen && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-300">
+              <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+                <div className="p-8 border-b-2 border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/80">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-red-200 dark:shadow-red-900/20">
+                      <Timer className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Detalhamento de Parada</h3>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sincronização de Motivo e Sugestões</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="p-3 hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 rounded-2xl transition-all"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="p-6 md:p-10 space-y-8 max-h-[70vh] overflow-y-auto dark:bg-slate-900/60">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tipo de Parada</label>
+                      <select
+                        value={tempParada.tipo}
+                        onChange={e => setTempParada({ ...tempParada, tipo: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-4 rounded-2xl text-xs font-bold uppercase outline-none focus:border-red-500 transition-all dark:text-slate-200"
+                      >
+                        <option value="">Selecione o Tipo...</option>
+                        {[
+                          'FALHA DE ENERGIA',
+                          'FALTA DE COLABORADOR',
+                          'FALTA DE MATERIA PRIMA',
+                          'LIMPEZA DE MÁQUINA',
+                          'MANUTENÇÃO',
+                          'PALESTRA/REUNIÃO',
+                          'SETUP (Preparação de máquina)',
+                          'PARADA PROGRAMADA',
+                          'OPERACIONAL',
+                          'ASSISTENCIA TÉCNICA'
+                        ].map(t => (
+                          <option key={t} value={t} className="dark:bg-slate-900">{t}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Equipamento</label>
+                      <select
+                        value={tempParada.maquina_id}
+                        onChange={e => setTempParada({ ...tempParada, maquina_id: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-4 rounded-2xl text-xs font-bold uppercase outline-none focus:border-red-500 transition-all dark:text-slate-200"
+                      >
+                        <option value="">Nenhuma / Geral</option>
                         {[
                           'ENCHEDORA',
                           'DATADORA',
@@ -452,298 +654,107 @@ const PaginaRegistro: React.FC = () => {
                           'INTERVALO',
                           'INJETOR DE ESSENCIA'
                         ].map(m => (
-                          <option key={m} value={m}>{m}</option>
+                          <option key={m} value={m} className="dark:bg-slate-900">{m}</option>
                         ))}
                       </select>
                     </div>
+                  </div>
 
-                    <div className="w-full lg:flex-1">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Motivo</label>
-                      <input
-                        type="text"
-                        value={parada.motivo}
-                        onChange={e => updateParada(index, 'motivo', e.target.value)}
-                        className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-800 outline-none shadow-inner"
-                        placeholder="Ex: Falha no sensor"
-                        required
-                      />
-                    </div>
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Duração da Parada (Minutos)</label>
+                    <input
+                      type="number"
+                      value={tempParada.duracao}
+                      onChange={e => setTempParada({ ...tempParada, duracao: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-6 text-4xl font-black text-center text-red-600 rounded-3xl outline-none focus:border-red-500 transition-all"
+                      placeholder="0"
+                    />
+                  </div>
 
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center justify-between">
+                      <span>Detalhes do Motivo</span>
+                      <span className="text-[8px] font-bold text-red-500 animate-pulse">Ocampo será padronizado em MAIÚSCULAS</span>
+                    </label>
 
-                    <div className="w-full lg:w-40">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Tipo</label>
-                      <select
-                        value={parada.tipo}
-                        onChange={e => updateParada(index, 'tipo', e.target.value)}
-                        className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-900 outline-none transition-all"
-                        required
-                      >
-                        <option value="">Selecione...</option>
-                        {[
-                          'FALHA DE ENERGIA',
-                          'FALTA DE COLABORADOR',
-                          'FALTA DE MATERIA PRIMA',
-                          'LIMPEZA DE MÁQUINA',
-                          'MANUTENÇÃO',
-                          'PALESTRA/REUNIÃO',
-                          'SETUP (Preparação de máquina)',
-                          'PARADA PROGRAMADA',
-                          'OPERACIONAL',
-                          'ASSISTENCIA TÉCNICA'
-                        ].map(t => (
-                          <option key={t} value={t}>{t}</option>
+                    <input
+                      type="text"
+                      value={tempParada.motivo}
+                      onChange={e => setTempParada({ ...tempParada, motivo: e.target.value.toUpperCase() })}
+                      className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-5 text-sm font-bold placeholder-slate-300 dark:placeholder-slate-600 rounded-2xl outline-none focus:border-red-500 transition-all dark:text-slate-200"
+                      placeholder="EX: FALHA NA BOMBA DE SUCÇÃO"
+                    />
+
+                    {/* Sugestões Inteligentes (Quick Pills) */}
+                    <div className="space-y-3 pt-2">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <TrendingUp className="w-3 h-3 text-red-500" /> Motivos Comuns para {tempParada.tipo || 'este Tipo'}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {MOTIVOS_COMUNS[tempParada.tipo as keyof typeof MOTIVOS_COMUNS]?.map(motivo => (
+                          <button
+                            key={motivo}
+                            type="button"
+                            onClick={() => setTempParada({ ...tempParada, motivo: motivo.toUpperCase() })}
+                            className="px-4 py-2 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-white/5 rounded-full text-[10px] font-bold text-slate-600 dark:text-slate-400 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400 transition-all active:scale-95"
+                          >
+                            {motivo.toUpperCase()}
+                          </button>
                         ))}
-                      </select>
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                          <Clock className="w-3 h-3" /> Hora Final
+                        </label>
+                        <input
+                          type="time"
+                          value={tempParada.hora_fim}
+                          onChange={e => updateTempParadaTime('hora_fim', e.target.value)}
+                          className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xl font-black text-slate-900 outline-none transition-all"
+                          required
+                        />
+                      </div>
                     </div>
 
-                    <div className="w-full lg:w-28">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Início</label>
-                      <input
-                        type="time"
-                        value={parada.hora_inicio}
-                        onChange={e => updateParada(index, 'hora_inicio', e.target.value)}
-                        className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-900 outline-none transition-all"
-                        required
-                      />
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tempo Total Calculado (Minutos)</label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder="0"
+                          value={tempParada.duracao}
+                          readOnly
+                          className="w-full p-5 bg-red-50 border-2 border-transparent rounded-2xl text-2xl font-black text-red-600 outline-none text-center cursor-not-allowed"
+                        />
+                        <Timer className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-red-300" />
+                      </div>
                     </div>
+                  </div>
 
-                    <div className="w-full lg:w-28">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Fim</label>
-                      <input
-                        type="time"
-                        value={parada.hora_fim}
-                        onChange={e => updateParada(index, 'hora_fim', e.target.value)}
-                        className="w-full p-4 bg-slate-100 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-900 outline-none transition-all"
-                        required
-                      />
-                    </div>
 
-                    <div className="w-full lg:w-20">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 text-center">Min</label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={parada.duracao}
-                        onChange={e => updateParada(index, 'duracao', parseInt(e.target.value) || 0)}
-                        className="w-full p-4 bg-red-50 text-red-600 border-none rounded-2xl text-base font-black text-center outline-none shadow-sm"
-                        required
-                      />
-                    </div>
-
+                  <div className="p-8 md:p-10 bg-slate-50 flex flex-col sm:flex-row gap-4">
                     <button
                       type="button"
-                      onClick={() => handleRemoveParada(index)}
-                      className="p-3 text-slate-300 hover:text-red-500 transition-all shrink-0"
+                      onClick={() => setIsModalOpen(false)}
+                      className="flex-1 px-8 py-5 border-2 border-slate-200 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-slate-600 transition-all"
                     >
-                      <Trash2 className="w-5 h-5" />
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveParada}
+                      className="flex-1 px-8 py-5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:shadow-xl hover:shadow-blue-200 transition-all flex items-center justify-center gap-3"
+                    >
+                      <Plus className="w-4 h-4" /> Confirmar Parada
                     </button>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-
-        <section className="bg-white/80 backdrop-blur-md p-8 md:p-10 rounded-[40px] shadow-xl border border-white/50 w-full">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="p-3 bg-slate-100 rounded-2xl"><ClipboardCheck className="w-5 h-5 text-slate-600" /></div>
-            <h2 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Observações / Ocorrências</h2>
-          </div>
-          <textarea
-            value={formData.observacoes}
-            onChange={e => setFormData({ ...formData, observacoes: e.target.value })}
-            placeholder="Registre aqui observações relevantes, ocorrências ou detalhes adicionais do turno..."
-            className="w-full p-6 bg-slate-50 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-[24px] text-xs font-bold text-slate-700 transition-all outline-none min-h-[150px] shadow-inner"
-          />
-        </section>
-
-        <footer className="pt-10 pb-20">
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full relative group overflow-hidden bg-slate-900 text-white font-black py-8 md:py-10 rounded-[40px] shadow-2xl hover:bg-blue-600 transition-all flex items-center justify-center gap-6 disabled:opacity-50"
-          >
-            <div className="relative z-10 flex items-center gap-6">
-              {saving ? <Loader2 className="animate-spin w-10 h-10 text-blue-400" /> : <Save className="w-10 h-10 text-blue-400" />}
-              <span className="text-sm md:text-lg tracking-[0.5em] uppercase font-black">
-                {saving ? 'Publicando...' : 'Gravar Apontamento Industrial'}
-              </span>
-            </div>
-          </button>
-        </footer>
-      </form>
-
-      {/* Modal de Registro de Paradas */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-8 md:p-10 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-red-50 rounded-2xl">
-                  <Timer className="w-6 h-6 text-red-500" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-slate-800 uppercase tracking-tighter">Registrar Nova Parada</h3>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Insira os detalhes técnicos do downtime</p>
                 </div>
               </div>
-            </div>
-
-            <div className="p-6 md:p-10 space-y-8 max-h-[70vh] overflow-y-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tipo de Parada</label>
-                  <select
-                    value={tempParada.tipo}
-                    onChange={e => setTempParada({ ...tempParada, tipo: e.target.value })}
-                    className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
-                    required
-                  >
-                    <option value="">Selecione o Tipo...</option>
-                    {[
-                      'FALHA DE ENERGIA',
-                      'FALTA DE COLABORADOR',
-                      'FALTA DE MATERIA PRIMA',
-                      'LIMPEZA DE MÁQUINA',
-                      'MANUTENÇÃO',
-                      'PALESTRA/REUNIÃO',
-                      'SETUP (Preparação de máquina)',
-                      'PARADA PROGRAMADA',
-                      'OPERACIONAL',
-                      'ASSISTENCIA TÉCNICA'
-                    ].map(t => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Máquina</label>
-                  <select
-                    value={tempParada.maquina_id}
-                    onChange={e => setTempParada({ ...tempParada, maquina_id: e.target.value })}
-                    className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
-                  >
-                    <option value="">Nenhuma / Geral</option>
-                    {[
-                      'ENCHEDORA',
-                      'DATADORA',
-                      'ROTULADORA',
-                      'EMPACOTADORA',
-                      'ESTEIRAS',
-                      'PAVAN',
-                      'UNIPLAS',
-                      'MULTIPET',
-                      'AEREO',
-                      'HALMMER',
-                      'CALDEIRA',
-                      'DESPALETIZADOR',
-                      'INTERVALO',
-                      'INJETOR DE ESSENCIA'
-                    ].map(m => (
-                      <option key={m} value={m} className="text-slate-900">{m}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Detalhes do Motivo</label>
-                <input
-                  type="text"
-                  placeholder="Ex: Quebra do comando elétrico"
-                  value={tempParada.motivo}
-                  onChange={e => setTempParada({ ...tempParada, motivo: e.target.value.toUpperCase() })}
-                  className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xs font-black uppercase text-slate-900 transition-all outline-none"
-                  required
-                />
-
-                {/* Sugestões Rápidas (Pills) */}
-                {tempParada.tipo && MOTIVOS_COMUNS[tempParada.tipo] && (
-                  <div className="space-y-2 mt-2">
-                    <p className="text-[8px] font-black text-blue-500 uppercase tracking-widest ml-1">Sugestões Rápidas:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {MOTIVOS_COMUNS[tempParada.tipo].map((motivo) => (
-                        <button
-                          key={motivo}
-                          type="button"
-                          onClick={() => setTempParada({ ...tempParada, motivo })}
-                          className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-tight transition-all border border-blue-100"
-                        >
-                          {motivo}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                    <Clock className="w-3 h-3" /> Hora Inicial
-                  </label>
-                  <input
-                    type="time"
-                    value={tempParada.hora_inicio}
-                    onChange={e => updateTempParadaTime('hora_inicio', e.target.value)}
-                    className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xl font-black text-slate-900 outline-none transition-all"
-                    required
-                  />
-                </div>
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                    <Clock className="w-3 h-3" /> Hora Final
-                  </label>
-                  <input
-                    type="time"
-                    value={tempParada.hora_fim}
-                    onChange={e => updateTempParadaTime('hora_fim', e.target.value)}
-                    className="w-full p-5 bg-slate-100 border-2 border-slate-200 focus:border-blue-500 focus:bg-white rounded-2xl text-xl font-black text-slate-900 outline-none transition-all"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tempo Total Calculado (Minutos)</label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    value={tempParada.duracao}
-                    readOnly
-                    className="w-full p-5 bg-red-50 border-2 border-transparent rounded-2xl text-2xl font-black text-red-600 outline-none text-center cursor-not-allowed"
-                  />
-                  <Timer className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-red-300" />
-                </div>
-              </div>
-            </div>
-
-
-            <div className="p-8 md:p-10 bg-slate-50 flex flex-col sm:flex-row gap-4">
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="flex-1 px-8 py-5 border-2 border-slate-200 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-slate-600 transition-all"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveParada}
-                className="flex-1 px-8 py-5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:shadow-xl hover:shadow-blue-200 transition-all flex items-center justify-center gap-3"
-              >
-                <Plus className="w-4 h-4" /> Confirmar Parada
-              </button>
-            </div>
-          </div>
-        </div>
       )}
-    </div>
-  );
+            </div>
+          );
 };
 
-export default PaginaRegistro;
+          export default PaginaRegistro;
 
