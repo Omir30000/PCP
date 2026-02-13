@@ -384,11 +384,12 @@ const RelatoriosDowntime: React.FC = () => {
                       data={analytics.typePieData}
                       cx="50%"
                       cy="45%"
-                      innerRadius={50}
-                      outerRadius={70}
+                      innerRadius={45}
+                      outerRadius={65}
                       paddingAngle={5}
                       dataKey="value"
-                      label={({ name, percentage }) => `${percentage}%`}
+                      label={({ name, percentage }) => `${name}: ${percentage}%`}
+                      labelLine={true}
                     >
                       {analytics.typePieData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={index === 0 ? '#ef4444' : index === 1 ? '#0f172a' : '#334155'} />
@@ -421,11 +422,12 @@ const RelatoriosDowntime: React.FC = () => {
                       data={analytics.machinePieData}
                       cx="50%"
                       cy="45%"
-                      innerRadius={50}
-                      outerRadius={70}
+                      innerRadius={45}
+                      outerRadius={65}
                       paddingAngle={5}
                       dataKey="value"
-                      label={({ name, percentage }) => `${percentage}%`}
+                      label={({ name, percentage }) => `${name}: ${percentage}%`}
+                      labelLine={true}
                     >
                       {analytics.machinePieData.map((entry, index) => (
                         <Cell key={`cell-m-${index}`} fill={['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316'][index % 5]} />
