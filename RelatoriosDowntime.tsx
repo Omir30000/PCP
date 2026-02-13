@@ -236,8 +236,8 @@ const RelatoriosDowntime: React.FC = () => {
     <div className="w-full max-w-[98%] mx-auto space-y-8 animate-in fade-in duration-500 pb-12 font-sans text-slate-900 print:text-black">
 
       {/* Controles Nexus */}
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm print:hidden">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-white p-4 lg:p-6 rounded-2xl border border-slate-200 shadow-sm print:hidden">
+        <div className="flex items-center gap-4 w-full xl:w-auto">
           <div className="p-3 bg-red-600 rounded-xl text-white shadow-lg shadow-red-200">
             <Timer className="w-6 h-6" />
           </div>
@@ -247,7 +247,7 @@ const RelatoriosDowntime: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+        <div className="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
           <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
             <Calendar className="ml-2 w-4 h-4 text-slate-400" />
             <input
@@ -314,7 +314,7 @@ const RelatoriosDowntime: React.FC = () => {
         </header>
 
         {/* KPIs Consolidados */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 break-inside-avoid">
+        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 break-inside-avoid">
           <div className="border border-slate-200 rounded-2xl p-6 bg-slate-50 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-2"><Timer className="w-8 h-8 text-slate-200/50" /></div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Inatividade Total</p>
@@ -372,9 +372,9 @@ const RelatoriosDowntime: React.FC = () => {
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             {/* Gráfico 1: Tipos de Parada */}
-            <div className="border border-slate-200 rounded-2xl p-6 h-[400px] bg-white shadow-sm flex flex-col">
+            <div className="border border-slate-200 rounded-2xl p-4 lg:p-6 h-[350px] lg:h-[400px] bg-white shadow-sm flex flex-col">
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-4">Distribuição por Tipo de Parada (%)</p>
               {analytics.typePieData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
@@ -406,7 +406,7 @@ const RelatoriosDowntime: React.FC = () => {
             </div>
 
             {/* Gráfico 2: Máquinas do Tipo Crítico */}
-            <div className="border border-slate-200 rounded-2xl p-6 h-[400px] bg-white shadow-sm flex flex-col">
+            <div className="border border-slate-200 rounded-2xl p-4 lg:p-6 h-[350px] lg:h-[400px] bg-white shadow-sm flex flex-col">
               <div className="mb-4">
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Impacto por Máquina</p>
                 <p className="text-[10px] font-black text-red-600 uppercase truncate">

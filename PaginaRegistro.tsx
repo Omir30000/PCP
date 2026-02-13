@@ -248,7 +248,7 @@ const PaginaRegistro: React.FC = () => {
   return (
     <div className="max-w-[98%] mx-auto space-y-8 w-full animate-in fade-in duration-700 pb-20 font-sans">
 
-      <header className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/70 backdrop-blur-xl p-8 rounded-[32px] border border-white/20 shadow-2xl w-full relative overflow-hidden">
+      <header className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-white/70 backdrop-blur-xl p-6 lg:p-8 rounded-[32px] border border-white/20 shadow-2xl w-full relative overflow-hidden">
         <div className="absolute top-0 left-0 w-64 h-64 bg-blue-100/20 rounded-full -ml-32 -mt-32 blur-3xl pointer-events-none" />
         <div className="flex items-center gap-6 relative z-10">
           <div className="bg-slate-900 p-4 rounded-[24px] shadow-2xl shadow-slate-400/20 shrink-0">
@@ -287,7 +287,7 @@ const PaginaRegistro: React.FC = () => {
             <h2 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Contexto da Operação</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-8 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6 lg:gap-8 w-full">
             <div className="space-y-3">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
                 <Calendar className="w-3 h-3" /> Data
@@ -391,7 +391,7 @@ const PaginaRegistro: React.FC = () => {
                   min="0"
                   value={formData.quantidade_produced}
                   onChange={e => setFormData({ ...formData, quantidade_produced: parseInt(e.target.value) || 0 })}
-                  className="w-full p-6 md:p-10 text-4xl md:text-8xl font-black border-4 border-transparent bg-blue-50/50 text-blue-700 rounded-[32px] md:rounded-[48px] text-center focus:border-blue-500 focus:bg-white transition-all outline-none placeholder-blue-300/50"
+                  className="w-full p-4 md:p-6 lg:p-10 text-4xl md:text-6xl lg:text-8xl font-black border-4 border-transparent bg-blue-50/50 text-blue-700 rounded-[32px] md:rounded-[48px] text-center focus:border-blue-500 focus:bg-white transition-all outline-none placeholder-blue-300/50"
                   required
                 />
               </div>
@@ -425,7 +425,7 @@ const PaginaRegistro: React.FC = () => {
                 {paradas.map((parada, index) => (
                   <div
                     key={index}
-                    className="bg-white p-6 md:p-8 rounded-[32px] border border-slate-100 shadow-sm flex flex-col lg:flex-row items-center gap-6 relative group hover:border-red-200 transition-all"
+                    className="bg-white p-4 lg:p-8 rounded-[32px] border border-slate-100 shadow-sm flex flex-col xl:flex-row items-center gap-6 relative group hover:border-red-200 transition-all font-sans"
                   >
                     <div className="w-full lg:w-40">
                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Máquina</label>
@@ -589,7 +589,7 @@ const PaginaRegistro: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-8 md:p-10 space-y-8">
+            <div className="p-6 md:p-10 space-y-8 max-h-[70vh] overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tipo de Parada</label>
