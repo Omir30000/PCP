@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from './lib/supabase';
 import { Linha, Produto, Maquina, Parada, Database } from './types/database';
 import {
@@ -68,6 +68,8 @@ const PaginaRegistro: React.FC = () => {
     hora_inicio: '',
     hora_fim: ''
   });
+
+  const horaFimRef = useRef<HTMLInputElement>(null);
 
 
 
@@ -146,6 +148,12 @@ const PaginaRegistro: React.FC = () => {
         field === 'hora_inicio' ? value : (prev.hora_inicio || ''),
         field === 'hora_fim' ? value : (prev.hora_fim || '')
       );
+
+      // Lógica de Salto Automático: Se preencheu hora_inicio (5 caracteres HH:mm), pula para hora_fim
+      if (field === 'hora_inicio' && value.length === 5 && horaFimRef.current) {
+        setTimeout(() => horaFimRef.current?.focus(), 10);
+      }
+
       return { ...updated, duracao: duration };
     });
   };
@@ -401,11 +409,15 @@ const PaginaRegistro: React.FC = () => {
               <div className="relative group">
                 <div className="absolute inset-0 bg-blue-400/20 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-all duration-1000" />
                 <input
-                  type="number"
-                  min="0"
-                  value={formData.quantidade_produced}
-                  onChange={e => setFormData({ ...formData, quantidade_produced: parseInt(e.target.value) || 0 })}
-                  className="w-full p-4 md:p-6 lg:p-10 text-4xl md:text-6xl lg:text-8xl font-black border-4 border-transparent bg-blue-50/50 dark:bg-black/40 text-blue-700 dark:text-blue-400 rounded-[32px] md:rounded-[48px] text-center focus:border-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all outline-none placeholder-blue-300/50"
+                  type="text"
+                  inputMode="numeric"
+                  value={formData.quantidade_produced || ''}
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    setFormData({ ...formData, quantidade_produced: val === '' ? 0 : parseInt(val) });
+                  }}
+                  placeholder="0"
+                  className="w-full p-4 md:p-6 lg:p-10 text-4xl md:text-6xl lg:text-8xl font-black border-4 border-transparent bg-blue-50/50 dark:bg-black/40 text-blue-700 dark:text-blue-400 rounded-[32px] md:rounded-[48px] text-center focus:border-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all outline-none placeholder-blue-300/50 cursor-text"
                   required
                 />
               </div>
@@ -644,6 +656,7 @@ const PaginaRegistro: React.FC = () => {
                   </label>
                   <input
                     type="time"
+                    ref={horaFimRef}
                     value={tempParada.hora_fim}
                     onChange={e => updateTempParadaTime('hora_fim', e.target.value)}
                     className="w-full p-4 bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 rounded-2xl text-[11px] font-black text-slate-900 dark:text-white outline-none focus:border-red-500 transition-all"

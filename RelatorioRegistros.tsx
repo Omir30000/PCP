@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from './lib/supabase';
 import {
     FileText,
@@ -59,6 +59,7 @@ const RelatorioRegistros: React.FC = () => {
     // Estado para Nova Parada no Modal
     const [novaParada, setNovaParada] = useState<ParadaCompleta>({ tipo: '', hora_inicio: '', hora_fim: '', duracao: 0, motivo: '', maquina_id: '' });
     const [editingParadaIndex, setEditingParadaIndex] = useState<number | null>(null);
+    const horaFimRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         loadAuxiliaryData();
@@ -660,10 +661,15 @@ const RelatorioRegistros: React.FC = () => {
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Produzido (UN)</label>
                                         <input
-                                            type="number"
-                                            value={editingRecord.quantidade_produzida}
-                                            onChange={e => setEditingRecord({ ...editingRecord, quantidade_produzida: Number(e.target.value) })}
-                                            className="w-full bg-blue-500/10 border border-blue-500/30 rounded-xl px-4 py-4 text-xl font-black text-blue-400 focus:border-blue-500 outline-none transition-all text-center"
+                                            type="text"
+                                            inputMode="numeric"
+                                            value={editingRecord.quantidade_produzida === 0 ? '' : editingRecord.quantidade_produzida}
+                                            onChange={e => {
+                                                const val = e.target.value.replace(/\D/g, '');
+                                                setEditingRecord({ ...editingRecord, quantidade_produzida: val === '' ? 0 : parseInt(val) });
+                                            }}
+                                            placeholder="0"
+                                            className="w-full bg-blue-500/10 border border-blue-500/30 rounded-xl px-4 py-4 text-xl font-black text-blue-400 focus:border-blue-500 outline-none transition-all text-center cursor-text"
                                         />
                                     </div>
                                 </div>
@@ -739,7 +745,13 @@ const RelatorioRegistros: React.FC = () => {
                                                 <input
                                                     type="time"
                                                     value={novaParada.hora_inicio}
-                                                    onChange={e => setNovaParada(p => ({ ...p, hora_inicio: e.target.value }))}
+                                                    onChange={e => {
+                                                        const val = e.target.value;
+                                                        setNovaParada(p => ({ ...p, hora_inicio: val }));
+                                                        if (val.length === 5 && horaFimRef.current) {
+                                                            setTimeout(() => horaFimRef.current?.focus(), 10);
+                                                        }
+                                                    }}
                                                     className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
                                                 />
                                             </div>
@@ -747,6 +759,7 @@ const RelatorioRegistros: React.FC = () => {
                                                 <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Fim</label>
                                                 <input
                                                     type="time"
+                                                    ref={horaFimRef}
                                                     value={novaParada.hora_fim}
                                                     onChange={e => setNovaParada(p => ({ ...p, hora_fim: e.target.value }))}
                                                     className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
