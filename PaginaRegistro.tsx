@@ -405,22 +405,21 @@ const PaginaRegistro: React.FC = () => {
             <div className="flex items-center gap-4 border-l-4 border-blue-500 pl-6">
               <h2 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-[0.2em]">Volume Produzido</h2>
             </div>
-            <div className="bg-blue-500/5 dark:bg-blue-500/10 p-4 lg:p-8 rounded-[40px] border border-blue-100 dark:border-blue-900/30">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-blue-400/20 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-all duration-1000" />
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  value={formData.quantidade_produced === 0 ? '' : formData.quantidade_produced}
-                  onChange={e => {
-                    const val = e.target.value;
-                    setFormData({ ...formData, quantidade_produced: val === '' ? 0 : parseInt(val) });
-                  }}
-                  placeholder="0"
-                  className="w-full p-4 md:p-6 lg:p-10 text-4xl md:text-6xl lg:text-8xl font-black border-4 border-transparent bg-blue-50/50 dark:bg-black/40 text-blue-700 dark:text-blue-400 rounded-[32px] md:rounded-[48px] text-center focus:border-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all outline-none placeholder-blue-300/50 cursor-text"
-                  required
-                />
-              </div>
+            <div className="bg-slate-900/50 p-8 rounded-3xl border border-white/10">
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
+                Digite a quantidade produzida:
+              </label>
+              <input
+                type="number"
+                value={formData.quantidade_produced === 0 ? '' : formData.quantidade_produced}
+                onChange={e => {
+                  const val = e.target.value;
+                  setFormData({ ...formData, quantidade_produced: val === '' ? 0 : Number(val) });
+                }}
+                className="w-full bg-black/40 border-2 border-white/10 p-6 rounded-2xl text-6xl font-black text-blue-400 outline-none focus:border-blue-500 transition-all text-center"
+                placeholder="0"
+                required
+              />
             </div>
           </div>
         </section>
