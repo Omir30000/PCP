@@ -1,23 +1,34 @@
 
 :root {
-  /* Light Theme */
-  --bg-app: #f8fafc;
-  --bg-sidebar: #0d0d0d; /* Keep sidebar dark even in light mode? Or make it light? User usually expects professional dark sidebar */
-  --bg-card: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border-primary: rgba(0, 0, 0, 0.05);
-  --accent-color: #facc15;
-}
-
-.dark {
-  /* Dark Theme */
+  /* Nexus Deep Dark Design - Global Overrides */
   --bg-app: #0a0a0a;
   --bg-sidebar: #0d0d0d;
   --bg-card: #141414;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --border-primary: rgba(255, 255, 255, 0.05);
+  --accent-color: #facc15;
+}
+
+/* Forçar Dark Mode Global */
+html, body {
+  background-color: #0a0a0a;
+  color: #f8fafc;
+}
+
+/* Auditoria de Visibilidade: Inputs e Dropdowns */
+input, select, textarea {
+  color-scheme: dark; /* Ajuda o navegador a escolher estilos nativos dark */
+}
+
+input::placeholder, textarea::placeholder {
+  color: #475569 !important; /* Slate-500 */
+}
+
+/* Correção Crítica: Dropdowns nativos em Windows/Linux/MacOS */
+select option {
+  background-color: #1a1a1a !important;
+  color: white !important;
 }
 
 /* Custom Utilities */

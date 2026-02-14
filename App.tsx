@@ -52,21 +52,10 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [isBiOpen, setIsBiOpen] = useState(true);
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const saved = localStorage.getItem('nexus-theme');
-    return (saved as 'light' | 'dark') || 'dark';
-  });
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('nexus-theme', newTheme);
-    document.documentElement.classList.toggle('dark', newTheme === 'dark');
-  };
-
-  // Sync theme class on mount
+  // Forçar Dark Mode fixo
   React.useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.classList.add('dark');
   }, []);
 
   const NavItem = ({ id, icon: Icon, label, isSubItem = false }: { id: Tab, icon: any, label: string, isSubItem?: boolean }) => {
@@ -94,7 +83,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen flex overflow-hidden font-sans selection:bg-[#facc15]/30 ${theme === 'dark' ? 'bg-[#0a0a0a] text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
+    <div className={`min-h-screen flex overflow-hidden font-sans selection:bg-[#facc15]/30 bg-[#0a0a0a] text-slate-100`}>
 
       <aside
         onMouseEnter={() => setIsSidebarExpanded(true)}
@@ -140,17 +129,7 @@ const App: React.FC = () => {
         </div>
 
         <div className={`p-4 mt-auto border-t border-white/5 bg-black/40 flex flex-col gap-4`}>
-          <button
-            onClick={toggleTheme}
-            className="w-full flex items-center gap-4 px-2 py-2 rounded-xl text-slate-500 hover:text-white hover:bg-white/5 transition-all"
-          >
-            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
-              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-            </div>
-            {isSidebarExpanded && (
-              <span className="text-[10px] font-black uppercase tracking-widest">{theme === 'light' ? 'Modo Escuro' : 'Modo Claro'}</span>
-            )}
-          </button>
+          {/* Toggle de Tema Removido conforme solicitação */}
 
           <div className="flex items-center gap-4">
             <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-[#facc15] shrink-0 border border-white/5">
@@ -166,7 +145,7 @@ const App: React.FC = () => {
         </div>
       </aside>
 
-      <main className={`flex-1 min-w-0 relative overflow-y-auto h-screen scroll-smooth transition-colors duration-500 ${theme === 'dark' ? 'bg-[#0a0a0a]' : 'bg-slate-50'}`}>
+      <main className={`flex-1 min-w-0 relative overflow-y-auto h-screen scroll-smooth transition-colors duration-500 bg-[#0a0a0a]`}>
         <div className="relative z-10 px-6 py-8 lg:px-10 lg:py-10 max-w-[1800px] mx-auto">
           {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'kanban' && <ProgramacaoKanban />}

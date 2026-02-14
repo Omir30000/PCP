@@ -235,10 +235,10 @@ const RelatoriosDowntime: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-[98%] mx-auto space-y-8 animate-in fade-in duration-500 pb-12 font-sans text-slate-900 dark:text-slate-100 print:text-black">
+    <div className="w-full max-w-[98%] mx-auto space-y-8 animate-in fade-in duration-500 pb-12 font-sans text-slate-100 print:text-black">
 
       {/* Controles Nexus */}
-      <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-white dark:bg-slate-900/50 p-4 lg:p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm print:hidden">
+      <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/50 p-4 lg:p-6 rounded-2xl border border-white/10 shadow-sm print:hidden">
         <div className="flex items-center gap-4 w-full xl:w-auto">
           <div className="p-3 bg-red-600 rounded-xl text-white shadow-lg shadow-red-200">
             <Timer className="w-6 h-6" />
@@ -250,7 +250,7 @@ const RelatoriosDowntime: React.FC = () => {
         </div>
 
         <div className="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
-          <div className="flex items-center gap-2 bg-slate-50 dark:bg-black/20 p-1.5 rounded-xl border border-slate-200 dark:border-white/10">
+          <div className="flex items-center gap-2 bg-black/20 p-1.5 rounded-xl border border-white/10">
             <Calendar className="ml-2 w-4 h-4 text-slate-400" />
             <input
               type="date"
@@ -317,7 +317,7 @@ const RelatoriosDowntime: React.FC = () => {
 
         {/* KPIs Consolidados */}
         <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 break-inside-avoid">
-          <div className="border border-slate-200 dark:border-white/10 rounded-2xl p-6 bg-slate-50 dark:bg-slate-900/40 relative overflow-hidden">
+          <div className="border border-white/10 rounded-2xl p-6 bg-slate-900/40 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-2"><Timer className="w-8 h-8 text-slate-200/50" /></div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Inatividade Total</p>
             <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.totalDowntime} <span className="text-xs">min</span></h4>
@@ -358,7 +358,7 @@ const RelatoriosDowntime: React.FC = () => {
             <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.mttr.toFixed(1)} <span className="text-xs">min</span></h4>
             <p className="text-[9px] text-slate-400 mt-2">Recuperação Média de Falha</p>
           </div>
-          <div className="border border-slate-200 dark:border-white/10 rounded-2xl p-6 bg-slate-900 dark:bg-slate-800 text-white relative overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none">
+          <div className="border border-white/10 rounded-2xl p-6 bg-slate-800 text-white relative overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none">
             <div className="absolute top-0 right-0 p-2"><Package className="w-8 h-8 text-white/10" /></div>
             <p className="text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Impacto Produtivo</p>
             <div className="flex items-baseline gap-2">

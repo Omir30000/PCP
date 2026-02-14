@@ -543,12 +543,11 @@ const Vendas: React.FC = () => {
                     <select
                       value={tempProdutoId}
                       onChange={(e) => setTempProdutoId(e.target.value)}
-                      style={{ backgroundColor: '#1a1a1a', color: 'white' }}
-                      className="w-full p-4 border border-white/10 rounded-xl text-[10px] font-black outline-none focus:border-[#facc15]/50 transition-all"
+                      className="w-full p-4 border border-white/10 rounded-xl text-[10px] font-black outline-none focus:border-[#facc15]/50 transition-all bg-[#1a1a1a] text-white"
                     >
-                      <option value="" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>SELECIONE O PRODUTO...</option>
+                      <option value="">SELECIONE O PRODUTO...</option>
                       {produtos.map(p => (
-                        <option key={p.id} value={p.id} style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                        <option key={p.id} value={p.id}>
                           {p.nome}
                         </option>
                       ))}
@@ -774,12 +773,6 @@ const Vendas: React.FC = () => {
         .nexus-horizontal-scroll::-webkit-scrollbar-thumb {
           background: rgba(250, 204, 21, 0.3);
           border-radius: 10px;
-        }
-
-        /* Correção específica para o seletor de produtos */
-        select option {
-          background-color: #1a1a1a;
-          color: white;
         }
       `}} />
     </div>

@@ -253,26 +253,26 @@ const PaginaRegistro: React.FC = () => {
   return (
     <div className="max-w-[98%] mx-auto space-y-8 w-full animate-in fade-in duration-700 pb-20 font-sans text-slate-900 dark:text-slate-100">
 
-      <header className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-white/70 dark:bg-slate-900/50 backdrop-blur-xl p-6 lg:p-8 rounded-[32px] border border-white/20 dark:border-white/5 shadow-2xl w-full relative overflow-hidden">
+      <header className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/50 backdrop-blur-xl p-6 lg:p-8 rounded-[32px] border border-white/5 shadow-2xl w-full relative overflow-hidden">
         <div className="absolute top-0 left-0 w-64 h-64 bg-[#facc15]/10 rounded-full -ml-32 -mt-32 blur-3xl pointer-events-none" />
         <div className="flex items-center gap-6 relative z-10">
-          <div className="bg-slate-900 dark:bg-[#facc15] p-4 rounded-[24px] shadow-2xl shadow-slate-400/20 dark:shadow-nexus/10 shrink-0">
-            <Activity className="w-8 h-8 text-[#facc15] dark:text-black" />
+          <div className="bg-[#facc15] p-4 rounded-[24px] shadow-2xl shadow-nexus/10 shrink-0">
+            <Activity className="w-8 h-8 text-black" />
           </div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tighter leading-none uppercase">Apontamento Industrial</h1>
-            <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter leading-none uppercase">Apontamento Industrial</h1>
+            <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
               <Layers className="w-3 h-3 text-[#facc15]" /> Nexus Production Intelligence
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-4 relative z-10 w-full xl:w-auto overflow-x-auto no-scrollbar pb-2 xl:pb-0">
-          <div className="flex items-center gap-3 bg-white/50 dark:bg-black/20 px-6 py-4 rounded-2xl border border-white dark:border-white/5 shadow-sm min-w-fit">
+          <div className="flex items-center gap-3 bg-black/20 px-6 py-4 rounded-2xl border border-white/5 shadow-sm min-w-fit">
             <User className="w-4 h-4 text-[#facc15]" />
             <div className="flex flex-col leading-none">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Colaborador</span>
-              <span className="text-xs font-black text-slate-800 dark:text-slate-200">OPERADOR NEXUS</span>
+              <span className="text-xs font-black text-slate-200">OPERADOR NEXUS</span>
             </div>
           </div>
         </div>
@@ -296,12 +296,12 @@ const PaginaRegistro: React.FC = () => {
         className="space-y-8 w-full"
       >
         {/* I. Contexto da Operação */}
-        <section className="bg-white/80 dark:bg-slate-900/40 backdrop-blur-md p-8 lg:p-12 rounded-[40px] border border-white dark:border-white/5 shadow-xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-50/50 dark:bg-blue-900/10 rounded-full -mr-48 -mt-48 blur-3xl pointer-events-none group-hover:bg-blue-100/30 transition-all duration-700" />
+        <section className="bg-slate-900/40 backdrop-blur-md p-8 lg:p-12 rounded-[40px] border border-white/5 shadow-xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-900/10 rounded-full -mr-48 -mt-48 blur-3xl pointer-events-none group-hover:bg-blue-100/30 transition-all duration-700" />
 
           <div className="relative z-10 space-y-12">
             <div className="flex items-center gap-4 border-l-4 border-[#facc15] pl-6">
-              <h2 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-[0.2em]">Contexto da Operação</h2>
+              <h2 className="text-sm font-black text-slate-200 uppercase tracking-[0.2em]">Contexto da Operação</h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6 lg:gap-8 w-full">
@@ -378,7 +378,7 @@ const PaginaRegistro: React.FC = () => {
                 <select
                   value={formData.produto_volume}
                   onChange={e => setFormData({ ...formData, produto_volume: e.target.value })}
-                  className="w-full bg-slate-100 dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-slate-900 dark:text-white transition-all outline-none focus:border-[#facc15]"
+                  className="w-full bg-black/40 border-2 border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-white transition-all outline-none focus:border-[#facc15]"
                   required
                 >
                   <option value="" className="bg-white dark:bg-slate-900">Selecione...</option>
