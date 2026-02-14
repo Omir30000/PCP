@@ -215,6 +215,24 @@ const CalendarioVendas: React.FC = () => {
                         <h4 className="text-[10px] font-black text-white uppercase truncate leading-tight group-hover:text-[#facc15] transition-colors">
                           {ped.cliente_nome}
                         </h4>
+
+                        {/* Lista de Produtos (Resumo) */}
+                        <div className="mt-1 space-y-0.5">
+                          {ped.itens_pedido?.slice(0, 2).map((item: any, idx: number) => (
+                            <div key={idx} className="flex items-center gap-1.5 overflow-hidden">
+                              <Package className="w-2.5 h-2.5 text-[#facc15]/60 shrink-0" />
+                              <span className="text-[7px] font-bold text-slate-500 uppercase truncate">
+                                {item.produtos?.nome}
+                              </span>
+                            </div>
+                          ))}
+                          {ped.itens_pedido?.length > 2 && (
+                            <div className="text-[6px] font-black text-slate-600 uppercase tracking-widest ml-4">
+                              + {ped.itens_pedido.length - 2} OUTROS ITENS
+                            </div>
+                          )}
+                        </div>
+
                         <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/[0.03]">
                           <div className="flex items-center gap-1.5">
                             <Box className="w-3 h-3 text-slate-500" />
