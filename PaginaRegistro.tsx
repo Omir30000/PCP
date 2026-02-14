@@ -409,11 +409,11 @@ const PaginaRegistro: React.FC = () => {
               <div className="relative group">
                 <div className="absolute inset-0 bg-blue-400/20 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-all duration-1000" />
                 <input
-                  type="text"
+                  type="number"
                   inputMode="numeric"
-                  value={formData.quantidade_produced || ''}
+                  value={formData.quantidade_produced === 0 ? '' : formData.quantidade_produced}
                   onChange={e => {
-                    const val = e.target.value.replace(/\D/g, '');
+                    const val = e.target.value;
                     setFormData({ ...formData, quantidade_produced: val === '' ? 0 : parseInt(val) });
                   }}
                   placeholder="0"
