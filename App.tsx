@@ -11,6 +11,7 @@ import RelatoriosProdutos from './RelatoriosProdutos';
 import RelatoriosDowntime from './RelatoriosDowntime';
 import RelatorioRegistros from './RelatorioRegistros';
 import RelatorioAnaliticoPorLinha from './RelatorioAnaliticoPorLinha';
+import CalendarioVendas from './CalendarioVendas';
 
 import {
   LayoutDashboard,
@@ -44,7 +45,8 @@ type Tab =
   | 'relatorios_produtos'
   | 'relatorios_downtime'
   | 'relatorio_registros'
-  | 'analise_gargalos';
+  | 'analise_gargalos'
+  | 'calendario_vendas';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -118,6 +120,7 @@ const App: React.FC = () => {
           <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
           <NavItem id="kanban" icon={LayoutGrid} label="Programação" />
           <NavItem id="vendas" icon={ShoppingCart} label="Pedidos" />
+          <NavItem id="calendario_vendas" icon={CalendarDays} label="Calendário" />
 
           <div className="h-px bg-white/5 my-6 mx-4" />
 
@@ -176,6 +179,7 @@ const App: React.FC = () => {
           {activeTab === 'relatorio_registros' && <RelatorioRegistros />}
           {activeTab === 'relatorios_downtime' && <RelatoriosDowntime />}
           {activeTab === 'analise_gargalos' && <RelatorioAnaliticoPorLinha />}
+          {activeTab === 'calendario_vendas' && <CalendarioVendas />}
         </div>
       </main>
 
