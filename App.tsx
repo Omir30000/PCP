@@ -120,7 +120,7 @@ const App: React.FC = () => {
           <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
           <NavItem id="kanban" icon={LayoutGrid} label="Programação" />
           <NavItem id="vendas" icon={ShoppingCart} label="Pedidos" />
-          <NavItem id="calendario_vendas" icon={CalendarDays} label="Calendário" />
+          <NavItem id="calendario_vendas" icon={CalendarDays} label="Calendário de Pedidos" />
 
           <div className="h-px bg-white/5 my-6 mx-4" />
 

@@ -22,6 +22,7 @@ const CalendarioVendas: React.FC = () => {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [todosRegistrosProducao, setTodosRegistrosProducao] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPedido, setSelectedPedido] = useState<any | null>(null);
 
   const [dataReferencia, setDataReferencia] = useState(() => {
     const now = new Date();
@@ -105,7 +106,7 @@ const CalendarioVendas: React.FC = () => {
     const itens = pedido.itens_pedido || [];
     if (itens.length === 0) return 'OK';
 
-    const todosProntos = itens.every((item: any) => 
+    const todosProntos = itens.every((item: any) =>
       getEstoqueAtual(item.produto_id) >= item.quantidade
     );
 
@@ -123,7 +124,7 @@ const CalendarioVendas: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      
+
       {/* Cabeçalho */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-[#141414] p-8 rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden">
         <div className="flex items-center gap-6 relative z-10">
@@ -140,7 +141,7 @@ const CalendarioVendas: React.FC = () => {
 
         <div className="flex items-center gap-4 relative z-10">
           <div className="flex items-center gap-2 bg-white/5 p-1.5 rounded-2xl border border-white/5">
-            <button 
+            <button
               onClick={() => { const d = new Date(dataReferencia); d.setDate(d.getDate() - 7); setDataReferencia(d); }}
               className="p-3 hover:text-[#facc15] hover:bg-white/5 rounded-xl transition-all"
             >
@@ -154,7 +155,7 @@ const CalendarioVendas: React.FC = () => {
                 Fevereiro 2026
               </span>
             </div>
-            <button 
+            <button
               onClick={() => { const d = new Date(dataReferencia); d.setDate(d.getDate() + 7); setDataReferencia(d); }}
               className="p-3 hover:text-[#facc15] hover:bg-white/5 rounded-xl transition-all"
             >
@@ -171,11 +172,10 @@ const CalendarioVendas: React.FC = () => {
           const isHoje = dia.iso === new Date().toISOString().split('T')[0];
 
           return (
-            <div 
-              key={dia.iso} 
-              className={`flex flex-col min-h-[500px] rounded-[24px] border transition-all duration-300 ${
-                isHoje ? 'bg-[#facc15]/5 border-[#facc15]/20' : 'bg-[#0d0d0d] border-white/5'
-              }`}
+            <div
+              key={dia.iso}
+              className={`flex flex-col min-h-[500px] rounded-[24px] border transition-all duration-300 ${isHoje ? 'bg-[#facc15]/5 border-[#facc15]/20' : 'bg-[#0d0d0d] border-white/5'
+                }`}
             >
               {/* Header do Dia */}
               <div className={`p-4 border-b text-center ${isHoje ? 'border-[#facc15]/10' : 'border-white/5'}`}>
@@ -195,11 +195,11 @@ const CalendarioVendas: React.FC = () => {
                   const totalItens = ped.itens_pedido?.reduce((a: number, b: any) => a + (Number(b.quantidade) || 0), 0) || 0;
 
                   return (
-                    <div 
-                      key={ped.id} 
-                      className={`p-4 rounded-2xl border bg-[#141414] hover:scale-[1.02] transition-all cursor-pointer group relative overflow-hidden ${
-                        isPronto ? 'border-emerald-500/20' : 'border-white/5 shadow-lg'
-                      }`}
+                    <div
+                      key={ped.id}
+                      onClick={() => setSelectedPedido(ped)}
+                      className={`p-4 rounded-2xl border bg-[#141414] hover:scale-[1.02] transition-all cursor-pointer group relative overflow-hidden ${isPronto ? 'border-emerald-500/20' : 'border-white/5 shadow-lg'
+                        }`}
                     >
                       <div className="flex flex-col gap-2">
                         <div className="flex justify-between items-start">
@@ -222,9 +222,8 @@ const CalendarioVendas: React.FC = () => {
                               {totalItens.toLocaleString()} <span className="text-[7px]">UN</span>
                             </span>
                           </div>
-                          <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${
-                            isPronto ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
-                          }`}>
+                          <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${isPronto ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
+                            }`}>
                             {status}
                           </span>
                         </div>
@@ -246,6 +245,83 @@ const CalendarioVendas: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Modal de Detalhes do Pedido */}
+      {selectedPedido && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={() => setSelectedPedido(null)} />
+          <div className="bg-[#141414] rounded-[40px] shadow-2xl w-full max-w-4xl relative z-10 border border-white/10 overflow-hidden animate-in zoom-in-95">
+            <header className="px-10 py-10 border-b border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <div className="p-4 bg-[#facc15] rounded-2xl">
+                  <Package className="w-8 h-8 text-black" />
+                </div>
+                <div>
+                  <h3 className="text-3xl font-black text-white uppercase tracking-tighter leading-none">
+                    {selectedPedido.cliente_nome}
+                  </h3>
+                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-2 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#facc15]" />
+                    Pedido REF: {selectedPedido.id.slice(0, 8).toUpperCase()} — Entrega: {new Date(selectedPedido.data_entrega).toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+              </div>
+              <button onClick={() => setSelectedPedido(null)} className="p-4 text-slate-500 hover:text-white transition-colors">
+                <LayoutGrid className="w-10 h-10" />
+              </button>
+            </header>
+
+            <div className="p-10 space-y-10 max-h-[70vh] overflow-y-auto no-scrollbar">
+              <div className="space-y-4">
+                <h6 className="text-[10px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
+                  <Box className="w-4 h-4 text-[#facc15]" /> Verificação de Intens e Saldo Industrial
+                </h6>
+                <div className="border border-white/5 rounded-[32px] overflow-hidden bg-black/40">
+                  <table className="w-full text-left">
+                    <thead className="bg-white/5 text-[9px] text-slate-500 font-black uppercase tracking-widest border-b border-white/5">
+                      <tr>
+                        <th className="px-8 py-5">Ativo SKU</th>
+                        <th className="px-8 py-5 text-center">Requisitado</th>
+                        <th className="px-8 py-5 text-center">Saldo em Estoque</th>
+                        <th className="px-8 py-5 text-right">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-[11px] text-slate-400">
+                      {selectedPedido.itens_pedido?.map((item: any, idx: number) => {
+                        const produzido = getEstoqueAtual(item.produto_id);
+                        const pronto = produzido >= item.quantidade;
+                        return (
+                          <tr key={idx} className={pronto ? 'bg-emerald-500/5' : 'bg-transparent'}>
+                            <td className="px-8 py-5 font-black text-white uppercase">{item.produtos?.nome || 'SKU'}</td>
+                            <td className="px-8 py-5 text-center font-bold">{item.quantidade.toLocaleString('pt-BR')}</td>
+                            <td className="px-8 py-5 text-center font-black text-[#facc15] text-lg">{produzido.toLocaleString('pt-BR')}</td>
+                            <td className="px-8 py-5 text-right">
+                              {pronto ? (
+                                <span className="text-emerald-500 font-black uppercase text-[10px] flex items-center justify-end gap-2">DISPONÍVEL <CheckCircle2 className="w-4 h-4" /></span>
+                              ) : (
+                                <span className="text-amber-500 font-black uppercase text-[10px] flex items-center justify-end gap-2">AGUARDANDO <AlertTriangle className="w-4 h-4" /></span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <footer className="px-10 py-10 bg-black/60 border-t border-white/5 flex justify-end">
+              <button
+                onClick={() => setSelectedPedido(null)}
+                className="px-10 py-5 bg-white/5 border border-white/10 rounded-3xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
+              >
+                Fechar Detalhes
+              </button>
+            </footer>
+          </div>
+        </div>
+      )}
 
       <style dangerouslySetInnerHTML={{
         __html: `
