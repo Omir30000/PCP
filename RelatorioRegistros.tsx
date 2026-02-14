@@ -689,6 +689,7 @@ const RelatorioRegistros: React.FC = () => {
                                                 >
                                                     <option value="" className="text-slate-900">Geral</option>
                                                     {[
+                                                        'GERAL',
                                                         'ENCHEDORA',
                                                         'DATADORA',
                                                         'ROTULADORA',
@@ -702,7 +703,8 @@ const RelatorioRegistros: React.FC = () => {
                                                         'CALDEIRA',
                                                         'DESPALETIZADOR',
                                                         'INTERVALO',
-                                                        'INJETOR DE ESSENCIA'
+                                                        'INJETOR DE ESSENCIA',
+                                                        'MANUTENÇÃO'
                                                     ].map(m => (
                                                         <option key={m} value={m} className="text-slate-900">{m}</option>
                                                     ))}

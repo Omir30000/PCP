@@ -26,13 +26,15 @@ import {
 } from 'lucide-react';
 
 const MOTIVOS_COMUNS: Record<string, string[]> = {
-  'OPERACIONAL': ['FALTA DE OPERADOR', 'TROCA DE ETIQUETA', 'AJUSTE DE PROCESSO', 'REFUGO EXCESSIVO', 'LIMPEZA SETORIAL', 'TROCA DE BOBINA'],
-  'MANUTENÇÃO': ['QUEBRA MECÂNICA', 'FALHA ELÉTRICA', 'TROCA DE SENSOR', 'AJUSTE DE CORRENTE', 'LUBRIFICAÇÃO', 'TROCA DE PEÇA', 'REPARO NA ESTEIRA'],
-  'SETUP (Preparação de máquina)': ['TROCA DE FORMATO', 'AJUSTE DE GUIA', 'AQUECIMENTO', 'TROCA DE PRODUTO', 'INÍCIO DE PRODUÇÃO', 'REGULAGEM TERMICA'],
-  'LIMPEZA DE MÁQUINA': ['LIMPEZA DE TANQUE', 'SANITIZAÇÃO', 'TROCA DE COR', 'LIMPEZA DE FIM DE TURNO'],
-  'FALTA DE MATERIA PRIMA': ['FALTA DE VASILHAME', 'FALTA DE TAMPA', 'FALTA DE RÓTULO', 'FALTA DE FILME', 'FALTA DE CAIXA'],
   'FALHA DE ENERGIA': ['PICO DE TENSÃO', 'QUEDA GERAL', 'ACIONAMENTO DE GERADOR'],
-  'PARADA PROGRAMADA': ['PREVENTIVA', 'TREINAMENTO', 'REUNIÃO DE TURNO', 'INVENTÁRIO', 'INTERVALO REFEIÇÃO'],
+  'FALTA DE COLABORADOR': ['AUSÊNCIA TÉCNICA', 'TROCA DE TURNO', 'FALTA DE OPERADOR'],
+  'FALTA DE MATERIA PRIMA': ['FALTA DE VASILHAME', 'FALTA DE TAMPA', 'FALTA DE RÓTULO', 'FALTA DE FILME', 'FALTA DE CAIXA', 'FALTA DE GÁS'],
+  'LIMPEZA DE MÁQUINA': ['LIMPEZA DE TANQUE', 'SANITIZAÇÃO', 'TROCA DE COR', 'LIMPEZA DE FIM DE TURNO'],
+  'MANUTENÇÃO': ['QUEBRA MECÂNICA', 'FALHA ELÉTRICA', 'TROCA DE SENSOR', 'AJUSTE DE CORRENTE', 'LUBRIFICAÇÃO', 'TROCA DE PEÇA', 'REPARO NA ESTEIRA', 'MANUTENÇÃO PREVENTIVA'],
+  'PALESTRA/REUNIÃO': ['TREINAMENTO', 'REUNIÃO DE TURNO', 'DIÁLOGO DE SEGURANÇA'],
+  'SETUP (Preparação de máquina)': ['TROCA DE FORMATO', 'AJUSTE DE GUIA', 'AQUECIMENTO', 'TROCA DE PRODUTO', 'INÍCIO DE PRODUÇÃO', 'REGULAGEM TERMICA'],
+  'PARADA PROGRAMADA': ['INTERVALO REFEIÇÃO', 'INVENTÁRIO', 'DESCANSO'],
+  'OPERACIONAL': ['FALTA DE OPERADOR', 'TROCA DE ETIQUETA', 'AJUSTE DE PROCESSO', 'REFUGO EXCESSIVO', 'LIMPEZA SETORIAL', 'TROCA DE BOBINA'],
   'ASSISTENCIA TÉCNICA': ['ACESSO REMOTO', 'VISITA TÉCNICA EXTERNA', 'SUPORTE TÉCNICO FABRICANTE']
 };
 
@@ -595,9 +597,30 @@ const PaginaRegistro: React.FC = () => {
                     onChange={e => setTempParada({ ...tempParada, maquina_id: e.target.value })}
                     className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-4 rounded-2xl text-[11px] font-bold uppercase outline-none focus:border-red-500 transition-all dark:text-slate-200"
                   >
-                    <option value="" className="dark:bg-slate-900">Nenhuma / Geral</option>
+                    <option value="" className="dark:bg-slate-900">Geral / Manutenção</option>
+                    {[
+                      'GERAL',
+                      'ENCHEDORA',
+                      'DATADORA',
+                      'ROTULADORA',
+                      'EMPACOTADORA',
+                      'ESTEIRAS',
+                      'PAVAN',
+                      'UNIPLAS',
+                      'MULTIPET',
+                      'AEREO',
+                      'HALMMER',
+                      'CALDEIRA',
+                      'DESPALETIZADOR',
+                      'INTERVALO',
+                      'INJETOR DE ESSENCIA',
+                      'MANUTENÇÃO'
+                    ].map(m => (
+                      <option key={m} value={m} className="dark:bg-slate-900">{m}</option>
+                    ))}
+                    {maquinasDaLinha.length > 0 && <option disabled className="text-slate-500">--- Máquinas da Linha ---</option>}
                     {maquinasDaLinha.map(m => (
-                      <option key={m.id} value={m.id} className="dark:bg-slate-900">{m.nome}</option>
+                      <option key={m.id} value={m.nome} className="dark:bg-slate-900">{m.nome}</option>
                     ))}
                   </select>
                 </div>
