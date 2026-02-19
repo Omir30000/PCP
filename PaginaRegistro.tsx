@@ -22,8 +22,16 @@ import {
   Box,
   ZapOff,
   X,
-  TrendingUp
+  TrendingUp,
+  MessageSquare
 } from 'lucide-react';
+
+const EVO_CONFIG = {
+  baseURL: 'https://evo.servidorpremium.duckdns.org',
+  apiKey: '27FF670803F3-4BD9-B0DB-66CA428410C8',
+  instance: 'lima',
+  destination: '5519999230899'
+};
 
 const MOTIVOS_COMUNS: Record<string, string[]> = {
   'FALHA DE ENERGIA': ['PICO DE TENSÃO', 'QUEDA GERAL', 'ACIONAMENTO DE GERADOR'],
@@ -78,6 +86,8 @@ const PaginaRegistro: React.FC = () => {
     quantidade_produced: 0,
     observacoes: ''
   });
+
+  const [enviarWhatsApp, setEnviarWhatsApp] = useState(true);
 
   const [paradas, setParadas] = useState<Parada[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -209,6 +219,33 @@ const PaginaRegistro: React.FC = () => {
     setParadas(newParadas);
   };
 
+  const enviarMensagemWhatsApp = async (dados: any, totalParado: number) => {
+    try {
+      const mensagem = `*RESUMO DE PRODUÇÃO*
+📅 *Data:* ${new Date(dados.data_registro).toLocaleDateString('pt-BR')}
+🌅 *Turno:* ${dados.turno}
+📦 *Produto:* ${dados.produto_volume}
+📊 *Quantidade:* ${dados.quantidade_produzida}
+⏱️ *Tempo Total Parado:* ${totalParado}min
+📝 *Observações:* ${dados.observacoes || 'Nenhuma'}`;
+
+      await fetch(`${EVO_CONFIG.baseURL}/message/sendText/${EVO_CONFIG.instance}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': EVO_CONFIG.apiKey
+        },
+        body: JSON.stringify({
+          number: EVO_CONFIG.destination,
+          text: mensagem,
+          linkPreview: false
+        })
+      });
+    } catch (err) {
+      console.error("Erro ao enviar WhatsApp:", err);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.linha_producao || !formData.produto_volume) {
@@ -248,6 +285,11 @@ const PaginaRegistro: React.FC = () => {
 
       const { error } = await supabase.from('registros_producao').insert(payload);
       if (error) throw error;
+
+      if (enviarWhatsApp) {
+        const totalParado = paradas.reduce((acc, p) => acc + (p.duracao || 0), 0);
+        await enviarMensagemWhatsApp(payload, totalParado);
+      }
 
       setMessage({ type: 'success', text: 'Registro industrial publicado com sucesso!' });
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -304,6 +346,21 @@ const PaginaRegistro: React.FC = () => {
             <div className="flex flex-col leading-none">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Colaborador</span>
               <span className="text-xs font-black text-slate-200">OPERADOR NEXUS</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 bg-black/20 px-4 py-3 rounded-2xl border border-white/5 shadow-sm min-w-fit">
+            <MessageSquare className={`w-4 h-4 ${enviarWhatsApp ? 'text-emerald-400' : 'text-slate-500'}`} />
+            <div className="flex flex-col leading-none">
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Enviar WhatsApp?</span>
+              <select
+                value={enviarWhatsApp ? 'sim' : 'nao'}
+                onChange={e => setEnviarWhatsApp(e.target.value === 'sim')}
+                className="bg-transparent text-[11px] font-black text-slate-200 outline-none uppercase cursor-pointer"
+              >
+                <option value="sim" className="bg-slate-900">Sim</option>
+                <option value="nao" className="bg-slate-900">Não</option>
+              </select>
             </div>
           </div>
         </div>
