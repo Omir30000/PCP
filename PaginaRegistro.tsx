@@ -38,6 +38,27 @@ const MOTIVOS_COMUNS: Record<string, string[]> = {
   'ASSISTENCIA TÉCNICA': ['ACESSO REMOTO', 'VISITA TÉCNICA EXTERNA', 'SUPORTE TÉCNICO FABRICANTE']
 };
 
+const LISTA_EQUIPAMENTOS = [
+  'GERAL',
+  'ENCHEDORA',
+  'DATADORA',
+  'ROTULADORA',
+  'EMPACOTADORA',
+  'ESTEIRAS',
+  'PAVAN',
+  'UNIPLAS',
+  'MULTIPET',
+  'AEREO',
+  'HALMMER',
+  'CALDEIRA',
+  'DESPALETIZADOR',
+  'INTERVALO',
+  'INJETOR DE ESSENCIA',
+  'INJETOR DE NITROGENIO',
+  'CABONATADOR',
+  'MANUTENÇÃO'
+];
+
 const PaginaRegistro: React.FC = () => {
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -458,7 +479,11 @@ const PaginaRegistro: React.FC = () => {
                           onChange={e => updateParada(index, 'maquina_id', e.target.value)}
                           className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-3 rounded-xl text-[11px] font-bold uppercase outline-none focus:border-red-500 dark:text-white"
                         >
-                          <option value="" className="dark:bg-slate-900">Selecione...</option>
+                          <option value="" className="dark:bg-slate-900">Selecione</option>
+                          {LISTA_EQUIPAMENTOS.map(m => (
+                            <option key={m} value={m} className="dark:bg-slate-900">{m}</option>
+                          ))}
+                          {maquinasDaLinha.length > 0 && <option disabled className="text-slate-500">--- Máquinas da Linha ---</option>}
                           {maquinasDaLinha.map(m => (
                             <option key={m.id} value={m.id} className="dark:bg-slate-900">{m.nome}</option>
                           ))}
@@ -608,25 +633,8 @@ const PaginaRegistro: React.FC = () => {
                     onChange={e => setTempParada({ ...tempParada, maquina_id: e.target.value })}
                     className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-4 rounded-2xl text-[11px] font-bold uppercase outline-none focus:border-red-500 transition-all dark:text-slate-200"
                   >
-                    <option value="" className="dark:bg-slate-900">Geral / Manutenção</option>
-                    {[
-                      'GERAL',
-                      'ENCHEDORA',
-                      'DATADORA',
-                      'ROTULADORA',
-                      'EMPACOTADORA',
-                      'ESTEIRAS',
-                      'PAVAN',
-                      'UNIPLAS',
-                      'MULTIPET',
-                      'AEREO',
-                      'HALMMER',
-                      'CALDEIRA',
-                      'DESPALETIZADOR',
-                      'INTERVALO',
-                      'INJETOR DE ESSENCIA',
-                      'MANUTENÇÃO'
-                    ].map(m => (
+                    <option value="" className="dark:bg-slate-900">Selecione</option>
+                    {LISTA_EQUIPAMENTOS.map(m => (
                       <option key={m} value={m} className="dark:bg-slate-900">{m}</option>
                     ))}
                     {maquinasDaLinha.length > 0 && <option disabled className="text-slate-500">--- Máquinas da Linha ---</option>}

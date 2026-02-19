@@ -16,6 +16,27 @@ import {
 } from 'lucide-react';
 import { RegistroProducao, Linha, Produto } from './types/database';
 
+const LISTA_EQUIPAMENTOS = [
+    'GERAL',
+    'ENCHEDORA',
+    'DATADORA',
+    'ROTULADORA',
+    'EMPACOTADORA',
+    'ESTEIRAS',
+    'PAVAN',
+    'UNIPLAS',
+    'MULTIPET',
+    'AEREO',
+    'HALMMER',
+    'CALDEIRA',
+    'DESPALETIZADOR',
+    'INTERVALO',
+    'INJETOR DE ESSENCIA',
+    'INJETOR DE NITROGENIO',
+    'CABONATADOR',
+    'MANUTENÇÃO'
+];
+
 // Tipagem estendida para Paradas com horários
 interface ParadaCompleta {
     id?: string; // ID temporário para lista
@@ -693,25 +714,8 @@ const RelatorioRegistros: React.FC = () => {
                                                     onChange={e => setNovaParada(p => ({ ...p, maquina_id: e.target.value }))}
                                                     className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold outline-none"
                                                 >
-                                                    <option value="" className="text-slate-900">Geral</option>
-                                                    {[
-                                                        'GERAL',
-                                                        'ENCHEDORA',
-                                                        'DATADORA',
-                                                        'ROTULADORA',
-                                                        'EMPACOTADORA',
-                                                        'ESTEIRAS',
-                                                        'PAVAN',
-                                                        'UNIPLAS',
-                                                        'MULTIPET',
-                                                        'AEREO',
-                                                        'HALMMER',
-                                                        'CALDEIRA',
-                                                        'DESPALETIZADOR',
-                                                        'INTERVALO',
-                                                        'INJETOR DE ESSENCIA',
-                                                        'MANUTENÇÃO'
-                                                    ].map(m => (
+                                                    <option value="" className="text-slate-900">Selecione</option>
+                                                    {LISTA_EQUIPAMENTOS.map(m => (
                                                         <option key={m} value={m} className="text-slate-900">{m}</option>
                                                     ))}
                                                 </select>
