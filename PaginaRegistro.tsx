@@ -30,7 +30,7 @@ const EVO_CONFIG = {
   baseURL: 'https://evo.servidorpremium.duckdns.org',
   apiKey: '27FF670803F3-4BD9-B0DB-66CA428410C8',
   instance: 'lima',
-  destination: '5519999230899'
+  destination: '553599586919'
 };
 
 const MOTIVOS_COMUNS: Record<string, string[]> = {
