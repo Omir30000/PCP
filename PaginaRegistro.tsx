@@ -224,6 +224,7 @@ const PaginaRegistro: React.FC = () => {
       const mensagem = `*RESUMO DE PRODUÇÃO*
 📅 *Data:* ${new Date(dados.data_registro).toLocaleDateString('pt-BR')}
 🌅 *Turno:* ${dados.turno}
+📦 *Linha:* ${dados.linha_producao}
 📦 *Produto:* ${dados.produto_volume}
 📊 *Quantidade:* ${dados.quantidade_produzida}
 ⏱️ *Tempo Total Parado:* ${totalParado}min
