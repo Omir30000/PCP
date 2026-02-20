@@ -138,8 +138,12 @@ const RelatoriosDowntime: React.FC = () => {
       // Prioriza a capacidade registrada no registro de produção, fallback para o produto
       const nominalCap = Number(reg.capacidade_producao) || Number(reg.produtos?.capacidade_nominal) || 7200;
 
-      // Cálculo de eficiência: nominalCap é baseada em 8 horas (480 minutos)
-      const capPerMin = nominalCap / 480;
+      // Cálculo de eficiência: nominalCap é baseada na carga horária real do registro (fallback 8h)
+      const cargaH = Number(reg.carga_horaria) || 8;
+      const totalMinTurno = cargaH * 60;
+      const capPerMin = nominalCap / totalMinTurno;
+
+      const unidadesPorFardo = Number(reg.produtos?.unidades_por_fardo) || 0;
 
       paradas.forEach((p: any) => {
         // Suporte a múltiplos nomes de campos no JSON (duracao, tempo, total_min)
@@ -172,7 +176,8 @@ const RelatoriosDowntime: React.FC = () => {
           motivo: p.motivo || 'GERAL',
           duracao: dur,
           obs: reg.observacoes,
-          volumePerdido: Math.round(lostInThisStop)
+          volumePerdido: Math.round(lostInThisStop),
+          unidadesPorFardo: unidadesPorFardo
         });
       });
     });
@@ -497,7 +502,16 @@ const RelatoriosDowntime: React.FC = () => {
                         {fail.duracao}m
                         {fail.duracao > 30 && <AlertTriangle className="w-3 h-3 inline ml-1 align-middle" />}
                       </td>
-                      <td className="px-5 py-3 text-right text-emerald-600 dark:text-emerald-400 font-bold">{fail.volumePerdido.toLocaleString('pt-BR')} un</td>
+                      <td className="px-5 py-3 text-right text-emerald-600 dark:text-emerald-400 font-bold whitespace-nowrap">
+                        <div className="flex flex-col items-end leading-tight">
+                          <span>{fail.volumePerdido.toLocaleString('pt-BR')} un</span>
+                          {fail.unidadesPorFardo > 0 && (
+                            <span className="text-[8px] opacity-60">
+                              ≈ {Math.round(fail.volumePerdido / fail.unidadesPorFardo)} fd
+                            </span>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                   {analytics.detailedFailures.length === 0 && (
