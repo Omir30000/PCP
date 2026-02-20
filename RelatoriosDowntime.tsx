@@ -37,6 +37,7 @@ const RelatoriosDowntime: React.FC = () => {
   const [dataInicio, setDataInicio] = useState(getHoje());
   const [dataFim, setDataFim] = useState(getHoje());
   const [linhaId, setLinhaId] = useState<string>('todos');
+  const [turno, setTurno] = useState<string>('todos');
 
   const [loading, setLoading] = useState(false);
   const [registros, setRegistros] = useState<any[]>([]);
@@ -68,7 +69,8 @@ const RelatoriosDowntime: React.FC = () => {
       const filtrados = (regsRes.data || []).filter(r => {
         const dMatch = r.data_registro >= dataInicio && r.data_registro <= dataFim;
         const lMatch = linhaId === 'todos' || r.linha_id === linhaId;
-        return dMatch && lMatch;
+        const tMatch = turno === 'todos' || r.turno === turno;
+        return dMatch && lMatch && tMatch;
       });
 
       setRegistros(filtrados);
@@ -268,9 +270,20 @@ const RelatoriosDowntime: React.FC = () => {
           </div>
 
           <select
+            value={turno}
+            onChange={e => setTurno(e.target.value)}
+            className="bg-slate-50 border border-slate-200 p-2 rounded-xl text-xs font-bold uppercase outline-none cursor-pointer text-slate-900"
+          >
+            <option value="todos">Todos os Turnos</option>
+            <option value="TURNO A">Turno A</option>
+            <option value="TURNO B">Turno B</option>
+            <option value="TURNO C">Turno C</option>
+          </select>
+
+          <select
             value={linhaId}
             onChange={e => setLinhaId(e.target.value)}
-            className="bg-slate-50 border border-slate-200 p-2 rounded-xl text-xs font-bold uppercase outline-none cursor-pointer"
+            className="bg-slate-50 border border-slate-200 p-2 rounded-xl text-xs font-bold uppercase outline-none cursor-pointer text-slate-900"
           >
             <option value="todos">Grade Completa</option>
             {linhas.map(l => <option key={l.id} value={l.id}>{l.nome}</option>)}
