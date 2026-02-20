@@ -275,9 +275,8 @@ const RelatoriosDowntime: React.FC = () => {
             className="bg-slate-50 border border-slate-200 p-2 rounded-xl text-xs font-bold uppercase outline-none cursor-pointer text-slate-900"
           >
             <option value="todos">Todos os Turnos</option>
-            <option value="TURNO A">Turno A</option>
-            <option value="TURNO B">Turno B</option>
-            <option value="TURNO C">Turno C</option>
+            <option value="1º Turno">1º Turno</option>
+            <option value="2º Turno">2º Turno</option>
           </select>
 
           <select
