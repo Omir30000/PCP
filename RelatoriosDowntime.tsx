@@ -125,6 +125,7 @@ const RelatoriosDowntime: React.FC = () => {
     let totalDowntime = 0;
     let totalStopsCount = 0;
     let volumeLost = 0;
+    let totalProduced = 0;
     const byEquipment: Record<string, number> = {};
     const byEquipmentCount: Record<string, number> = {};
     const byType: Record<string, number> = {};
@@ -134,6 +135,7 @@ const RelatoriosDowntime: React.FC = () => {
       // Extração segura do JSONB de paradas
       const paradasRaw = reg.paradas;
       const paradas = Array.isArray(paradasRaw) ? paradasRaw : [];
+      totalProduced += Number(reg.quantidade_produzida) || 0;
 
       // Prioriza a capacidade registrada no registro de produção, fallback para o produto
       const nominalCap = Number(reg.capacidade_producao) || Number(reg.produtos?.capacidade_nominal) || 7200;
@@ -226,6 +228,7 @@ const RelatoriosDowntime: React.FC = () => {
       totalDowntime: totalDowntime || 0,
       totalStopsCount: totalStopsCount || 0,
       volumeLost: Math.round(volumeLost) || 0,
+      totalProduced: totalProduced || 0,
       mttr: mttr || 0,
       typePieData,
       machinePieData,
@@ -333,12 +336,12 @@ const RelatoriosDowntime: React.FC = () => {
         </header>
 
         {/* KPIs Consolidados */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 break-inside-avoid">
-          <div className="border border-white/10 rounded-2xl p-6 bg-slate-900/40 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-2"><Timer className="w-8 h-8 text-slate-200/50" /></div>
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 break-inside-avoid">
+          <div className="border border-white/10 rounded-2xl p-6 bg-slate-900/40 relative overflow-hidden group shadow-lg shadow-slate-200/20">
+            <div className="absolute top-0 right-0 p-2 opacity-20 group-hover:scale-110 transition-transform"><Timer className="w-8 h-8 text-slate-200" /></div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Inatividade Total</p>
-            <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.totalDowntime} <span className="text-xs">min</span></h4>
-            <p className="text-[9px] text-slate-400 mt-2">Duração Bruta Acumulada</p>
+            <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.totalDowntime} <span className="text-xs font-bold text-slate-400">minutos</span></h4>
+            <p className="text-[9px] text-slate-400 mt-2 font-bold uppercase tracking-tighter">Duração Bruta Acumulada</p>
           </div>
           <div className="border border-slate-200 rounded-2xl p-6 bg-slate-50 relative overflow-hidden flex flex-col justify-between min-h-[140px]">
             <div className="absolute top-0 right-0 p-2"><AlertCircle className="w-8 h-8 text-red-100" /></div>
@@ -375,13 +378,22 @@ const RelatoriosDowntime: React.FC = () => {
             <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.mttr.toFixed(1)} <span className="text-xs">min</span></h4>
             <p className="text-[9px] text-slate-400 mt-2">Recuperação Média de Falha</p>
           </div>
-          <div className="border border-white/10 rounded-2xl p-6 bg-slate-800 text-white relative overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none">
+          <div className="border border-white/10 rounded-2xl p-6 bg-blue-600 text-white relative overflow-hidden shadow-xl shadow-blue-100">
+            <div className="absolute top-0 right-0 p-2"><Box className="w-8 h-8 text-white/20" /></div>
+            <p className="text-[10px] font-black text-blue-100 uppercase tracking-widest mb-1">Volume Produzido</p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-2xl font-black tracking-tighter">{(analytics.totalProduced).toLocaleString('pt-BR')} <span className="text-[10px] font-bold opacity-60">un</span></p>
+            </div>
+            <p className="text-[8px] font-medium text-blue-100/40 uppercase tracking-widest mt-1 italic">Produção Efetiva no Período</p>
+          </div>
+
+          <div className="border border-white/10 rounded-2xl p-6 bg-slate-800 text-white relative overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none font-bold">
             <div className="absolute top-0 right-0 p-2"><Package className="w-8 h-8 text-white/10" /></div>
             <p className="text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Impacto Produtivo</p>
             <div className="flex items-baseline gap-2">
               <p className="text-2xl font-black tracking-tighter">{(analytics.volumeLost).toLocaleString('pt-BR')} <span className="text-[10px] font-bold opacity-60">un</span></p>
             </div>
-            <p className="text-[8px] font-medium text-white/40 uppercase tracking-widest mt-1">Estimativa de Perda Volumétrica</p>
+            <p className="text-[8px] font-medium text-white/40 uppercase tracking-widest mt-1 italic">Estimativa de Perda Volumétrica</p>
           </div>
         </section>
 
