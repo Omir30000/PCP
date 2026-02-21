@@ -173,6 +173,8 @@ const RelatoriosDowntime: React.FC = () => {
         detailedFailures.push({
           data: reg.data_registro,
           linha: reg.linhas?.nome || 'LINHA DESCONHECIDA',
+          turno: reg.turno || 'N/A',
+          produto: reg.produto_volume || (reg.produtos?.nome || 'N/A'),
           equipamento: equipName,
           tipo: type,
           motivo: p.motivo || 'GERAL',
@@ -489,36 +491,38 @@ const RelatoriosDowntime: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[800px]">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-white/10">
-                    <th className="px-5 py-4 text-[8px] font-black text-slate-400 uppercase tracking-widest">Data Registro</th>
-                    <th className="px-5 py-4 text-[8px] font-black text-slate-400 uppercase tracking-widest">Linha</th>
-                    <th className="px-5 py-4 text-[8px] font-black text-slate-400 uppercase tracking-widest">Tipo</th>
-                    <th className="px-5 py-4 text-[8px] font-black text-slate-400 uppercase tracking-widest">Máquina</th>
-                    <th className="px-5 py-4 text-[8px] font-black text-slate-400 uppercase tracking-widest">Motivo</th>
-                    <th className="px-5 py-4 text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">Duração</th>
-                    <th className="px-5 py-4 text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">Perda Est.</th>
+                  <tr className="bg-slate-100 border-b-2 border-slate-900">
+                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Data</th>
+                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest text-center">Turno</th>
+                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Linha</th>
+                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Produto</th>
+                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Máquina</th>
+                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Motivo</th>
+                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest text-right">Dur.</th>
+                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest text-right">Perda Est.</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-[10px]">
+                <tbody className="divide-y divide-slate-100 text-[9px]">
                   {analytics.detailedFailures.map((fail, idx) => (
-                    <tr key={idx} className={`hover:bg-slate-50 dark:hover:bg-white/5 transition-colors ${fail.duracao > 30 ? 'bg-red-50/30 dark:bg-red-500/5' : ''}`}>
-                      <td className="px-5 py-3 font-bold text-slate-500 dark:text-slate-400">{formatarDataBR(fail.data)}</td>
-                      <td className="px-5 py-3 text-blue-600 dark:text-blue-400 font-black">{fail.linha}</td>
-                      <td className="px-5 py-3 font-bold text-slate-700 dark:text-slate-300 uppercase text-[9px]">{fail.tipo}</td>
-                      <td className="px-5 py-3 font-bold text-slate-800 dark:text-slate-200 uppercase">{fail.equipamento}</td>
-                      <td className="px-5 py-3 text-slate-600 dark:text-slate-400">
-                        <p className="font-bold">{fail.motivo}</p>
-                        {fail.obs && <p className="text-[8px] text-slate-400 dark:text-slate-500 italic truncate max-w-[200px]">Obs: {fail.obs}</p>}
+                    <tr key={idx} className={`hover:bg-slate-50 transition-colors ${fail.duracao > 30 ? 'bg-red-50/50' : ''}`}>
+                      <td className="px-3 py-2 font-bold text-slate-600 whitespace-nowrap">{formatarDataBR(fail.data)}</td>
+                      <td className="px-3 py-2 text-center text-slate-900 font-black">{fail.turno}</td>
+                      <td className="px-3 py-2 text-blue-700 font-black whitespace-nowrap">{fail.linha}</td>
+                      <td className="px-3 py-2 font-bold text-slate-900 truncate max-w-[120px]">{fail.produto}</td>
+                      <td className="px-3 py-2 font-black text-slate-900 uppercase whitespace-nowrap">{fail.equipamento}</td>
+                      <td className="px-3 py-2 text-slate-700 leading-tight">
+                        <p className="font-bold uppercase text-[8px]">{fail.motivo}</p>
+                        {fail.obs && <p className="text-[7px] text-slate-400 italic truncate max-w-[150px]">Obs: {fail.obs}</p>}
                       </td>
-                      <td className={`px-5 py-3 text-right font-black ${fail.duracao > 30 ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-slate-200'}`}>
+                      <td className={`px-3 py-2 text-right font-black ${fail.duracao > 30 ? 'text-red-600' : 'text-slate-900'} whitespace-nowrap`}>
                         {fail.duracao}m
-                        {fail.duracao > 30 && <AlertTriangle className="w-3 h-3 inline ml-1 align-middle" />}
+                        {fail.duracao > 30 && <AlertTriangle className="w-2.5 h-2.5 inline ml-0.5 align-middle" />}
                       </td>
-                      <td className="px-5 py-3 text-right text-emerald-600 dark:text-emerald-400 font-bold whitespace-nowrap">
-                        <div className="flex flex-col items-end leading-tight">
+                      <td className="px-3 py-2 text-right text-emerald-700 font-bold whitespace-nowrap">
+                        <div className="flex flex-col items-end leading-none">
                           <span>{fail.volumePerdido.toLocaleString('pt-BR')} un</span>
                           {fail.unidadesPorFardo > 0 && (
-                            <span className="text-[8px] opacity-60">
+                            <span className="text-[7px] opacity-60">
                               ≈ {Math.round(fail.volumePerdido / fail.unidadesPorFardo)} fd
                             </span>
                           )}
