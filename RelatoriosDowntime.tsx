@@ -56,26 +56,37 @@ const RelatoriosDowntime: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Sincronização mestre: Registros com Joins de Produtos e Linhas
+      // Sincronização mestre com filtros no servidor para maior precisão
+      let query = supabase
+        .from('registros_producao')
+        .select('*, produtos(*), linhas(*)')
+        .gte('data_registro', dataInicio)
+        .lte('data_registro', dataFim)
+        .order('data_registro', { ascending: false });
+
+      if (turno !== 'todos') {
+        query = query.eq('turno', turno);
+      }
+
+      if (linhaId !== 'todos') {
+        query = query.eq('linha_id', linhaId);
+      }
+
       const [regsRes, linesRes, machRes] = await Promise.all([
-        supabase.from('registros_producao').select('*, produtos(*), linhas(*)').order('data_registro', { ascending: false }),
+        query,
         supabase.from('linhas').select('*').order('nome'),
         supabase.from('maquinas').select('*')
       ]);
 
+      if (regsRes.error) throw regsRes.error;
+
       if (linesRes.data) setLinhas(linesRes.data);
       if (machRes.data) setMaquinas(machRes.data);
+      if (regsRes.data) setRegistros(regsRes.data);
 
-      const filtrados = (regsRes.data || []).filter(r => {
-        const dMatch = r.data_registro >= dataInicio && r.data_registro <= dataFim;
-        const lMatch = linhaId === 'todos' || r.linha_id === linhaId;
-        const tMatch = turno === 'todos' || r.turno === turno;
-        return dMatch && lMatch && tMatch;
-      });
-
-      setRegistros(filtrados);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Nexus Downtime Sync Error:", err);
+      alert("Erro ao sincronizar dados: " + (err.message || "Erro de conexão"));
     } finally {
       setLoading(false);
     }
