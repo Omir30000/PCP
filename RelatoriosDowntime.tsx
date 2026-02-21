@@ -141,6 +141,7 @@ const RelatoriosDowntime: React.FC = () => {
     const byEquipmentCount: Record<string, number> = {};
     const byType: Record<string, number> = {};
     const detailedFailures: any[] = [];
+    let totalNominal = 0;
 
     registros.forEach(reg => {
       // Extração segura do JSONB de paradas
@@ -150,6 +151,7 @@ const RelatoriosDowntime: React.FC = () => {
 
       // Prioriza EXATAMENTE o valor da tabela de produtos conforme solicitado pelo usuário
       const nominalCap = Number(reg.produtos?.capacidade_nominal) || Number(reg.capacidade_producao) || 7200;
+      totalNominal += nominalCap;
 
       // Cálculo de eficiência: Nominal sempre baseada em 8 horas (480 min) para ser exato
       // Fórmula: (Capacidade Master do Produto / 480) * Minutos de Parada
@@ -247,7 +249,7 @@ const RelatoriosDowntime: React.FC = () => {
       machinePieData,
       mostCriticalType,
       topEquipments,
-      somaNominal: (totalProduced + volumeLost) || 0,
+      somaNominal: totalNominal || 0,
       detailedFailures: detailedFailures.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
     };
   }, [registros, maquinas]);
@@ -416,7 +418,7 @@ const RelatoriosDowntime: React.FC = () => {
             <div className="flex items-baseline gap-2">
               <p className="text-2xl font-black text-emerald-700 tracking-tighter">{(analytics.somaNominal).toLocaleString('pt-BR')} <span className="text-[10px] font-bold opacity-60">un</span></p>
             </div>
-            <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mt-1 italic text-center w-full">Total Produzido + Perda</p>
+            <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mt-1 italic text-center w-full">Capacidade Teórica Acumulada</p>
           </div>
         </section>
 
