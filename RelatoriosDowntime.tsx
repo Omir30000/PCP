@@ -148,13 +148,12 @@ const RelatoriosDowntime: React.FC = () => {
       const paradas = Array.isArray(paradasRaw) ? paradasRaw : [];
       totalProduced += Number(reg.quantidade_produzida) || 0;
 
-      // Prioriza a capacidade registrada no registro de produção, fallback para o produto
-      const nominalCap = Number(reg.capacidade_producao) || Number(reg.produtos?.capacidade_nominal) || 7200;
+      // Prioriza EXATAMENTE o valor da tabela de produtos conforme solicitado pelo usuário
+      const nominalCap = Number(reg.produtos?.capacidade_nominal) || Number(reg.capacidade_producao) || 7200;
 
-      // Cálculo de eficiência: nominalCap é baseada na carga horária real do registro (fallback 8h)
-      const cargaH = Number(reg.carga_horaria) || 8;
-      const totalMinTurno = cargaH * 60;
-      const capPerMin = nominalCap / totalMinTurno;
+      // Cálculo de eficiência: Nominal sempre baseada em 8 horas (480 min) para ser exato
+      // Fórmula: (Capacidade Master do Produto / 480) * Minutos de Parada
+      const capPerMin = nominalCap / 480;
 
       const unidadesPorFardo = Number(reg.produtos?.unidades_por_fardo) || 0;
 
@@ -248,6 +247,7 @@ const RelatoriosDowntime: React.FC = () => {
       machinePieData,
       mostCriticalType,
       topEquipments,
+      somaNominal: (totalProduced + volumeLost) || 0,
       detailedFailures: detailedFailures.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
     };
   }, [registros, maquinas]);
@@ -350,7 +350,7 @@ const RelatoriosDowntime: React.FC = () => {
         </header>
 
         {/* KPIs Consolidados */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 break-inside-avoid">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 break-inside-avoid">
           <div className="border border-slate-200 rounded-2xl p-6 bg-white relative overflow-hidden group shadow-sm">
             <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:scale-110 transition-transform"><Timer className="w-8 h-8 text-slate-400" /></div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Inatividade Total</p>
@@ -408,6 +408,15 @@ const RelatoriosDowntime: React.FC = () => {
               <p className="text-2xl font-black text-slate-900 tracking-tighter">{(analytics.volumeLost).toLocaleString('pt-BR')} <span className="text-[10px] font-bold opacity-60">un</span></p>
             </div>
             <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1 italic text-center w-full">Estimativa de Perda Volumétrica</p>
+          </div>
+
+          <div className="border border-emerald-100 rounded-2xl p-6 bg-emerald-50 relative overflow-hidden shadow-sm">
+            <div className="absolute top-0 right-0 p-2 opacity-20"><TrendingUp className="w-8 h-8 text-emerald-600" /></div>
+            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Soma Nominal</p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-2xl font-black text-emerald-700 tracking-tighter">{(analytics.somaNominal).toLocaleString('pt-BR')} <span className="text-[10px] font-bold opacity-60">un</span></p>
+            </div>
+            <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mt-1 italic text-center w-full">Total Produzido + Perda</p>
           </div>
         </section>
 
