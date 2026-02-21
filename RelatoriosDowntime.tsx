@@ -337,10 +337,10 @@ const RelatoriosDowntime: React.FC = () => {
 
         {/* KPIs Consolidados */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 break-inside-avoid">
-          <div className="border border-white/10 rounded-2xl p-6 bg-slate-900/40 relative overflow-hidden group shadow-lg shadow-slate-200/20">
-            <div className="absolute top-0 right-0 p-2 opacity-20 group-hover:scale-110 transition-transform"><Timer className="w-8 h-8 text-slate-200" /></div>
+          <div className="border border-slate-200 rounded-2xl p-6 bg-white relative overflow-hidden group shadow-sm">
+            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:scale-110 transition-transform"><Timer className="w-8 h-8 text-slate-400" /></div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Inatividade Total</p>
-            <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.totalDowntime} <span className="text-xs font-bold text-slate-400">minutos</span></h4>
+            <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.totalDowntime} <span className="text-xs font-bold text-slate-500">minutos</span></h4>
             <p className="text-[9px] text-slate-400 mt-2 font-bold uppercase tracking-tighter">Duração Bruta Acumulada</p>
           </div>
           <div className="border border-slate-200 rounded-2xl p-6 bg-slate-50 relative overflow-hidden flex flex-col justify-between min-h-[140px]">
@@ -372,28 +372,28 @@ const RelatoriosDowntime: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="border border-slate-200 rounded-2xl p-6 bg-slate-50 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-2"><Activity className="w-8 h-8 text-slate-200/50" /></div>
+          <div className="border border-slate-200 rounded-2xl p-6 bg-white relative overflow-hidden shadow-sm">
+            <div className="absolute top-0 right-0 p-2 opacity-10"><Activity className="w-8 h-8 text-slate-400" /></div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">MTTR (Média)</p>
-            <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.mttr.toFixed(1)} <span className="text-xs">min</span></h4>
-            <p className="text-[9px] text-slate-400 mt-2">Recuperação Média de Falha</p>
+            <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.mttr.toFixed(1)} <span className="text-xs font-bold text-slate-500">min</span></h4>
+            <p className="text-[9px] text-slate-400 mt-2 font-bold uppercase tracking-tighter">Recuperação Média de Falha</p>
           </div>
-          <div className="border border-white/10 rounded-2xl p-6 bg-blue-600 text-white relative overflow-hidden shadow-xl shadow-blue-100">
-            <div className="absolute top-0 right-0 p-2"><Box className="w-8 h-8 text-white/20" /></div>
-            <p className="text-[10px] font-black text-blue-100 uppercase tracking-widest mb-1">Volume Produzido</p>
+          <div className="border border-blue-100 rounded-2xl p-6 bg-blue-50 relative overflow-hidden shadow-sm">
+            <div className="absolute top-0 right-0 p-2 opacity-20"><Box className="w-8 h-8 text-blue-600" /></div>
+            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Volume Produzido</p>
             <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-black tracking-tighter">{(analytics.totalProduced).toLocaleString('pt-BR')} <span className="text-[10px] font-bold opacity-60">un</span></p>
+              <p className="text-2xl font-black text-blue-700 tracking-tighter">{(analytics.totalProduced).toLocaleString('pt-BR')} <span className="text-[10px] font-bold opacity-60">un</span></p>
             </div>
-            <p className="text-[8px] font-medium text-blue-100/40 uppercase tracking-widest mt-1 italic">Produção Efetiva no Período</p>
+            <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest mt-1 italic">Produção Efetiva no Período</p>
           </div>
 
-          <div className="border border-white/10 rounded-2xl p-6 bg-slate-800 text-white relative overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none font-bold">
-            <div className="absolute top-0 right-0 p-2"><Package className="w-8 h-8 text-white/10" /></div>
-            <p className="text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Impacto Produtivo</p>
+          <div className="border border-slate-200 rounded-2xl p-6 bg-white relative overflow-hidden shadow-sm font-bold">
+            <div className="absolute top-0 right-0 p-2 opacity-10"><Package className="w-8 h-8 text-slate-400" /></div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Impacto Produtivo</p>
             <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-black tracking-tighter">{(analytics.volumeLost).toLocaleString('pt-BR')} <span className="text-[10px] font-bold opacity-60">un</span></p>
+              <p className="text-2xl font-black text-slate-900 tracking-tighter">{(analytics.volumeLost).toLocaleString('pt-BR')} <span className="text-[10px] font-bold opacity-60">un</span></p>
             </div>
-            <p className="text-[8px] font-medium text-white/40 uppercase tracking-widest mt-1 italic">Estimativa de Perda Volumétrica</p>
+            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1 italic text-center w-full">Estimativa de Perda Volumétrica</p>
           </div>
         </section>
 
@@ -410,8 +410,8 @@ const RelatoriosDowntime: React.FC = () => {
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             {/* Gráfico 1: Tipos de Parada */}
-            <div className="border border-slate-200 dark:border-white/10 rounded-2xl p-4 lg:p-6 h-[350px] lg:h-[400px] bg-white dark:bg-slate-900/50 shadow-sm flex flex-col">
-              <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">Distribuição por Tipo de Parada (%)</p>
+            <div className="border border-slate-200 rounded-2xl p-6 h-[400px] bg-white shadow-sm flex flex-col">
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-4">Distribuição por Tipo de Parada (%)</p>
               {analytics.typePieData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -419,19 +419,19 @@ const RelatoriosDowntime: React.FC = () => {
                       data={analytics.typePieData}
                       cx="50%"
                       cy="45%"
-                      innerRadius={45}
-                      outerRadius={65}
+                      innerRadius={50}
+                      outerRadius={75}
                       paddingAngle={5}
                       dataKey="value"
                       label={({ name, percentage }) => `${name}: ${percentage}%`}
                       labelLine={true}
                     >
                       {analytics.typePieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={index === 0 ? '#ef4444' : index === 1 ? '#0f172a' : '#334155'} />
+                        <Cell key={`cell-${index}`} fill={['#ef4444', '#1e293b', '#334155', '#64748b', '#94a3b8'][index % 5]} />
                       ))}
                     </Pie>
                     <RechartsTooltip
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px' }}
+                      contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', fontSize: '10px', color: '#0f172a' }}
                       formatter={(value: any, name: string, props: any) => [`${value} min (${props.payload.percentage}%)`, name]}
                     />
                   </PieChart>
@@ -442,7 +442,7 @@ const RelatoriosDowntime: React.FC = () => {
             </div>
 
             {/* Gráfico 2: Máquinas do Tipo Crítico */}
-            <div className="border border-slate-200 dark:border-white/10 rounded-2xl p-4 lg:p-6 h-[350px] lg:h-[400px] bg-white dark:bg-slate-900/50 shadow-sm flex flex-col">
+            <div className="border border-slate-200 rounded-2xl p-6 h-[400px] bg-white shadow-sm flex flex-col">
               <div className="mb-4">
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Impacto por Máquina</p>
                 <p className="text-[10px] font-black text-red-600 uppercase truncate">
@@ -456,19 +456,19 @@ const RelatoriosDowntime: React.FC = () => {
                       data={analytics.machinePieData}
                       cx="50%"
                       cy="45%"
-                      innerRadius={45}
-                      outerRadius={65}
+                      innerRadius={50}
+                      outerRadius={75}
                       paddingAngle={5}
                       dataKey="value"
                       label={({ name, percentage }) => `${name}: ${percentage}%`}
                       labelLine={true}
                     >
                       {analytics.machinePieData.map((entry, index) => (
-                        <Cell key={`cell-m-${index}`} fill={['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316'][index % 5]} />
+                        <Cell key={`cell-m-${index}`} fill={['#3b82f6', '#1d4ed8', '#2563eb', '#60a5fa', '#93c5fd'][index % 5]} />
                       ))}
                     </Pie>
                     <RechartsTooltip
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px' }}
+                      contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', fontSize: '10px', color: '#0f172a' }}
                       formatter={(value: any, name: string, props: any) => [`${value} min (${props.payload.percentage}%)`, name]}
                     />
                   </PieChart>
