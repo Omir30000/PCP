@@ -186,6 +186,7 @@ const RelatoriosDowntime: React.FC = () => {
           linha: reg.linhas?.nome || 'LINHA DESCONHECIDA',
           turno: reg.turno || 'N/A',
           produto: reg.produto_volume || (reg.produtos?.nome || 'N/A'),
+          nominal: nominalCap,
           equipamento: equipName,
           tipo: type,
           motivo: p.motivo || 'GERAL',
@@ -503,24 +504,26 @@ const RelatoriosDowntime: React.FC = () => {
               <table className="w-full text-left border-collapse min-w-[800px]">
                 <thead>
                   <tr className="bg-slate-100 border-b-2 border-slate-900">
-                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Data</th>
-                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest text-center">Turno</th>
-                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Linha</th>
-                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Produto</th>
-                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Máquina</th>
-                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Motivo</th>
-                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest text-right">Dur.</th>
-                    <th className="px-3 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest text-right">Perda Est.</th>
+                    <th className="px-2 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Data</th>
+                    <th className="px-2 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest text-center">Turno</th>
+                    <th className="px-2 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Linha</th>
+                    <th className="px-2 py-3 text-[8px] font-black text-slate-900 uppercase tracking-widest">Produto</th>
+                    <th className="px-2 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest text-center">Nominal</th>
+                    <th className="px-2 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Máquina</th>
+                    <th className="px-2 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Motivo</th>
+                    <th className="px-2 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest text-right">Dur.</th>
+                    <th className="px-2 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest text-right">Perda Est.</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-[9px]">
+                <tbody className="divide-y divide-slate-100 text-[9px] bg-white">
                   {analytics.detailedFailures.map((fail, idx) => (
                     <tr key={idx} className={`hover:bg-slate-50 transition-colors ${fail.duracao > 30 ? 'bg-red-50/50' : ''}`}>
-                      <td className="px-3 py-2 font-bold text-slate-600 whitespace-nowrap">{formatarDataBR(fail.data)}</td>
-                      <td className="px-3 py-2 text-center text-slate-900 font-black">{fail.turno}</td>
-                      <td className="px-3 py-2 text-blue-700 font-black whitespace-nowrap">{fail.linha}</td>
-                      <td className="px-3 py-2 font-bold text-slate-900 truncate max-w-[120px]">{fail.produto}</td>
-                      <td className="px-3 py-2 font-black text-slate-900 uppercase whitespace-nowrap">{fail.equipamento}</td>
+                      <td className="px-2 py-2 font-bold text-slate-600 whitespace-nowrap">{formatarDataBR(fail.data)}</td>
+                      <td className="px-2 py-2 text-center text-slate-900 font-black">{fail.turno}</td>
+                      <td className="px-2 py-2 text-blue-700 font-black whitespace-nowrap">{fail.linha}</td>
+                      <td className="px-2 py-2 font-bold text-slate-900 truncate max-w-[100px]">{fail.produto}</td>
+                      <td className="px-2 py-2 text-center text-slate-500 font-bold">{fail.nominal.toLocaleString('pt-BR')}</td>
+                      <td className="px-2 py-2 font-black text-slate-900 uppercase whitespace-nowrap">{fail.equipamento}</td>
                       <td className="px-3 py-2 text-slate-700 leading-tight">
                         <p className="font-bold uppercase text-[8px]">{fail.motivo}</p>
                         {fail.obs && <p className="text-[7px] text-slate-400 italic truncate max-w-[150px]">Obs: {fail.obs}</p>}
@@ -543,7 +546,7 @@ const RelatoriosDowntime: React.FC = () => {
                   ))}
                   {analytics.detailedFailures.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="px-5 py-12 text-center text-slate-300 dark:text-slate-700 uppercase font-bold tracking-widest italic">
+                      <td colSpan={9} className="px-5 py-12 text-center text-slate-300 dark:text-slate-700 uppercase font-bold tracking-widest italic">
                         Sem inatividade reportada no período selecionado
                       </td>
                     </tr>
