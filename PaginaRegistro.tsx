@@ -42,7 +42,7 @@ const MOTIVOS_COMUNS: Record<string, string[]> = {
   'PALESTRA/REUNIÃO': ['TREINAMENTO', 'REUNIÃO DE TURNO', 'DIÁLOGO DE SEGURANÇA'],
   'SETUP (Preparação de máquina)': ['TROCA DE FORMATO', 'AJUSTE DE GUIA', 'AQUECIMENTO', 'TROCA DE PRODUTO', 'INÍCIO DE PRODUÇÃO', 'REGULAGEM TERMICA'],
   'PARADA PROGRAMADA': ['INTERVALO REFEIÇÃO', 'INVENTÁRIO', 'DESCANSO'],
-  'OPERACIONAL': ['FALTA DE OPERADOR', 'TROCA DE ETIQUETA', 'AJUSTE DE PROCESSO', 'REFUGO EXCESSIVO', 'LIMPEZA SETORIAL', 'TROCA DE BOBINA', 'LIMPEZA DE COLA'],
+  'OPERACIONAL': ['FALTA DE OPERADOR', 'TROCA DE RÓTULO', 'AJUSTE DE PROCESSO', 'REFUGO EXCESSIVO', 'LIMPEZA SETORIAL', 'TROCA DE BOBINA', 'LIMPEZA DE COLA'],
   'ASSISTENCIA TÉCNICA': ['ACESSO REMOTO', 'VISITA TÉCNICA EXTERNA', 'SUPORTE TÉCNICO FABRICANTE']
 };
 
@@ -112,6 +112,7 @@ const PaginaRegistro: React.FC = () => {
   });
 
   const horaFimRef = useRef<HTMLInputElement>(null);
+  const motivoRef = useRef<HTMLInputElement>(null);
 
 
 
@@ -767,6 +768,7 @@ const PaginaRegistro: React.FC = () => {
                     type="time"
                     value={tempParada.hora_inicio}
                     onChange={e => updateTempParadaTime('hora_inicio', e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && horaFimRef.current?.focus()}
                     className="w-full p-4 bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 rounded-2xl text-[11px] font-black text-slate-900 dark:text-white outline-none focus:border-red-500 transition-all"
                   />
                 </div>
@@ -779,6 +781,7 @@ const PaginaRegistro: React.FC = () => {
                     ref={horaFimRef}
                     value={tempParada.hora_fim}
                     onChange={e => updateTempParadaTime('hora_fim', e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && motivoRef.current?.focus()}
                     className="w-full p-4 bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 rounded-2xl text-[11px] font-black text-slate-900 dark:text-white outline-none focus:border-red-500 transition-all"
                   />
                 </div>
@@ -805,8 +808,10 @@ const PaginaRegistro: React.FC = () => {
 
                 <input
                   type="text"
+                  ref={motivoRef}
                   value={tempParada.motivo}
                   onChange={e => setTempParada({ ...tempParada, motivo: e.target.value.toUpperCase() })}
+                  onKeyDown={e => e.key === 'Enter' && handleSaveParada()}
                   className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-5 text-sm font-bold placeholder-slate-300 dark:placeholder-slate-600 dark:text-white rounded-2xl outline-none focus:border-red-500 transition-all"
                   placeholder="EX: FALHA NA BOMBA DE SUCÇÃO"
                 />

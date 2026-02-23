@@ -81,6 +81,7 @@ const RelatorioRegistros: React.FC = () => {
     const [novaParada, setNovaParada] = useState<ParadaCompleta>({ tipo: '', hora_inicio: '', hora_fim: '', duracao: 0, motivo: '', maquina_id: '' });
     const [editingParadaIndex, setEditingParadaIndex] = useState<number | null>(null);
     const horaFimRef = useRef<HTMLInputElement>(null);
+    const motivoRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         loadAuxiliaryData();
@@ -753,6 +754,7 @@ const RelatorioRegistros: React.FC = () => {
                                                         const val = e.target.value;
                                                         setNovaParada(p => ({ ...p, hora_inicio: val }));
                                                     }}
+                                                    onKeyDown={e => e.key === 'Enter' && horaFimRef.current?.focus()}
                                                     className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
                                                 />
                                             </div>
@@ -763,6 +765,7 @@ const RelatorioRegistros: React.FC = () => {
                                                     ref={horaFimRef}
                                                     value={novaParada.hora_fim}
                                                     onChange={e => setNovaParada(p => ({ ...p, hora_fim: e.target.value }))}
+                                                    onKeyDown={e => e.key === 'Enter' && motivoRef.current?.focus()}
                                                     className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
                                                 />
                                             </div>
@@ -777,9 +780,11 @@ const RelatorioRegistros: React.FC = () => {
                                         <div className="flex gap-4">
                                             <input
                                                 type="text"
+                                                ref={motivoRef}
                                                 placeholder="MOTIVO DA PARADA..."
                                                 value={novaParada.motivo}
                                                 onChange={e => setNovaParada(p => ({ ...p, motivo: e.target.value }))}
+                                                onKeyDown={e => e.key === 'Enter' && handleSaveParada()}
                                                 className="flex-1 bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 uppercase font-bold"
                                             />
                                             <button
