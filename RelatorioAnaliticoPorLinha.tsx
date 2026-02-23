@@ -26,6 +26,7 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
     const [dataInicio, setDataInicio] = useState(getHoje());
     const [dataFim, setDataFim] = useState(getHoje());
     const [linhaId, setLinhaId] = useState<string>('');
+    const [turno, setTurno] = useState<string>('');
 
     const [loading, setLoading] = useState(false);
     const [registros, setRegistros] = useState<any[]>([]);
@@ -57,13 +58,18 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
         if (!linhaId) return;
         setLoading(true);
         try {
-            const { data, error } = await supabase
+            let query = supabase
                 .from('registros_producao')
                 .select('*, produtos(*), linhas(*)')
                 .eq('linha_id', linhaId)
                 .gte('data_registro', dataInicio)
-                .lte('data_registro', dataFim)
-                .order('data_registro', { ascending: false });
+                .lte('data_registro', dataFim);
+
+            if (turno) {
+                query = query.eq('turno', turno);
+            }
+
+            const { data, error } = await query.order('data_registro', { ascending: false });
 
             if (error) throw error;
             setRegistros(data || []);
@@ -185,7 +191,7 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-4 bg-slate-50 p-2 rounded-3xl border border-slate-100">
-                    <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-2xl shadow-sm border border-slate-100">
+                    <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-blue-200 transition-colors">
                         <Activity className="w-4 h-4 text-blue-500" />
                         <select
                             value={linhaId}
@@ -197,20 +203,33 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                         </select>
                     </div>
 
-                    <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-2xl shadow-sm border border-slate-100">
-                        <Calendar className="w-4 h-4 text-slate-400" />
+                    <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-blue-200 transition-colors">
+                        <LayoutGrid className="w-4 h-4 text-purple-500" />
+                        <select
+                            value={turno}
+                            onChange={e => setTurno(e.target.value)}
+                            className="bg-transparent text-xs font-black uppercase outline-none cursor-pointer text-slate-900"
+                        >
+                            <option value="">Todos os Turnos</option>
+                            <option value="1º Turno">1º Turno</option>
+                            <option value="2º Turno">2º Turno</option>
+                        </select>
+                    </div>
+
+                    <div className="flex items-center gap-3 px-4 py-2 bg-slate-100 rounded-2xl shadow-inner border border-slate-200 hover:border-blue-400 transition-all group">
+                        <Calendar className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform" />
                         <input
                             type="date"
                             value={dataInicio}
                             onChange={e => setDataInicio(e.target.value)}
-                            className="bg-transparent text-xs font-black uppercase outline-none text-slate-900"
+                            className="bg-transparent text-xs font-black uppercase outline-none text-slate-900 cursor-pointer"
                         />
-                        <ArrowRight className="w-3 h-3 text-slate-300" />
+                        <ArrowRight className="w-3 h-3 text-slate-400" />
                         <input
                             type="date"
                             value={dataFim}
                             onChange={e => setDataFim(e.target.value)}
-                            className="bg-transparent text-xs font-black uppercase outline-none text-slate-900"
+                            className="bg-transparent text-xs font-black uppercase outline-none text-slate-900 cursor-pointer"
                         />
                     </div>
 
