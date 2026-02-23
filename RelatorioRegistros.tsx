@@ -752,9 +752,6 @@ const RelatorioRegistros: React.FC = () => {
                                                     onChange={e => {
                                                         const val = e.target.value;
                                                         setNovaParada(p => ({ ...p, hora_inicio: val }));
-                                                        if (val.length === 5 && horaFimRef.current) {
-                                                            setTimeout(() => horaFimRef.current?.focus(), 10);
-                                                        }
                                                     }}
                                                     className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
                                                 />
