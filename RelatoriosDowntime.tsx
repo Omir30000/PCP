@@ -179,10 +179,12 @@ const RelatoriosDowntime: React.FC = () => {
         const mObj = maquinas.find(m => m.id === p.maquina_id);
         const equipName = p.maquina || (mObj ? mObj.nome : (p.equipamento || 'GERAL'));
 
-        byEquipment[equipName] = (byEquipment[equipName] || 0) + dur;
-        byEquipmentCount[equipName] = (byEquipmentCount[equipName] || 0) + 1;
-
-        byType[type] = (byType[type] || 0) + dur;
+        // Apenas alimenta os gráficos se NÃO for parada programada
+        if (type !== 'PARADA PROGRAMADA') {
+          byEquipment[equipName] = (byEquipment[equipName] || 0) + dur;
+          byEquipmentCount[equipName] = (byEquipmentCount[equipName] || 0) + 1;
+          byType[type] = (byType[type] || 0) + dur;
+        }
 
         detailedFailures.push({
           data: reg.data_registro,
