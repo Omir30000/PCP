@@ -84,7 +84,6 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
         let totalDowntime = 0;
         let totalStopsCount = 0;
         const byEquipment: Record<string, number> = {};
-        const byReason: Record<string, number> = {};
         const byType: Record<string, number> = {};
         const detailedFailures: any[] = [];
 
@@ -104,10 +103,6 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
 
                     const equipName = p.maquina || p.maquina_id || p.equipamento || 'GERAL';
                     byEquipment[equipName] = (byEquipment[equipName] || 0) + dur;
-
-                    const reason = (p.motivo || 'NÃO INFORMADO').toUpperCase();
-                    byReason[reason] = (byReason[reason] || 0) + dur;
-
                     byType[type] = (byType[type] || 0) + dur;
                 }
 
@@ -122,32 +117,51 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
             });
         });
 
-        const paretoEquip = Object.entries(byEquipment)
-            .map(([name, value]) => ({ name, value }))
-            .sort((a, b) => b.value - a.value)
-            .slice(0, 10);
+        // 1. Gráfico de Pizza: Distribuição por Equipamento
+        const equipmentPieData = Object.entries(byEquipment)
+            .map(([name, value]) => ({
+                name,
+                value,
+                percentage: totalDowntime > 0 ? ((value / totalDowntime) * 100).toFixed(1) : 0
+            }))
+            .sort((a, b) => b.value - a.value);
 
-        const paretoReason = Object.entries(byReason)
-            .map(([name, value]) => ({ name, value }))
-            .sort((a, b) => b.value - a.value)
-            .slice(0, 10);
+        const mostCriticalEquipment = equipmentPieData[0]?.name || null;
 
-        const typeData = Object.entries(byType).map(([name, value]) => ({ name, value }));
+        // 2. Gráfico de Pizza: Motivos do Equipamento mais crítico
+        const reasonByCriticalEquipment: Record<string, number> = {};
+        if (mostCriticalEquipment) {
+            detailedFailures.forEach(fail => {
+                if (fail.equipamento === mostCriticalEquipment && fail.tipo.toUpperCase() !== 'PARADA PROGRAMADA') {
+                    const m = fail.motivo.toUpperCase();
+                    reasonByCriticalEquipment[m] = (reasonByCriticalEquipment[m] || 0) + fail.duracao;
+                }
+            });
+        }
+
+        const totalDowntimeCritical = byEquipment[mostCriticalEquipment || ''] || 0;
+        const reasonPieData = Object.entries(reasonByCriticalEquipment)
+            .map(([name, value]) => ({
+                name,
+                value,
+                percentage: totalDowntimeCritical > 0 ? ((value / totalDowntimeCritical) * 100).toFixed(1) : 0
+            }))
+            .sort((a, b) => b.value - a.value);
 
         const mttr = totalStopsCount > 0 ? totalDowntime / totalStopsCount : 0;
-        const criticalGargalo = paretoEquip[0]?.name || '--';
 
         return {
             totalDowntime,
             totalStopsCount,
             mttr,
-            paretoEquip,
-            paretoReason,
-            typeData,
-            criticalGargalo,
+            equipmentPieData,
+            reasonPieData,
+            mostCriticalEquipment,
             detailedFailures: detailedFailures.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
         };
     }, [registros]);
+
+    const COLORS = ['#ef4444', '#0f172a', '#334155', '#64748b', '#94a3b8', '#cbd5e1'];
 
     const handlePrint = () => {
         if (!reportRef.current) return;
@@ -266,7 +280,7 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                         <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl relative overflow-hidden group">
                             <div className="absolute top-0 right-0 p-6 text-red-100 group-hover:scale-110 transition-transform"><AlertCircle className="w-16 h-16" /></div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Ponto Crítico (Gargalo)</p>
-                            <h2 className="text-3xl font-black text-red-600 tracking-tighter uppercase truncate pr-16">{analytics.criticalGargalo}</h2>
+                            <h2 className="text-3xl font-black text-red-600 tracking-tighter uppercase truncate pr-16">{analytics.mostCriticalEquipment || '--'}</h2>
                             <p className="text-[10px] font-bold text-slate-300 mt-2 uppercase">Maior acumulador de parada</p>
                         </div>
 
@@ -286,66 +300,77 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* Pareto Maquinas */}
+                        {/* Pizza Maquinas */}
                         <section className="bg-white p-10 rounded-[48px] border border-slate-100 shadow-2xl space-y-8">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-red-50 rounded-2xl text-red-500"><Settings className="w-6 h-6" /></div>
-                                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Pareto de Equipamentos</h3>
+                                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Gargalo por Equipamento (%)</h3>
                                 </div>
                             </div>
 
                             <div className="h-[400px]">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={analytics.paretoEquip} layout="vertical">
-                                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                                        <XAxis type="number" hide />
-                                        <YAxis
-                                            dataKey="name"
-                                            type="category"
-                                            fontSize={10}
-                                            fontWeight="bold"
-                                            width={120}
-                                            axisLine={false}
-                                            tickLine={false}
-                                        />
-                                        <RechartsTooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }} />
-                                        <Bar dataKey="value" radius={[0, 10, 10, 0]}>
-                                            {analytics.paretoEquip.map((_, index) => (
-                                                <Cell key={index} fill={index === 0 ? '#ef4444' : '#0f172a'} />
+                                    <PieChart>
+                                        <Pie
+                                            data={analytics.equipmentPieData}
+                                            dataKey="value"
+                                            nameKey="name"
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={80}
+                                            outerRadius={120}
+                                            paddingAngle={5}
+                                            label={({ name, percentage }) => `${name}: ${percentage}%`}
+                                        >
+                                            {analytics.equipmentPieData.map((_, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                             ))}
-                                        </Bar>
-                                    </BarChart>
+                                        </Pie>
+                                        <RechartsTooltip
+                                            contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
+                                            formatter={(value: any, name: string, props: any) => [`${value} min (${props.payload.percentage}%)`, name]}
+                                        />
+                                    </PieChart>
                                 </ResponsiveContainer>
                             </div>
                         </section>
 
-                        {/* Pareto Motivos */}
+                        {/* Pizza Detalhes do Gargalo */}
                         <section className="bg-white p-10 rounded-[48px] border border-slate-100 shadow-2xl space-y-8">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-blue-50 rounded-2xl text-blue-500"><BarChart2 className="w-6 h-6" /></div>
-                                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Principais Motivos</h3>
+                                    <div>
+                                        <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Motivos: {analytics.mostCriticalEquipment}</h3>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Detalhamento do maior gargalo</p>
+                                    </div>
                                 </div>
                             </div>
 
                             <div className="h-[400px]">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={analytics.paretoReason} layout="vertical">
-                                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                                        <XAxis type="number" hide />
-                                        <YAxis
-                                            dataKey="name"
-                                            type="category"
-                                            fontSize={10}
-                                            fontWeight="bold"
-                                            width={120}
-                                            axisLine={false}
-                                            tickLine={false}
+                                    <PieChart>
+                                        <Pie
+                                            data={analytics.reasonPieData}
+                                            dataKey="value"
+                                            nameKey="name"
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={80}
+                                            outerRadius={120}
+                                            paddingAngle={5}
+                                            label={({ name, percentage }) => `${name}: ${percentage}%`}
+                                        >
+                                            {analytics.reasonPieData.map((_, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <RechartsTooltip
+                                            contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
+                                            formatter={(value: any, name: string, props: any) => [`${value} min (${props.payload.percentage}%)`, name]}
                                         />
-                                        <RechartsTooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }} />
-                                        <Bar dataKey="value" radius={[0, 10, 10, 0]} fill="#0f172a" />
-                                    </BarChart>
+                                    </PieChart>
                                 </ResponsiveContainer>
                             </div>
                         </section>
