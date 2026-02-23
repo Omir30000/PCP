@@ -67,6 +67,15 @@ const LISTA_EQUIPAMENTOS = [
   'MANUTENÇÃO'
 ];
 
+// Mapeamento de Produtos por Linha (Nomes exatos do Banco)
+const LINHA_PRODUTO_MAP: Record<string, string[]> = {
+  'Linha 1': ['Galão 6 Litros', 'Galão 10 litros'],
+  'Linha 2': ['Natural 1500ml', 'Gás 1500ml', 'Natural 310ml', 'Gás 310 ml', 'Natural 510ml', 'Gás 510ml'],
+  'Linha 3': ['Natural 1500ml', 'Natural 310ml', 'Natural 510ml'],
+  'Linha 4': ['Copo 200ml', 'Copo 305ml'],
+  'Linha 5': ['Lata 355ml Natural', 'Lata 355ml Gás']
+};
+
 const PaginaRegistro: React.FC = () => {
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -79,10 +88,12 @@ const PaginaRegistro: React.FC = () => {
   const [formData, setFormData] = useState({
     data_registro: new Date().toISOString().split('T')[0],
     turno: '1º Turno',
+    hora_inicio_turno: '07:00',
+    hora_fim_turno: '15:48',
     linha_producao: '',
     produto_volume: '',
     lote: '',
-    carga_horaria: 8, // Default industrial padrão de 8 horas
+    carga_horaria: 8,
     quantidade_produced: 0,
     observacoes: ''
   });
@@ -149,6 +160,20 @@ const PaginaRegistro: React.FC = () => {
       setFormData(prev => ({ ...prev, lote: formattedDate }));
     }
   }, [formData.data_registro]);
+
+  // Cálculo Automático da Carga Horária
+  useEffect(() => {
+    if (formData.hora_inicio_turno && formData.hora_fim_turno) {
+      const duracaoMinutos = calculateDuration(formData.hora_inicio_turno, formData.hora_fim_turno);
+      const duracaoHoras = Number((duracaoMinutos / 60).toFixed(2));
+      setFormData(prev => ({ ...prev, carga_horaria: duracaoHoras }));
+    }
+  }, [formData.hora_inicio_turno, formData.hora_fim_turno]);
+
+  // Reseta produto ao mudar linha
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, produto_volume: '' }));
+  }, [formData.linha_producao]);
 
   const handleAddParada = () => {
     if (!formData.linha_producao) return;
@@ -393,7 +418,7 @@ const PaginaRegistro: React.FC = () => {
               <h2 className="text-sm font-black text-slate-200 uppercase tracking-[0.2em]">Contexto da Operação</h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6 lg:gap-8 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-8 gap-6 lg:gap-4 w-full">
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
                   <Calendar className="w-3 h-3" /> Data
@@ -420,17 +445,34 @@ const PaginaRegistro: React.FC = () => {
               </div>
 
               <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Início</label>
+                <input
+                  type="time"
+                  value={formData.hora_inicio_turno}
+                  onChange={e => setFormData({ ...formData, hora_inicio_turno: e.target.value })}
+                  className="w-full bg-slate-100 dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-slate-900 dark:text-white transition-all outline-none focus:border-[#facc15]"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Término</label>
+                <input
+                  type="time"
+                  value={formData.hora_fim_turno}
+                  onChange={e => setFormData({ ...formData, hora_fim_turno: e.target.value })}
+                  className="w-full bg-slate-100 dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-slate-900 dark:text-white transition-all outline-none focus:border-[#facc15]"
+                />
+              </div>
+
+              <div className="space-y-3">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
                   <Clock className="w-3 h-3 text-[#facc15]" /> Carga (h)
                 </label>
                 <input
                   type="number"
-                  step="0.1"
-                  min="0"
                   value={formData.carga_horaria}
-                  onChange={e => setFormData({ ...formData, carga_horaria: parseFloat(e.target.value) || 0 })}
-                  className="w-full bg-slate-100 dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-slate-900 dark:text-white transition-all outline-none focus:border-[#facc15]"
-                  required
+                  readOnly
+                  className="w-full bg-slate-50 dark:bg-black/20 border-2 border-slate-100 dark:border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-slate-400 dark:text-slate-500 outline-none cursor-not-allowed"
                 />
               </div>
 
@@ -467,11 +509,18 @@ const PaginaRegistro: React.FC = () => {
                 <select
                   value={formData.produto_volume}
                   onChange={e => setFormData({ ...formData, produto_volume: e.target.value })}
-                  className="w-full bg-black/40 border-2 border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-white transition-all outline-none focus:border-[#facc15]"
+                  className="w-full bg-slate-100 dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-slate-900 dark:text-white transition-all outline-none focus:border-[#facc15]"
                   required
                 >
                   <option value="" className="bg-white dark:bg-slate-900">Selecione...</option>
-                  {produtos.map(p => (<option key={p.id} value={p.id} className="bg-white dark:bg-slate-900">{p.nome}</option>))}
+                  {produtos
+                    .filter(p => {
+                      if (!formData.linha_producao) return true;
+                      const linhaNome = linhas.find(l => l.id === formData.linha_producao)?.nome || '';
+                      const allowedProducts = LINHA_PRODUTO_MAP[linhaNome] || [];
+                      return allowedProducts.includes(p.nome);
+                    })
+                    .map(p => (<option key={p.id} value={p.id} className="bg-white dark:bg-slate-900">{p.nome}</option>))}
                 </select>
               </div>
             </div>
