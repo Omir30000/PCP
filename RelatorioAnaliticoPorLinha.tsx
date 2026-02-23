@@ -87,23 +87,27 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
 
             paradas.forEach((p: any) => {
                 const dur = parseMinutos(p.duracao || p.tempo || p.total_min || 0);
+                const type = (p.tipo || 'NÃO PLANEJADA').toUpperCase();
+
                 if (dur <= 0) return;
 
-                totalDowntime += dur;
-                totalStopsCount += 1;
+                // Regra de Negócio: Paradas programadas não computam nos gargalos/indicadores técnicos
+                if (type !== 'PARADA PROGRAMADA') {
+                    totalDowntime += dur;
+                    totalStopsCount += 1;
 
-                const equipName = p.maquina || p.maquina_id || p.equipamento || 'GERAL';
-                byEquipment[equipName] = (byEquipment[equipName] || 0) + dur;
+                    const equipName = p.maquina || p.maquina_id || p.equipamento || 'GERAL';
+                    byEquipment[equipName] = (byEquipment[equipName] || 0) + dur;
 
-                const reason = (p.motivo || 'NÃO INFORMADO').toUpperCase();
-                byReason[reason] = (byReason[reason] || 0) + dur;
+                    const reason = (p.motivo || 'NÃO INFORMADO').toUpperCase();
+                    byReason[reason] = (byReason[reason] || 0) + dur;
 
-                const type = (p.tipo || 'NÃO DEFINIDO').toUpperCase();
-                byType[type] = (byType[type] || 0) + dur;
+                    byType[type] = (byType[type] || 0) + dur;
+                }
 
                 detailedFailures.push({
                     data: reg.data_registro,
-                    equipamento: equipName,
+                    equipamento: p.maquina || p.maquina_id || p.equipamento || 'GERAL',
                     motivo: p.motivo || 'GERAL',
                     tipo: p.tipo || 'Não Planejada',
                     duracao: dur,
