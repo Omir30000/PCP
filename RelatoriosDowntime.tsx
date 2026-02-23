@@ -242,7 +242,7 @@ const RelatoriosDowntime: React.FC = () => {
     return {
       totalDowntime: totalDowntime || 0,
       totalStopsCount: totalStopsCount || 0,
-      volumeLost: Math.round(volumeLost) || 0,
+      volumeLost: Math.round(totalProduced - totalNominal) || 0,
       totalProduced: totalProduced || 0,
       mttr: mttr || 0,
       typePieData,
