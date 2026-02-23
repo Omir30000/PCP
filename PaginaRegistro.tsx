@@ -440,7 +440,9 @@ const PaginaRegistro: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Turno</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <Layers className="w-3 h-3 text-[#facc15]" /> Turno
+                </label>
                 <select
                   value={formData.turno}
                   onChange={e => setFormData({ ...formData, turno: e.target.value })}
@@ -452,7 +454,9 @@ const PaginaRegistro: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Início</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <Clock className="w-3 h-3 text-[#facc15]" /> Início
+                </label>
                 <input
                   type="time"
                   value={formData.hora_inicio_turno}
@@ -462,7 +466,9 @@ const PaginaRegistro: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Término</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <Clock className="w-3 h-3 text-[#facc15]" /> Término
+                </label>
                 <input
                   type="time"
                   value={formData.hora_fim_turno}
@@ -484,7 +490,9 @@ const PaginaRegistro: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Lote</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <Layers className="w-3 h-3 text-[#facc15]" /> Lote
+                </label>
                 <input
                   type="text"
                   placeholder="REF LOTE"
