@@ -166,11 +166,8 @@ const RelatoriosDowntime: React.FC = () => {
 
         if (dur <= 0) return;
 
-        // Se for PARADA PROGRAMADA, não impacta na inatividade total mas ajusta a nominal para o cálculo de impacto
-        if (type === 'PARADA PROGRAMADA') {
-          const plannedLost = dur * capPerMin;
-          totalNominal -= plannedLost; // Subtrai da nominal para não penalizar o "Impacto Produtivo"
-        } else {
+        // Se for PARADA PROGRAMADA, não somamos na inatividade total, mas a Nominal permanece BRUTA conforme solicitado
+        if (type !== 'PARADA PROGRAMADA') {
           totalDowntime += dur;
           totalStopsCount += 1;
         }
