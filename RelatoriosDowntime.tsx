@@ -162,24 +162,26 @@ const RelatoriosDowntime: React.FC = () => {
       paradas.forEach((p: any) => {
         // Suporte a múltiplos nomes de campos no JSON (duracao, tempo, total_min)
         const dur = parseMinutos(p.duracao || p.tempo || p.total_min || 0);
+        const type = (p.tipo || 'NÃO PLANEJADA').toUpperCase();
 
         if (dur <= 0) return;
 
-        totalDowntime += dur;
-        totalStopsCount += 1;
+        // Se for PARADA PROGRAMADA, não impacta na inatividade total mas ajusta a nominal para o cálculo de impacto
+        if (type === 'PARADA PROGRAMADA') {
+          const plannedLost = dur * capPerMin;
+          totalNominal -= plannedLost; // Subtrai da nominal para não penalizar o "Impacto Produtivo"
+        } else {
+          totalDowntime += dur;
+          totalStopsCount += 1;
+        }
 
-        // Impacto produtivo calculado por minuto de indisponibilidade
-        const lostInThisStop = dur * capPerMin;
-        volumeLost += lostInThisStop;
-
-        // Identificação técnica do equipamento
+        // Histórico técnico para gráficos e tabela (mantém tudo)
         const mObj = maquinas.find(m => m.id === p.maquina_id);
         const equipName = p.maquina || (mObj ? mObj.nome : (p.equipamento || 'GERAL'));
 
         byEquipment[equipName] = (byEquipment[equipName] || 0) + dur;
         byEquipmentCount[equipName] = (byEquipmentCount[equipName] || 0) + 1;
 
-        const type = (p.tipo || 'NÃO PLANEJADA').toUpperCase();
         byType[type] = (byType[type] || 0) + dur;
 
         detailedFailures.push({
@@ -193,7 +195,7 @@ const RelatoriosDowntime: React.FC = () => {
           motivo: p.motivo || 'GERAL',
           duracao: dur,
           obs: reg.observacoes,
-          volumePerdido: Math.round(lostInThisStop),
+          volumePerdido: Math.round(dur * capPerMin),
           unidadesPorFardo: unidadesPorFardo
         });
       });
@@ -233,8 +235,16 @@ const RelatoriosDowntime: React.FC = () => {
     // Indicadores de Manutenção
     const mttr = totalStopsCount > 0 ? totalDowntime / totalStopsCount : 0;
 
-    // Detecção de Top 3 Equipamentos Críticos (Por Frequência)
-    const topEquipments = Object.entries(byEquipmentCount)
+    // Detecção de Top 3 Equipamentos Críticos (Por Frequência - Ignorando Programadas)
+    // Recalcular byEquipmentCount apenas para não programadas se necessário, ou filtrar no final
+    const filteredByEquipmentCount: Record<string, number> = {};
+    detailedFailures.forEach(f => {
+      if (f.tipo !== 'PARADA PROGRAMADA') {
+        filteredByEquipmentCount[f.equipamento] = (filteredByEquipmentCount[f.equipamento] || 0) + 1;
+      }
+    });
+
+    const topEquipments = Object.entries(filteredByEquipmentCount)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
       .map(([name, count]) => ({ name, count }));
@@ -249,7 +259,7 @@ const RelatoriosDowntime: React.FC = () => {
       machinePieData,
       mostCriticalType,
       topEquipments,
-      somaNominal: totalNominal || 0,
+      somaNominal: Math.round(totalNominal) || 0,
       detailedFailures: detailedFailures.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
     };
   }, [registros, maquinas]);
