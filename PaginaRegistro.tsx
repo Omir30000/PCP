@@ -161,14 +161,25 @@ const PaginaRegistro: React.FC = () => {
     }
   }, [formData.data_registro]);
 
-  // Cálculo Automático da Carga Horária
+  // Cálculo Automático da Carga Horária Líquida (Desconto de 1h de intervalo)
   useEffect(() => {
     if (formData.hora_inicio_turno && formData.hora_fim_turno) {
-      const duracaoMinutos = calculateDuration(formData.hora_inicio_turno, formData.hora_fim_turno);
-      const duracaoHoras = Number((duracaoMinutos / 60).toFixed(2));
+      const duracaoBruta = calculateDuration(formData.hora_inicio_turno, formData.hora_fim_turno);
+      // Subtrai 60 minutos do intervalo, mas garante que não fique negativo
+      const duracaoLiquida = Math.max(0, duracaoBruta - 60);
+      const duracaoHoras = Number((duracaoLiquida / 60).toFixed(2));
       setFormData(prev => ({ ...prev, carga_horaria: duracaoHoras }));
     }
   }, [formData.hora_inicio_turno, formData.hora_fim_turno]);
+
+  // Sincroniza Horários Padrão por Turno
+  useEffect(() => {
+    if (formData.turno === '1º Turno') {
+      setFormData(prev => ({ ...prev, hora_inicio_turno: '06:00', hora_fim_turno: '16:00' }));
+    } else if (formData.turno === '2º Turno') {
+      setFormData(prev => ({ ...prev, hora_inicio_turno: '15:30', hora_fim_turno: '00:30' }));
+    }
+  }, [formData.turno]);
 
   // Reseta produto ao mudar linha
   useEffect(() => {
