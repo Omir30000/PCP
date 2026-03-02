@@ -39,13 +39,6 @@ const RelatorioBoletim: React.FC = () => {
 
   const reportRef = useRef<HTMLDivElement>(null);
 
-  const parseMinutos = (val: any): number => {
-    if (val === null || val === undefined) return 0;
-    if (typeof val === 'number') return val;
-    const match = String(val).match(/\d+/);
-    return match ? parseInt(match[0]) : 0;
-  };
-
   const fetchRelatorioData = async () => {
     setLoading(true);
     try {
@@ -55,7 +48,7 @@ const RelatorioBoletim: React.FC = () => {
       const { data, error } = await supabase
         .from('registros_producao')
         .select('*, produtos(*)')
-        .order('data_registro', { ascending: true }); // Ordenar ascendente para gráficos
+        .order('data_registro', { ascending: true });
 
       if (error) throw error;
 
@@ -125,15 +118,12 @@ const RelatorioBoletim: React.FC = () => {
     const diffTime = Math.abs(d2.getTime() - d1.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
-    // Gerar lista de todos os dias no período para o gráfico
     const diasNoPeriodo: string[] = [];
     for (let i = 0; i < diffDays; i++) {
       const d = new Date(d1);
       d.setDate(d1.getDate() + i);
       diasNoPeriodo.push(d.toISOString().split('T')[0]);
     }
-
-    let totalCargaHorariaGlobalMin = 0;
 
     const registrosFiltradosTurno = filtroTurno === 'GLOBAL'
       ? registros
@@ -147,16 +137,14 @@ const RelatorioBoletim: React.FC = () => {
       );
 
       let totalQty = 0;
-      let totalDowntimeLinha = 0;
-      let totalEfficiencyLinha = 0;
+      let totalCapNominalLinha = 0;
       let status: 'active' | 'inactive' = 'inactive';
 
-      // Dados para o Gráfico de Evolução (Eleição)
       const serieHistorica = diasNoPeriodo.map(dia => {
         const regsDoDia = regsDaLinha.filter(r => r.data_registro === dia);
         const qtdDia = regsDoDia.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
         return {
-          data: dia.split('-').reverse().slice(0, 2).join('/'), // DD/MM
+          data: dia.split('-').reverse().slice(0, 2).join('/'),
           quantidade: qtdDia
         };
       });
@@ -164,30 +152,14 @@ const RelatorioBoletim: React.FC = () => {
       if (regsDaLinha.length > 0) {
         status = 'active';
         totalQty = regsDaLinha.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
-
-        const sumEff = regsDaLinha.reduce((acc, r) => {
-          const metaNominal = Number(r.produtos?.capacidade_nominal) || 7200;
-          const cargaHoras = Number(r.carga_horaria) || 8;
-          const tempoDispMin = cargaHoras * 60;
-          totalCargaHorariaGlobalMin += tempoDispMin;
-
-          const paradas = Array.isArray(r.paradas) ? r.paradas : [];
-          const downtimeRegMin = paradas.reduce((a, b: any) => {
-            const min = parseMinutos(b.duracao || b.tempo || b.total_min || 0);
-            return a + min;
-          }, 0);
-
-          totalDowntimeLinha += downtimeRegMin;
-
-          const disponibilidade = tempoDispMin > 0 ? (tempoDispMin - downtimeRegMin) / tempoDispMin : 0;
-          const metaAjustada = (metaNominal / 8) * cargaHoras;
-          const performance = metaAjustada > 0 ? (Number(r.quantidade_produzida) / metaAjustada) : 0;
-
-          return acc + (performance * disponibilidade * 100);
+        totalCapNominalLinha = regsDaLinha.reduce((acc, r) => {
+          const cap = Number(r.produtos?.capacidade_nominal) || 0;
+          return acc + cap;
         }, 0);
-
-        totalEfficiencyLinha = sumEff / regsDaLinha.length;
       }
+
+      // SINCRO COM DASHBOARD: Eficiência = Produzido / Capacidade Nominal
+      const eficiencia = totalCapNominalLinha > 0 ? (totalQty / totalCapNominalLinha) * 100 : 0;
 
       const latestProd = regsDaLinha[0]?.produtos;
       const unitsPerBundle = Number(latestProd?.unidades_por_fardo) || 12;
@@ -201,19 +173,22 @@ const RelatorioBoletim: React.FC = () => {
         producaoTotal: totalQty,
         totalBundles,
         totalPallets: parseFloat((totalBundles / bundlesPerPallet).toFixed(1)),
-        eficiencia: totalEfficiencyLinha || 0,
-        downtime: totalDowntimeLinha || 0,
+        eficiencia,
+        capNominal: totalCapNominalLinha,
         serieHistorica
       };
     });
 
+    // SINCRO COM DASHBOARD: OEE Médio Planta = Soma(Produzido) / Soma(Capacidade Nominal)
+    const totalProduzidoGeral = linesSummary.reduce((acc, l) => acc + l.producaoTotal, 0);
+    const totalCapNominalGeral = linesSummary.reduce((acc, l) => acc + l.capNominal, 0);
+    const avgEfficiency = totalCapNominalGeral > 0 ? (totalProduzidoGeral / totalCapNominalGeral) * 100 : 0;
+
     const factoryTotals = {
-      totalUnits: linesSummary.reduce((acc, l) => acc + l.producaoTotal, 0),
+      totalUnits: totalProduzidoGeral,
       bundles: linesSummary.reduce((acc, l) => acc + l.totalBundles, 0),
       pallets: parseFloat(linesSummary.reduce((acc, l) => acc + l.totalPallets, 0).toFixed(1)),
-      avgEfficiency: linesSummary.filter(l => l.status === 'active').length > 0
-        ? linesSummary.filter(l => l.status === 'active').reduce((acc, l) => acc + l.eficiencia, 0) / linesSummary.filter(l => l.status === 'active').length
-        : 0
+      avgEfficiency
     };
 
     return { linesSummary, factoryTotals, diffDays };
@@ -333,7 +308,7 @@ const RelatorioBoletim: React.FC = () => {
                 </div>
                 <div className="h-24 w-px bg-white/10 hidden md:block" />
                 <div className="text-center md:text-right">
-                  <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4">OEE Médio de Planta</p>
+                  <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4">Eficiência de Planta (Sincro)</p>
                   <h4 className="text-6xl font-black text-emerald-400 tracking-tighter leading-none mb-2">
                     {analytics.factoryTotals.avgEfficiency.toFixed(1)}%
                   </h4>
@@ -390,7 +365,6 @@ const RelatorioBoletim: React.FC = () => {
                 className={`p-8 border-2 rounded-[40px] flex flex-col lg:flex-row gap-10 break-inside-avoid shadow-sm transition-all ${line.status === 'active' ? 'border-slate-100 bg-white' : 'border-slate-50 bg-slate-50/50 opacity-60 grayscale'
                   }`}
               >
-                {/* Lado Esquerdo: Métricas da Linha */}
                 <div className="lg:w-1/3 space-y-6">
                   <div className="flex justify-between items-center pb-4 border-b border-slate-100">
                     <div>
@@ -406,11 +380,11 @@ const RelatorioBoletim: React.FC = () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-slate-50 p-6 rounded-3xl">
-                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Volume Total</p>
+                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Volume Real</p>
                       <p className="text-2xl font-black text-slate-900">{line.producaoTotal.toLocaleString()}</p>
                     </div>
                     <div className="bg-slate-50 p-6 rounded-3xl">
-                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">OEE Real</p>
+                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Eficiência (Sincro)</p>
                       <p className={`text-2xl font-black ${line.eficiencia >= 80 ? 'text-emerald-500' : 'text-blue-600'}`}>
                         {line.eficiencia.toFixed(1)}%
                       </p>
@@ -431,7 +405,6 @@ const RelatorioBoletim: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Lado Direito: Gráfico de Evolução (Eleição) */}
                 <div className="lg:w-2/3 h-[220px] bg-slate-50/50 rounded-3xl p-4 border border-slate-100">
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] mb-6 text-center">
                     <TrendingUp className="w-3 h-3 inline mr-2 text-blue-500" /> Tendência de Evolução Produtiva (Dia a Dia)
@@ -474,14 +447,13 @@ const RelatorioBoletim: React.FC = () => {
           </div>
         </section>
 
-        {/* Rodapé Nexus */}
         <footer className="pt-12 border-t-2 border-slate-900 break-inside-avoid">
           <div className="flex justify-between items-end mb-20">
             <div className="flex items-center gap-5">
               <ShieldCheck className="w-10 h-10 text-slate-400" />
               <div>
                 <p className="text-[11px] font-black text-slate-800 uppercase tracking-widest leading-none mb-1">Consolidação Industrial Nexus PCP</p>
-                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em]">Autenticação de Dados: {Math.random().toString(36).substring(7).toUpperCase()}</p>
+                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em]">Autenticação Sincronizada Dashboard v2.6</p>
               </div>
             </div>
             <div className="text-right">
@@ -493,11 +465,11 @@ const RelatorioBoletim: React.FC = () => {
           <div className="grid grid-cols-2 gap-32">
             <div className="text-center">
               <div className="border-t border-slate-900 pt-3"></div>
-              <p className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em]">Gestão de PCP</p>
+              <p className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Gestão de PCP</p>
             </div>
             <div className="text-center">
               <div className="border-t border-slate-900 pt-3"></div>
-              <p className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em]">Gerência Industrial</p>
+              <p className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Gerência Industrial</p>
             </div>
           </div>
         </footer>
