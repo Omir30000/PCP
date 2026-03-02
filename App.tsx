@@ -12,6 +12,7 @@ import RelatoriosDowntime from './RelatoriosDowntime';
 import RelatorioRegistros from './RelatorioRegistros';
 import RelatorioAnaliticoPorLinha from './RelatorioAnaliticoPorLinha';
 import CalendarioVendas from './CalendarioVendas';
+import RelatorioBoletim from './RelatorioBoletim';
 
 import {
   LayoutDashboard,
@@ -46,7 +47,8 @@ type Tab =
   | 'relatorios_downtime'
   | 'relatorio_registros'
   | 'analise_gargalos'
-  | 'calendario_vendas';
+  | 'calendario_vendas'
+  | 'relatorio_boletim';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -123,6 +125,7 @@ const App: React.FC = () => {
           )}
           <NavItem id="analise_disponibilidade" icon={Scale} label="Balanço" isSubItem={isSidebarExpanded} />
           <NavItem id="relatorios" icon={FileText} label="Boletim" isSubItem={isSidebarExpanded} />
+          <NavItem id="relatorio_boletim" icon={Calculator} label="Boletim Turno" isSubItem={isSidebarExpanded} />
           <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" isSubItem={isSidebarExpanded} />
           <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime" isSubItem={isSidebarExpanded} />
           <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" isSubItem={isSidebarExpanded} />
@@ -159,6 +162,7 @@ const App: React.FC = () => {
           {activeTab === 'relatorios_downtime' && <RelatoriosDowntime />}
           {activeTab === 'analise_gargalos' && <RelatorioAnaliticoPorLinha />}
           {activeTab === 'calendario_vendas' && <CalendarioVendas />}
+          {activeTab === 'relatorio_boletim' && <RelatorioBoletim />}
         </div>
       </main>
 
