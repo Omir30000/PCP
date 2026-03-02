@@ -126,41 +126,33 @@ const Relatorios: React.FC = () => {
 
       let totalQty = 0;
       let totalDowntimeLinha = 0;
-      let totalEfficiencyLinha = 0;
+      let totalCapNominalLinha = 0;
       let status: 'active' | 'inactive' = 'inactive';
 
       if (regsDaLinha.length > 0) {
         status = 'active';
         totalQty = regsDaLinha.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
 
-        // Cálculo Realista de OEE e Disponibilidade
-        const sumEff = regsDaLinha.reduce((acc, r) => {
-          const metaNominal = Number(r.produtos?.capacidade_nominal) || 7200;
-          const cargaHoras = Number(r.carga_horaria) || 8;
-          const tempoDispMin = cargaHoras * 60;
-          totalCargaHorariaGlobalMin += tempoDispMin;
+        regsDaLinha.forEach(r => {
+          const cap = Number(r.produtos?.capacidade_nominal) || 0;
+          totalCapNominalLinha += cap;
 
           const paradas = Array.isArray(r.paradas) ? r.paradas : [];
           const downtimeRegMin = paradas.reduce((a, b: any) => {
             const min = parseMinutos(b.duracao || b.tempo || b.total_min || 0);
-            // Alimenta a matriz de gargalos global enquanto percorre
             const motivo = (b.motivo || b.equipamento || 'OUTROS').toUpperCase();
             bottlenecksMap[motivo] = (bottlenecksMap[motivo] || 0) + min;
             return a + min;
           }, 0);
-
           totalDowntimeLinha += downtimeRegMin;
 
-          const disponibilidade = tempoDispMin > 0 ? (tempoDispMin - downtimeRegMin) / tempoDispMin : 0;
-          const metaAjustada = (metaNominal / 8) * cargaHoras;
-          const performance = metaAjustada > 0 ? (Number(r.quantidade_produzida) / metaAjustada) : 0;
-
-          // OEE Simplificado (Performance * Disponibilidade)
-          return acc + (performance * disponibilidade * 100);
-        }, 0);
-
-        totalEfficiencyLinha = sumEff / regsDaLinha.length;
+          const cargaHoras = Number(r.carga_horaria) || 8;
+          totalCargaHorariaGlobalMin += (cargaHoras * 60);
+        });
       }
+
+      // SINCRO COM DASHBOARD: Eficiência = Produzido / Capacidade Nominal
+      const eficiencia = totalCapNominalLinha > 0 ? (totalQty / totalCapNominalLinha) * 100 : 0;
 
       const latestProd = regsDaLinha[0]?.produtos;
       const unitsPerBundle = Number(latestProd?.unidades_por_fardo) || 12;
@@ -174,18 +166,21 @@ const Relatorios: React.FC = () => {
         producaoTotal: totalQty,
         totalBundles,
         totalPallets: parseFloat((totalBundles / bundlesPerPallet).toFixed(1)),
-        eficiencia: totalEfficiencyLinha || 0,
+        eficiencia,
+        capNominal: totalCapNominalLinha,
         downtime: totalDowntimeLinha || 0
       };
     });
 
+    const totalProduzidoGeral = linesSummary.reduce((acc, l) => acc + l.producaoTotal, 0);
+    const totalCapNominalGeral = linesSummary.reduce((acc, l) => acc + (l.capNominal || 0), 0);
+    const avgEfficiency = totalCapNominalGeral > 0 ? (totalProduzidoGeral / totalCapNominalGeral) * 100 : 0;
+
     const factoryTotals = {
-      totalUnits: linesSummary.reduce((acc, l) => acc + l.producaoTotal, 0),
+      totalUnits: totalProduzidoGeral,
       bundles: linesSummary.reduce((acc, l) => acc + l.totalBundles, 0),
       pallets: parseFloat(linesSummary.reduce((acc, l) => acc + l.totalPallets, 0).toFixed(1)),
-      avgEfficiency: linesSummary.filter(l => l.status === 'active').length > 0
-        ? linesSummary.filter(l => l.status === 'active').reduce((acc, l) => acc + l.eficiencia, 0) / linesSummary.filter(l => l.status === 'active').length
-        : 0
+      avgEfficiency
     };
 
     // Matriz de Gargalos Formatada
@@ -226,21 +221,25 @@ const Relatorios: React.FC = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
-          <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
-            <Calendar className="ml-2 w-4 h-4 text-slate-400" />
-            <input
-              type="date"
-              value={dataInicio}
-              onChange={e => setDataInicio(e.target.value)}
-              className="bg-transparent px-2 py-1.5 text-xs font-bold outline-none uppercase"
-            />
-            <span className="text-slate-300">|</span>
-            <input
-              type="date"
-              value={dataFim}
-              onChange={e => setDataFim(e.target.value)}
-              className="bg-transparent px-2 py-1.5 text-xs font-bold outline-none uppercase"
-            />
+          <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border-2 border-slate-200 focus-within:border-blue-500 transition-all shadow-sm">
+            <Calendar className="w-5 h-5 text-blue-600" />
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={dataInicio}
+                onChange={e => setDataInicio(e.target.value)}
+                className="bg-transparent text-xs font-black outline-none uppercase text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                title="Data Inicial"
+              />
+              <span className="text-slate-300 font-bold">/</span>
+              <input
+                type="date"
+                value={dataFim}
+                onChange={e => setDataFim(e.target.value)}
+                className="bg-transparent text-xs font-black outline-none uppercase text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                title="Data Final"
+              />
+            </div>
           </div>
 
           <button
@@ -333,7 +332,7 @@ const Relatorios: React.FC = () => {
 
                 <div className="space-y-1">
                   <div className="flex justify-between items-center">
-                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">OEE Realista (Disp x Perf)</span>
+                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Eficiência (Sincro)</span>
                     <span className={`text-[10px] font-black ${line.eficiencia >= 80 ? 'text-emerald-600' : 'text-blue-600'}`}>
                       {line.eficiencia > 0 ? line.eficiencia.toFixed(1) : '0.0'}%
                     </span>
