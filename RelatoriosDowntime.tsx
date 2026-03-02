@@ -285,21 +285,32 @@ const RelatoriosDowntime: React.FC = () => {
         </div>
 
         <div className="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
-          <div className="flex items-center gap-2 bg-black/20 p-1.5 rounded-xl border border-white/10">
-            <Calendar className="ml-2 w-4 h-4 text-slate-400" />
-            <input
-              type="date"
-              value={dataInicio}
-              onChange={e => setDataInicio(e.target.value)}
-              className="bg-transparent px-2 py-1.5 text-xs font-bold outline-none uppercase"
-            />
-            <span className="text-slate-300">|</span>
-            <input
-              type="date"
-              value={dataFim}
-              onChange={e => setDataFim(e.target.value)}
-              className="bg-transparent px-2 py-1.5 text-xs font-bold outline-none uppercase"
-            />
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 focus-within:border-blue-500 transition-all shadow-sm">
+              <Calendar className="w-5 h-5 text-blue-600" />
+              <div className="flex flex-col">
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Início</span>
+                <input
+                  type="date"
+                  value={dataInicio}
+                  onChange={e => setDataInicio(e.target.value)}
+                  className="bg-transparent text-[11px] font-black uppercase outline-none text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 focus-within:border-blue-500 transition-all shadow-sm">
+              <Calendar className="w-5 h-5 text-blue-600" />
+              <div className="flex flex-col">
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Fim</span>
+                <input
+                  type="date"
+                  value={dataFim}
+                  onChange={e => setDataFim(e.target.value)}
+                  className="bg-transparent text-[11px] font-black uppercase outline-none text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                />
+              </div>
+            </div>
           </div>
 
           <select

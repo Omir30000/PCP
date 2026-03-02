@@ -455,28 +455,32 @@ const RelatorioRegistros: React.FC = () => {
 
             {/* Filtros */}
             <form onSubmit={handleSearch} className="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/5 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Calendar className="w-3 h-3 text-blue-500" /> Data Início
-                    </label>
-                    <input
-                        type="date"
-                        value={dataInicio}
-                        onChange={(e) => setDataInicio(e.target.value)}
-                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
-                    />
-                </div>
+                <div className="flex flex-col sm:flex-row items-center gap-3 md:col-span-2">
+                    <div className="flex-1 flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border-2 border-white/10 focus-within:border-blue-500 transition-all shadow-sm w-full">
+                        <Calendar className="w-5 h-5 text-blue-500" />
+                        <div className="flex flex-col">
+                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Início</span>
+                            <input
+                                type="date"
+                                value={dataInicio}
+                                onChange={(e) => setDataInicio(e.target.value)}
+                                className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-blue-400 transition-colors"
+                            />
+                        </div>
+                    </div>
 
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Calendar className="w-3 h-3 text-blue-500" /> Data Fim
-                    </label>
-                    <input
-                        type="date"
-                        value={dataFim}
-                        onChange={(e) => setDataFim(e.target.value)}
-                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
-                    />
+                    <div className="flex-1 flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border-2 border-white/10 focus-within:border-blue-500 transition-all shadow-sm w-full">
+                        <Calendar className="w-5 h-5 text-blue-500" />
+                        <div className="flex flex-col">
+                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Fim</span>
+                            <input
+                                type="date"
+                                value={dataFim}
+                                onChange={(e) => setDataFim(e.target.value)}
+                                className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-blue-400 transition-colors"
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div className="space-y-2">
@@ -605,15 +609,18 @@ const RelatorioRegistros: React.FC = () => {
 
                                 {/* Seção Principal */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Data</label>
-                                        <input
-                                            type="date"
-                                            required
-                                            value={editingRecord.data_registro}
-                                            onChange={e => setEditingRecord({ ...editingRecord, data_registro: e.target.value })}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
-                                        />
+                                    <div className="flex items-center gap-3 bg-black/40 px-4 py-2 rounded-xl border-2 border-white/10 focus-within:border-blue-500 transition-all shadow-sm">
+                                        <Calendar className="w-5 h-5 text-blue-500" />
+                                        <div className="flex flex-col">
+                                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Data do Registro</span>
+                                            <input
+                                                type="date"
+                                                required
+                                                value={editingRecord.data_registro}
+                                                onChange={e => setEditingRecord({ ...editingRecord, data_registro: e.target.value })}
+                                                className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-blue-400 transition-colors"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="space-y-2">

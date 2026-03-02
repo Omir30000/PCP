@@ -2,12 +2,12 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from './lib/supabase';
 import { Produto, RegistroProducao } from './types/database';
-import { 
-  Printer, 
-  Calendar, 
-  Search, 
-  Loader2, 
-  TrendingUp, 
+import {
+  Printer,
+  Calendar,
+  Search,
+  Loader2,
+  TrendingUp,
   Activity,
   Package,
   Layers,
@@ -24,7 +24,7 @@ import {
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 
 const COLORS = [
-  '#0f172a', '#2563eb', '#10b981', '#f59e0b', '#7c3aed', 
+  '#0f172a', '#2563eb', '#10b981', '#f59e0b', '#7c3aed',
   '#db2777', '#475569', '#06b6d4', '#84cc16', '#ef4444',
   '#1e293b', '#3b82f6', '#10b981', '#fcd34d', '#a78bfa'
 ];
@@ -50,8 +50,8 @@ const RelatoriosProdutos: React.FC = () => {
         .order('data_registro', { ascending: false });
 
       if (error) throw error;
-      
-      const filtrados = (data || []).filter(r => 
+
+      const filtrados = (data || []).filter(r =>
         r.data_registro >= dataInicio && r.data_registro <= dataFim
       );
 
@@ -69,7 +69,7 @@ const RelatoriosProdutos: React.FC = () => {
 
   const handlePrint = () => {
     if (!reportRef.current) return;
-    
+
     // Bypass sandbox constraints using window.open para garantir compatibilidade
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -118,7 +118,7 @@ const RelatoriosProdutos: React.FC = () => {
     registros.forEach(reg => {
       // Garante que estamos pegando o objeto de produto corretamente do Join
       const prod = Array.isArray(reg.produtos) ? reg.produtos[0] : reg.produtos;
-      
+
       if (!prod || !prod.id) return;
 
       const pid = prod.id; // AGRUPAMENTO OBRIGATÓRIO PELO ID ÚNICO DO PRODUTO (SKU)
@@ -128,7 +128,7 @@ const RelatoriosProdutos: React.FC = () => {
       if (!skuAggregation[pid]) {
         // Concatenação Institucional: {nome} {volume} ({tipo})
         const displaySKU = `${prod.nome} ${prod.volume || ''} (${(prod.tipo || 'PADRÃO').toUpperCase()})`.replace(/\s+/g, ' ').trim();
-        
+
         skuAggregation[pid] = {
           id: pid,
           sku: displaySKU,
@@ -171,7 +171,7 @@ const RelatoriosProdutos: React.FC = () => {
 
   return (
     <div className="w-full max-w-[98%] mx-auto space-y-8 animate-in fade-in duration-500 pb-12 font-sans text-slate-900 print:text-black">
-      
+
       {/* Controles de Geração e Filtro */}
       <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm print:hidden">
         <div className="flex items-center gap-4">
@@ -185,24 +185,35 @@ const RelatoriosProdutos: React.FC = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
-          <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
-            <Calendar className="ml-2 w-4 h-4 text-slate-400" />
-            <input 
-              type="date" 
-              value={dataInicio} 
-              onChange={e => setDataInicio(e.target.value)}
-              className="bg-transparent px-2 py-1.5 text-xs font-bold outline-none uppercase"
-            />
-            <span className="text-slate-300">|</span>
-            <input 
-              type="date" 
-              value={dataFim} 
-              onChange={e => setDataFim(e.target.value)}
-              className="bg-transparent px-2 py-1.5 text-xs font-bold outline-none uppercase"
-            />
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="flex-1 flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 focus-within:border-blue-500 transition-all shadow-sm w-full">
+              <Calendar className="w-5 h-5 text-blue-600" />
+              <div className="flex flex-col">
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Início</span>
+                <input
+                  type="date"
+                  value={dataInicio}
+                  onChange={e => setDataInicio(e.target.value)}
+                  className="bg-transparent text-[11px] font-black uppercase outline-none text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 focus-within:border-blue-500 transition-all shadow-sm w-full">
+              <Calendar className="w-5 h-5 text-blue-600" />
+              <div className="flex flex-col">
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Fim</span>
+                <input
+                  type="date"
+                  value={dataFim}
+                  onChange={e => setDataFim(e.target.value)}
+                  className="bg-transparent text-[11px] font-black uppercase outline-none text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                />
+              </div>
+            </div>
           </div>
 
-          <button 
+          <button
             onClick={fetchData}
             className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center gap-2"
           >
@@ -210,7 +221,7 @@ const RelatoriosProdutos: React.FC = () => {
             Sincronizar SKUs
           </button>
 
-          <button 
+          <button
             onClick={handlePrint}
             className="px-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg shadow-slate-200"
           >
@@ -222,7 +233,7 @@ const RelatoriosProdutos: React.FC = () => {
 
       {/* Template de Impressão Final A4 */}
       <div ref={reportRef} className="bg-white p-0 space-y-10 print:p-0">
-        
+
         {/* Cabeçalho de Auditoria de Produtos */}
         <header className="flex justify-between items-start border-b-2 border-slate-900 pb-6 break-inside-avoid">
           <div className="flex items-center gap-4">
@@ -232,7 +243,7 @@ const RelatoriosProdutos: React.FC = () => {
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">Mix de Produção e Ocupação Logística por SKU</p>
             </div>
           </div>
-          
+
           <div className="text-right">
             <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-1">RELATÓRIO FISCAL DE SKUS</h2>
             <p className="text-[10px] font-bold text-slate-400 uppercase">
@@ -249,11 +260,10 @@ const RelatoriosProdutos: React.FC = () => {
           <div className="grid grid-cols-3 gap-4">
             {analytics.top3.length > 0 ? analytics.top3.map((item, idx) => (
               <div key={item.id} className="border border-slate-200 rounded-xl p-5 flex items-center gap-5 bg-white shadow-sm relative overflow-hidden">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${
-                  idx === 0 ? 'bg-slate-900 text-amber-400' : 
-                  idx === 1 ? 'bg-slate-100 text-slate-600' : 
-                  'bg-orange-50 text-orange-600'
-                }`}>
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${idx === 0 ? 'bg-slate-900 text-amber-400' :
+                    idx === 1 ? 'bg-slate-100 text-slate-600' :
+                      'bg-orange-50 text-orange-600'
+                  }`}>
                   {idx === 0 ? <Trophy className="w-6 h-6" /> : <Medal className="w-6 h-6" />}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -270,7 +280,7 @@ const RelatoriosProdutos: React.FC = () => {
 
         {/* Detalhamento por SKU e Gráfico de Mix Lado a Lado */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          
+
           {/* Tabela de Detalhamento Unitário por SKU (2/3) */}
           <section className="lg:col-span-2 space-y-4 break-inside-avoid">
             <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] flex items-center gap-2">
@@ -331,7 +341,7 @@ const RelatoriosProdutos: React.FC = () => {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <RechartsTooltip 
+                      <RechartsTooltip
                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '9px', fontWeight: 'bold' }}
                       />
                     </PieChart>

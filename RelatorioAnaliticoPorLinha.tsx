@@ -230,21 +230,32 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                         </select>
                     </div>
 
-                    <div className="flex items-center gap-3 px-4 py-2 bg-slate-100 rounded-2xl shadow-inner border border-slate-200 hover:border-blue-400 transition-all group">
-                        <Calendar className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform" />
-                        <input
-                            type="date"
-                            value={dataInicio}
-                            onChange={e => setDataInicio(e.target.value)}
-                            className="bg-transparent text-xs font-black uppercase outline-none text-slate-900 cursor-pointer"
-                        />
-                        <ArrowRight className="w-3 h-3 text-slate-400" />
-                        <input
-                            type="date"
-                            value={dataFim}
-                            onChange={e => setDataFim(e.target.value)}
-                            className="bg-transparent text-xs font-black uppercase outline-none text-slate-900 cursor-pointer"
-                        />
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                        <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 focus-within:border-blue-500 transition-all shadow-sm">
+                            <Calendar className="w-5 h-5 text-blue-600" />
+                            <div className="flex flex-col">
+                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Início</span>
+                                <input
+                                    type="date"
+                                    value={dataInicio}
+                                    onChange={e => setDataInicio(e.target.value)}
+                                    className="bg-transparent text-[11px] font-black uppercase outline-none text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 focus-within:border-blue-500 transition-all shadow-sm">
+                            <Calendar className="w-5 h-5 text-blue-600" />
+                            <div className="flex flex-col">
+                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Fim</span>
+                                <input
+                                    type="date"
+                                    value={dataFim}
+                                    onChange={e => setDataFim(e.target.value)}
+                                    className="bg-transparent text-[11px] font-black uppercase outline-none text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <button
