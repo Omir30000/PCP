@@ -32,7 +32,8 @@ import {
   LayoutGrid,
   TrendingDown,
   Sun,
-  Moon
+  Moon,
+  Calculator
 } from 'lucide-react';
 
 type Tab =
