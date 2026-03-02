@@ -3,23 +3,25 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from './lib/supabase';
 import { Produto, Linha, RegistroProducao } from './types/database';
 import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer
+} from 'recharts';
+import {
   Printer,
   Calendar,
   Search,
   Loader2,
   TrendingUp,
-  AlertCircle,
   Activity,
   ShieldCheck,
   Package,
   Layers,
-  Factory,
-  MessageSquare as MessageSquareIcon,
   Calculator,
-  UserCheck,
-  FileText,
-  AlertTriangle,
-  Clock,
   ChevronRight,
   Zap,
   Target,
@@ -53,7 +55,7 @@ const RelatorioBoletim: React.FC = () => {
       const { data, error } = await supabase
         .from('registros_producao')
         .select('*, produtos(*)')
-        .order('data_registro', { ascending: false });
+        .order('data_registro', { ascending: true }); // Ordenar ascendente para gráficos
 
       if (error) throw error;
 
@@ -91,18 +93,19 @@ const RelatorioBoletim: React.FC = () => {
             body { font-family: 'Inter', sans-serif; background: white !important; color: #1e293b; padding: 0; margin: 0; }
             @media print {
               @page { size: A4 portrait; margin: 0.5cm; }
-              body { zoom: 0.95; }
+              body { zoom: 0.90; }
               .print\\:hidden { display: none !important; }
               .break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
               .bg-slate-900 { background-color: #0f172a !important; color: white !important; -webkit-print-color-adjust: exact; }
               .bg-blue-600 { background-color: #2563eb !important; color: white !important; -webkit-print-color-adjust: exact; }
               .text-white { color: white !important; }
+              .recharts-area { -webkit-print-color-adjust: exact; }
             }
           </style>
       </head>
       <body>
           <div class="p-4">${content}</div>
-          <script>window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 600); };</script>
+          <script>window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 800); };</script>
       </body>
       </html>
     `);
@@ -122,6 +125,14 @@ const RelatorioBoletim: React.FC = () => {
     const diffTime = Math.abs(d2.getTime() - d1.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
+    // Gerar lista de todos os dias no período para o gráfico
+    const diasNoPeriodo: string[] = [];
+    for (let i = 0; i < diffDays; i++) {
+      const d = new Date(d1);
+      d.setDate(d1.getDate() + i);
+      diasNoPeriodo.push(d.toISOString().split('T')[0]);
+    }
+
     let totalCargaHorariaGlobalMin = 0;
 
     const registrosFiltradosTurno = filtroTurno === 'GLOBAL'
@@ -139,6 +150,16 @@ const RelatorioBoletim: React.FC = () => {
       let totalDowntimeLinha = 0;
       let totalEfficiencyLinha = 0;
       let status: 'active' | 'inactive' = 'inactive';
+
+      // Dados para o Gráfico de Evolução (Eleição)
+      const serieHistorica = diasNoPeriodo.map(dia => {
+        const regsDoDia = regsDaLinha.filter(r => r.data_registro === dia);
+        const qtdDia = regsDoDia.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
+        return {
+          data: dia.split('-').reverse().slice(0, 2).join('/'), // DD/MM
+          quantidade: qtdDia
+        };
+      });
 
       if (regsDaLinha.length > 0) {
         status = 'active';
@@ -181,7 +202,8 @@ const RelatorioBoletim: React.FC = () => {
         totalBundles,
         totalPallets: parseFloat((totalBundles / bundlesPerPallet).toFixed(1)),
         eficiencia: totalEfficiencyLinha || 0,
-        downtime: totalDowntimeLinha || 0
+        downtime: totalDowntimeLinha || 0,
+        serieHistorica
       };
     });
 
@@ -287,7 +309,7 @@ const RelatorioBoletim: React.FC = () => {
           </div>
         </header>
 
-        {/* TOTALIZAÇÃO GLOBAL DE FÁBRICA - ALICERCE (ALTO IMPACTO) */}
+        {/* TOTALIZAÇÃO GLOBAL DE FÁBRICA - ALICERCE */}
         <section className="space-y-6 break-inside-avoid">
           <div className="flex items-center gap-4 mb-2">
             <div className="h-8 w-1.5 bg-blue-600 rounded-full" />
@@ -297,7 +319,6 @@ const RelatorioBoletim: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-12 gap-6 w-full">
-            {/* KPI Principal: Volume Consolidado */}
             <div className="col-span-12 lg:col-span-8 bg-slate-900 text-white p-10 rounded-[40px] shadow-2xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full -mr-48 -mt-48 blur-3xl pointer-events-none" />
               <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
@@ -307,7 +328,7 @@ const RelatorioBoletim: React.FC = () => {
                     {analytics.factoryTotals.totalUnits.toLocaleString()}
                   </h4>
                   <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest flex items-center justify-center md:justify-start gap-2">
-                    <Package className="w-3.5 h-3.5" /> Total de Unidades Produzidas no Período
+                    <Package className="w-3.5 h-3.5" /> Total de Unidades Produzidas
                   </p>
                 </div>
                 <div className="h-24 w-px bg-white/10 hidden md:block" />
@@ -323,7 +344,6 @@ const RelatorioBoletim: React.FC = () => {
               </div>
             </div>
 
-            {/* KPIs Secundários: Logística e Diária */}
             <div className="col-span-12 lg:col-span-4 grid grid-cols-1 gap-6">
               <div className="bg-white border-2 border-slate-100 p-8 rounded-[40px] shadow-sm flex items-center justify-between">
                 <div>
@@ -331,20 +351,20 @@ const RelatorioBoletim: React.FC = () => {
                   <h5 className="text-3xl font-black text-slate-900">
                     {Math.round(analytics.factoryTotals.totalUnits / analytics.diffDays).toLocaleString()}
                   </h5>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase">UN / DIA</p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">UN / DIA</p>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-2xl">
-                  <TrendingUp className="w-8 h-8 text-blue-600" />
+                  <BarChart3 className="w-8 h-8 text-blue-600" />
                 </div>
               </div>
 
-              <div className="bg-slate-50 p-8 rounded-[40px] flex items-center justify-between border-2 border-transparent hover:border-blue-100 transition-all">
+              <div className="bg-slate-50 p-8 rounded-[40px] flex items-center justify-between border-2 border-transparent">
                 <div>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">Fração Logística</p>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">Expedição (PLT)</p>
                   <h5 className="text-3xl font-black text-blue-600">
                     {analytics.factoryTotals.pallets.toFixed(1)}
                   </h5>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase">PALETES (PLT)</p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">PALETES CONSOLIDADO</p>
                 </div>
                 <div className="p-4 bg-white rounded-2xl shadow-sm">
                   <Layers className="w-8 h-8 text-blue-400" />
@@ -354,54 +374,100 @@ const RelatorioBoletim: React.FC = () => {
           </div>
         </section>
 
-        {/* Grade de Desempenho por CT */}
-        <section className="space-y-4">
-          <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] flex items-center gap-2">
-            <Activity className="w-3.5 h-3.5 text-blue-600" /> I. DESEMPENHO ISOLADO POR CENTRO DE TRABALHO
-          </h3>
+        {/* DESEMPENHO E EVOLUÇÃO POR CT */}
+        <section className="space-y-8">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="h-8 w-1.5 bg-blue-600 rounded-full" />
+            <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.3em]">
+              I. EVOLUÇÃO E PERFORMANCE POR CENTRO DE TRABALHO
+            </h3>
+          </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-8">
             {analytics.linesSummary.map(line => (
               <div
                 key={line.id}
-                className={`p-5 border rounded-[24px] space-y-4 break-inside-avoid ${line.status === 'active' ? 'border-slate-200 bg-white shadow-sm' : 'border-slate-100 bg-slate-50 opacity-60 grayscale'
+                className={`p-8 border-2 rounded-[40px] flex flex-col lg:flex-row gap-10 break-inside-avoid shadow-sm transition-all ${line.status === 'active' ? 'border-slate-100 bg-white' : 'border-slate-50 bg-slate-50/50 opacity-60 grayscale'
                   }`}
               >
-                <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                  <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest">{line.nome}</span>
-                  <span className={`text-[8px] font-black px-3 py-1 rounded-full ${line.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'} uppercase tracking-widest`}>
-                    {line.status === 'active' ? 'Operante' : 'Inativa'}
-                  </span>
+                {/* Lado Esquerdo: Métricas da Linha */}
+                <div className="lg:w-1/3 space-y-6">
+                  <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+                    <div>
+                      <h4 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none">{line.nome}</h4>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1 italic">
+                        {line.status === 'active' ? 'Linha em Operação' : 'Sem Registros no Período'}
+                      </p>
+                    </div>
+                    <div className={`p-3 rounded-xl ${line.eficiencia >= 80 ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
+                      <Activity className="w-6 h-6" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-slate-50 p-6 rounded-3xl">
+                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Volume Total</p>
+                      <p className="text-2xl font-black text-slate-900">{line.producaoTotal.toLocaleString()}</p>
+                    </div>
+                    <div className="bg-slate-50 p-6 rounded-3xl">
+                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">OEE Real</p>
+                      <p className={`text-2xl font-black ${line.eficiencia >= 80 ? 'text-emerald-500' : 'text-blue-600'}`}>
+                        {line.eficiencia.toFixed(1)}%
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                      <span className="text-slate-400 flex items-center gap-1.5"><Package className="w-3.5 h-3.5" /> {line.totalBundles.toLocaleString()} PK</span>
+                      <span className="text-slate-400 flex items-center gap-1.5"><Layers className="w-3.5 h-3.5" /> {line.totalPallets.toFixed(1)} PLT</span>
+                    </div>
+                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${line.eficiencia >= 80 ? 'bg-emerald-500' : 'bg-blue-600'}`}
+                        style={{ width: `${Math.min(100, line.eficiencia)}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex justify-between items-end">
-                  <div>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Carga Produzida</p>
-                    <p className="text-3xl font-black text-slate-900 leading-none">
-                      {line.producaoTotal.toLocaleString()} <span className="text-[12px] text-slate-400 uppercase font-black">un</span>
-                    </p>
-                  </div>
-                  <div className="bg-slate-50 px-3 py-2 rounded-xl text-center">
-                    <p className="text-[10px] font-black text-emerald-600">{line.eficiencia.toFixed(1)}% <span className="text-[8px] text-slate-400 uppercase ml-1">OEE</span></p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 py-3 bg-slate-50 rounded-2xl px-4">
-                  <div className="flex items-center gap-3">
-                    <Package className="w-3.5 h-3.5 text-slate-400" />
-                    <span className="text-[11px] font-black text-slate-900">{line.totalBundles.toLocaleString()} <span className="text-slate-400 font-bold ml-1">PK</span></span>
-                  </div>
-                  <div className="flex items-center gap-3 border-l border-slate-200 pl-4">
-                    <Layers className="w-3.5 h-3.5 text-slate-400" />
-                    <span className="text-[11px] font-black text-slate-900">{line.totalPallets.toFixed(1)} <span className="text-slate-400 font-bold ml-1">PLT</span></span>
-                  </div>
-                </div>
-
-                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-1000 ${line.eficiencia >= 80 ? 'bg-emerald-500' : 'bg-blue-600'}`}
-                    style={{ width: `${Math.min(100, line.eficiencia)}%` }}
-                  />
+                {/* Lado Direito: Gráfico de Evolução (Eleição) */}
+                <div className="lg:w-2/3 h-[220px] bg-slate-50/50 rounded-3xl p-4 border border-slate-100">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] mb-6 text-center">
+                    <TrendingUp className="w-3 h-3 inline mr-2 text-blue-500" /> Tendência de Evolução Produtiva (Dia a Dia)
+                  </p>
+                  <ResponsiveContainer width="100%" height="80%">
+                    <AreaChart data={line.serieHistorica} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id={`colorQty-${line.id}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                      <XAxis
+                        dataKey="data"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 8, fontWeight: 900, fill: '#94a3b8' }}
+                        interval={'preserveStartEnd'}
+                      />
+                      <YAxis hide={true} />
+                      <RechartsTooltip
+                        contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '9px', fontWeight: 900, color: '#fff' }}
+                        itemStyle={{ color: '#3b82f6' }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="quantidade"
+                        stroke="#3b82f6"
+                        strokeWidth={3}
+                        fillOpacity={1}
+                        fill={`url(#colorQty-${line.id})`}
+                        animationDuration={1500}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
             ))}
@@ -410,28 +476,28 @@ const RelatorioBoletim: React.FC = () => {
 
         {/* Rodapé Nexus */}
         <footer className="pt-12 border-t-2 border-slate-900 break-inside-avoid">
-          <div className="flex justify-between items-end mb-16">
-            <div className="flex items-center gap-4">
-              <ShieldCheck className="w-8 h-8 text-slate-400" />
+          <div className="flex justify-between items-end mb-20">
+            <div className="flex items-center gap-5">
+              <ShieldCheck className="w-10 h-10 text-slate-400" />
               <div>
-                <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest leading-none mb-1">Consolidação Industrial Nexus PCP</p>
-                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em]">Autenticação Certificada: {Math.random().toString(36).substring(7).toUpperCase()}</p>
+                <p className="text-[11px] font-black text-slate-800 uppercase tracking-widest leading-none mb-1">Consolidação Industrial Nexus PCP</p>
+                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em]">Autenticação de Dados: {Math.random().toString(36).substring(7).toUpperCase()}</p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-[9px] font-black text-slate-800 uppercase tracking-widest">Emitido via Terminal Nexus em: {new Date().toLocaleString('pt-BR')}</p>
-              <p className="text-[8px] font-bold text-slate-400 uppercase mt-1 opacity-50">Documento Classificado - Uso Interno</p>
+              <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest italic">Nexus Intelligence Terminal</p>
+              <p className="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">{new Date().toLocaleString('pt-BR')}</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-20">
+          <div className="grid grid-cols-2 gap-32">
             <div className="text-center">
-              <div className="border-t border-slate-900 pt-3 mb-1"></div>
-              <p className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Gestão de PCP</p>
+              <div className="border-t border-slate-900 pt-3"></div>
+              <p className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em]">Gestão de PCP</p>
             </div>
             <div className="text-center">
-              <div className="border-t border-slate-900 pt-3 mb-1"></div>
-              <p className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Diretoria de Operações</p>
+              <div className="border-t border-slate-900 pt-3"></div>
+              <p className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em]">Gerência Industrial</p>
             </div>
           </div>
         </footer>
