@@ -222,21 +222,25 @@ const RelatorioBoletim: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
-            <Calendar className="ml-2 w-4 h-4 text-slate-400" />
-            <input
-              type="date"
-              value={dataInicio}
-              onChange={e => setDataInicio(e.target.value)}
-              className="bg-transparent px-2 py-1.5 text-xs font-bold outline-none uppercase"
-            />
-            <span className="text-slate-300">|</span>
-            <input
-              type="date"
-              value={dataFim}
-              onChange={e => setDataFim(e.target.value)}
-              className="bg-transparent px-2 py-1.5 text-xs font-bold outline-none uppercase"
-            />
+          <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border-2 border-slate-200 focus-within:border-blue-500 transition-all shadow-sm">
+            <Calendar className="w-5 h-5 text-blue-600" />
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={dataInicio}
+                onChange={e => setDataInicio(e.target.value)}
+                className="bg-transparent text-xs font-black outline-none uppercase text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                title="Data Inicial"
+              />
+              <span className="text-slate-300 font-bold">/</span>
+              <input
+                type="date"
+                value={dataFim}
+                onChange={e => setDataFim(e.target.value)}
+                className="bg-transparent text-xs font-black outline-none uppercase text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                title="Data Final"
+              />
+            </div>
           </div>
 
           <button
