@@ -48,15 +48,12 @@ const RelatorioBoletim: React.FC = () => {
       const { data, error } = await supabase
         .from('registros_producao')
         .select('*, produtos(*)')
+        .gte('data_registro', dataInicio)
+        .lte('data_registro', dataFim)
         .order('data_registro', { ascending: true });
 
       if (error) throw error;
-
-      const filtrados = (data || []).filter(r =>
-        r.data_registro >= dataInicio && r.data_registro <= dataFim
-      );
-
-      setRegistros(filtrados);
+      setRegistros(data || []);
     } catch (err) {
       console.error("Erro na consolidação do relatório:", err);
     } finally {
@@ -197,14 +194,14 @@ const RelatorioBoletim: React.FC = () => {
   return (
     <div className="w-full max-w-[98%] mx-auto space-y-8 animate-in fade-in duration-500 pb-12 font-sans text-slate-900 print:text-black">
 
-      {/* Controles do Relatório */}
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm print:hidden">
+      {/* Controles do Relatório Premium */}
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-2xl print:hidden">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-slate-900 rounded-xl text-white">
+          <div className="p-3 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-500/20">
             <Calculator className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-xl font-bold uppercase tracking-tight">Gerador de Boletim</h2>
+            <h2 className="text-xl font-bold uppercase tracking-tight text-white leading-tight">Gerador de Boletim</h2>
             <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Consolidação Industrial em A4</p>
           </div>
         </div>
@@ -245,10 +242,11 @@ const RelatorioBoletim: React.FC = () => {
 
           <button
             onClick={fetchRelatorioData}
-            className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center gap-2"
+            disabled={loading}
+            className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-            Sincronizar
+            {loading ? 'Sincronizando...' : 'Sincronizar'}
           </button>
 
           <button

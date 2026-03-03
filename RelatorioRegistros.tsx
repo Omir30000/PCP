@@ -441,20 +441,20 @@ const RelatorioRegistros: React.FC = () => {
         <div className="space-y-6 animate-in fade-in duration-500">
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/50 backdrop-blur-sm p-6 rounded-3xl border border-white/5">
-                <div>
-                    <h1 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
-                        <FileText className="text-blue-500" />
-                        Relatório de Produção
-                    </h1>
-                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">
-                        Histórico detalhado de apontamentos
-                    </p>
+            <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-3xl border border-white/10 shadow-2xl mb-8">
+                <div className="flex items-center gap-4 w-full xl:w-auto">
+                    <div className="p-3 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-500/20">
+                        <History className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-bold uppercase tracking-tight text-white leading-tight">Registros de Produção</h2>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Auditoria e Rastreabilidade Industrial</p>
+                    </div>
                 </div>
             </div>
 
-            {/* Filtros */}
-            <form onSubmit={handleSearch} className="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/5 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            {/* Filtros Premium */}
+            <form onSubmit={handleSearch} className="bg-slate-900/50 backdrop-blur-md p-6 rounded-3xl border border-white/10 grid grid-cols-1 md:grid-cols-4 gap-6 items-end shadow-xl">
                 <div className="flex flex-col sm:flex-row items-center gap-3 md:col-span-2">
                     <div className="flex-1 flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border-2 border-white/10 focus-within:border-blue-500 transition-all shadow-sm w-full">
                         <Calendar className="w-5 h-5 text-blue-500" />
@@ -502,10 +502,10 @@ const RelatorioRegistros: React.FC = () => {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest text-xs py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed h-[46px]"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-blue-500/20 disabled:opacity-50"
                 >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                    Filtrar
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                    {loading ? 'BUSCANDO...' : 'PESQUISAR'}
                 </button>
             </form>
 

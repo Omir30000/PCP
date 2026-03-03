@@ -54,13 +54,13 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
         return match ? parseInt(match[0]) : 0;
     };
 
-    const fetchData = async () => {
+    const fetchRelatorioData = async () => {
         if (!linhaId) return;
         setLoading(true);
         try {
             let query = supabase
                 .from('registros_producao')
-                .select('*, produtos(*), linhas(*)')
+                .select('*, produtos(*)')
                 .eq('linha_id', linhaId)
                 .gte('data_registro', dataInicio)
                 .lte('data_registro', dataFim);
@@ -192,15 +192,15 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
     return (
         <div className="w-full max-w-[1600px] mx-auto space-y-8 animate-in fade-in duration-500 pb-20">
 
-            {/* Controles de Filtro */}
-            <div className="bg-white/80 backdrop-blur-xl p-8 rounded-[32px] border border-white/20 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 print:hidden">
-                <div className="flex items-center gap-6">
-                    <div className="bg-red-500 p-4 rounded-3xl shadow-lg shadow-red-200">
-                        <TrendingDown className="w-8 h-8 text-white" />
+            {/* Header de Filtros Premium */}
+            <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-3xl border border-white/10 shadow-2xl">
+                <div className="flex items-center gap-4 w-full xl:w-auto">
+                    <div className="p-3 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-500/20">
+                        <BarChart2 className="w-6 h-6" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Análise de Gargalos</h1>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-2">Diagnóstico de Performance por Linha</p>
+                        <h2 className="text-xl font-bold uppercase tracking-tight text-white leading-tight">Analítica de Gargalos</h2>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Performance por Centro de Trabalho</p>
                     </div>
                 </div>
 
@@ -259,12 +259,12 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                     </div>
 
                     <button
-                        onClick={fetchData}
+                        onClick={fetchRelatorioData}
                         disabled={loading || !linhaId}
-                        className="px-8 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center gap-3 shadow-xl shadow-slate-200 disabled:opacity-20"
+                        className="px-8 py-3 bg-blue-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                        Gerar Diagnóstico
+                        {loading ? 'Consultando...' : 'Consultar'}
                     </button>
                 </div>
             </div>

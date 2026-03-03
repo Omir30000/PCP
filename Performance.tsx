@@ -23,7 +23,9 @@ import {
   ChevronRight,
   Info,
   ArrowUpRight,
-  Layout
+  Layout,
+  Search,
+  BarChart2
 } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 
@@ -192,42 +194,39 @@ const Performance: React.FC = () => {
   return (
     <div className="space-y-6 md:space-y-10 animate-in fade-in duration-700 pb-20 w-full overflow-x-hidden max-w-[98%] mx-auto font-sans">
 
-      {/* Header Glassmorphism & Filtros Cápsula */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white/70 backdrop-blur-xl p-6 md:p-8 rounded-[40px] border border-white/20 shadow-2xl shadow-slate-200/50 w-full overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-100/20 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
-        <div className="shrink-0 flex items-center gap-5 relative z-10">
-          <div className="bg-slate-900 p-4 rounded-[24px] shadow-2xl shadow-slate-400/20 shrink-0">
-            <Activity className="w-7 h-7 text-blue-400 shrink-0" />
+      {/* Header Analítico Premium */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-slate-900/90 backdrop-blur-md p-8 rounded-[40px] border border-white/10 shadow-2xl w-full relative overflow-hidden mb-8">
+        <div className="flex items-center gap-6 z-10">
+          <div className="p-4 bg-blue-600 rounded-3xl text-white shadow-lg shadow-blue-500/20">
+            <TrendingUp className="w-8 h-8" />
           </div>
           <div>
-            <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tighter uppercase leading-none">Performance Analítica</h2>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-2 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-500" /> Sala de Controle Executiva
-            </p>
+            <h1 className="text-3xl font-black text-white uppercase tracking-tighter leading-none">Performance Analytics</h1>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.3em] mt-2">Diagnóstico de Rendimento e OEE</p>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full xl:w-auto relative z-10">
-          <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 focus-within:border-blue-500 transition-all shadow-sm">
-            <Calendar className="w-5 h-5 text-blue-600" />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto relative z-10">
+          <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border-2 border-white/5 focus-within:border-blue-500 transition-all shadow-sm">
+            <Calendar className="w-5 h-5 text-blue-400" />
             <div className="flex flex-col">
-              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Data de Análise</span>
+              <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Data de Análise</span>
               <input
                 type="date"
                 value={filtroData}
                 onChange={(e) => setFiltroData(e.target.value)}
-                className="bg-transparent text-[11px] font-black uppercase outline-none text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-blue-400 transition-colors"
                 title="Selecionar Data"
               />
             </div>
           </div>
 
-          <div className="flex bg-slate-200/50 p-1 rounded-2xl shrink-0">
+          <div className="flex bg-white/10 p-1 rounded-2xl shrink-0">
             {(['todos', '1', '2'] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setFiltroTurno(t)}
-                className={`px-5 py-2 text-[10px] font-black rounded-xl transition-all shrink-0 ${filtroTurno === t ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-500 hover:text-slate-700'
+                className={`px-5 py-2 text-[10px] font-black rounded-xl transition-all shrink-0 ${filtroTurno === t ? 'bg-blue-600 text-white shadow-xl' : 'text-slate-300 hover:text-white'
                   }`}
               >
                 {t === 'todos' ? 'AMBOS' : t + '° TURNO'}
@@ -236,265 +235,264 @@ const Performance: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between sm:justify-end gap-6 bg-white/40 p-3 px-6 rounded-[24px] border border-white/30 w-full sm:w-auto ml-auto">
+        <div className="flex items-center justify-between sm:justify-end gap-6 bg-white/10 p-3 px-6 rounded-[24px] border border-white/5 w-full sm:w-auto ml-auto">
           <div className="flex flex-col items-end shrink-0">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">OEE Médio</span>
-            <span className={`text-xl font-black ${analytics.globalPerformance >= 80 ? 'text-emerald-500' : analytics.globalPerformance >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
+            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">OEE Médio</span>
+            <span className={`text-xl font-black ${analytics.globalPerformance >= 80 ? 'text-emerald-400' : analytics.globalPerformance >= 50 ? 'text-amber-400' : 'text-red-400'}`}>
               {analytics.globalPerformance > 0 ? analytics.globalPerformance.toFixed(1) + '%' : '--'}
             </span>
           </div>
-          <div className="w-px h-8 bg-slate-200 shrink-0" />
+          <div className="w-px h-8 bg-white/10 shrink-0" />
           <div className="flex flex-col items-end shrink-0">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Expedição</span>
-            <span className="text-xl font-black text-blue-600 tracking-tighter">{analytics.totalTonnage.toFixed(1)} <span className="text-xs">Ton</span></span>
+            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Expedição</span>
+            <span className="text-xl font-black text-blue-400 tracking-tighter">{analytics.totalTonnage.toFixed(1)} <span className="text-xs">Ton</span></span>
           </div>
-          <button onClick={fetchData} className="p-2.5 bg-white hover:bg-slate-100 rounded-xl transition-all border border-slate-100 shadow-sm shrink-0">
+          <button onClick={fetchData} className="p-2.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all border border-white/5 shadow-sm shrink-0">
             <RefreshCw className="w-5 h-5 text-slate-400" />
           </button>
         </div>
       </div>
-    </div>
 
-      {/* Grid de Linhas - Estilo Smart Hub */ }
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 w-full items-stretch">
-    {analytics.lineCards.map((line) => (
-      <div key={line.id} className="group relative overflow-hidden bg-white/80 backdrop-blur-md rounded-[32px] p-7 border border-white transition-all duration-500 shadow-[0_10px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.12)]">
+      {/* Grid de Linhas - Estilo Smart Hub */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 w-full items-stretch">
+        {analytics.lineCards.map((line) => (
+          <div key={line.id} className="group relative overflow-hidden bg-white/80 backdrop-blur-md rounded-[32px] p-7 border border-white transition-all duration-500 shadow-[0_10px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.12)]">
 
-        {/* Sparkline de fluxo estável */}
-        <div className="absolute inset-x-0 bottom-0 h-24 opacity-10 pointer-events-none group-hover:opacity-30 transition-opacity">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={line.sparklineData}>
-              <Area
-                type="monotone"
-                dataKey="val"
-                stroke="#10b981"
-                fill="#d1fae5"
-                strokeWidth={3}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="relative z-10 flex flex-col h-full">
-          <div className="flex items-center justify-between mb-6">
-            <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{line.nome}</span>
-            <div className={`w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]`} />
-          </div>
-
-          <div className="space-y-1 mb-8">
-            <div className="flex items-baseline gap-1">
-              <h4 className="text-3xl font-black text-slate-800 tracking-tighter leading-none">
-                {Number(line.totalUnits).toLocaleString()}
-              </h4>
-              <span className="text-[10px] font-bold text-slate-400 uppercase">un</span>
+            {/* Sparkline de fluxo estável */}
+            <div className="absolute inset-x-0 bottom-0 h-24 opacity-10 pointer-events-none group-hover:opacity-30 transition-opacity">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={line.sparklineData}>
+                  <Area
+                    type="monotone"
+                    dataKey="val"
+                    stroke="#10b981"
+                    fill="#d1fae5"
+                    strokeWidth={3}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-              <TrendingUp className="w-3 h-3 text-emerald-500" /> Fluxo Estável
-            </p>
-          </div>
 
-          <div className="mt-auto space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Timer className="w-3.5 h-3.5 text-rose-300" />
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">Inatividade</span>
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{line.nome}</span>
+                <div className={`w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]`} />
               </div>
-              <span className={`text-xs font-black ${line.downtime > 60 ? 'text-red-500' : 'text-slate-600'}`}>{line.downtime}m</span>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Truck className="w-3.5 h-3.5 text-blue-300" />
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">Logística</span>
+              <div className="space-y-1 mb-8">
+                <div className="flex items-baseline gap-1">
+                  <h4 className="text-3xl font-black text-slate-800 tracking-tighter leading-none">
+                    {Number(line.totalUnits).toLocaleString()}
+                  </h4>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">un</span>
+                </div>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3 text-emerald-500" /> Fluxo Estável
+                </p>
               </div>
-              <span className="text-xs font-black text-slate-600">{line.totalPallets} plt</span>
-            </div>
 
-            {/* Progress Bar Elegante no rodapé do card */}
-            <div className="pt-4 border-t border-slate-100/50">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Meta OEE</span>
-                <span className="text-[10px] font-black text-slate-800">{line.performance.toFixed(1)}%</span>
-              </div>
-              <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
-                <div
-                  className={`h-full transition-all duration-1000 rounded-full ${line.performance >= 80 ? 'bg-emerald-500' : line.performance >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
-                  style={{ width: `${Math.min(100, line.performance)}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-
-  {/* Ranking de Inatividade - Badges Flutuantes */ }
-  <div className="bg-white/80 backdrop-blur-md p-10 rounded-[40px] shadow-sm border border-white/50 w-full relative overflow-hidden">
-    <div className="absolute top-0 left-0 w-32 h-32 bg-red-100/10 rounded-full -ml-16 -mt-16 blur-3xl pointer-events-none" />
-
-    <div className="flex items-center justify-between mb-10 relative z-10">
-      <div className="flex items-center gap-4 shrink-0">
-        <Timer className="w-7 h-7 text-red-500 shrink-0" />
-        <h3 className="text-lg font-black text-slate-800 uppercase tracking-tighter leading-none">Ocorrências por Equipamento</h3>
-      </div>
-      <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] italic shrink-0">Ranking de Downtime Diário</span>
-    </div>
-
-    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-6 md:gap-8 w-full relative z-10">
-      {analytics.kanbanDowntime.map((item) => {
-        const config = CATEGORIAS_CONFIG[item.name] || CATEGORIAS_CONFIG['OUTROS'];
-        return (
-          <div
-            key={item.name}
-            onClick={() => setSelectedCategory(item.name)}
-            className={`p-6 md:p-8 bg-white rounded-[32px] border border-slate-50 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-2 cursor-pointer group active:scale-95 shadow-lg shadow-slate-200/50 hover:shadow-2xl hover:border-blue-100`}
-          >
-            <div className={`w-14 h-14 rounded-2xl ${config.bg} mb-4 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform ${config.color} shrink-0 mx-auto`}>
-              <Settings className="w-7 h-7" />
-            </div>
-            <h4 className={`text-[10px] font-black uppercase mb-1 truncate w-full tracking-tighter ${config.color}`}>{item.name}</h4>
-            <p className="text-3xl font-black text-slate-800 tracking-tighter leading-none">
-              {item.value}<span className="text-[10px] ml-1 font-bold text-slate-400 uppercase">min</span>
-            </p>
-            <div className="mt-3 text-[8px] font-black text-blue-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Ver Detalhes</div>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-
-  {/* Monitoramento Logístico - Glass Effect */ }
-  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
-    <div className="lg:col-span-2 bg-slate-900 rounded-[40px] p-10 md:p-14 text-white relative overflow-hidden shadow-2xl w-full">
-      <Layers className="absolute -right-16 -top-16 w-80 h-80 text-white/5" />
-      <div className="relative z-10 h-full flex flex-col justify-center">
-        <div className="flex items-center gap-4 mb-14">
-          <div className="p-3 bg-blue-500/20 rounded-2xl shrink-0"><Truck className="w-7 h-7 text-blue-400 shrink-0" /></div>
-          <h3 className="text-2xl font-black uppercase tracking-tighter leading-none">Performance Logística & Pesagem</h3>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-16 w-full">
-          <div className="space-y-3">
-            <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">Peso Expedido</p>
-            <div className="flex items-baseline gap-3">
-              <span className="text-5xl md:text-7xl font-black tracking-tighter text-emerald-400">
-                {analytics.totalTonnage.toFixed(2)}
-              </span>
-              <span className="text-[12px] font-black text-slate-500 uppercase">Ton</span>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">Fardos Totais</p>
-            <div className="flex items-baseline gap-3">
-              <span className="text-5xl md:text-7xl font-black tracking-tighter text-blue-400">
-                {analytics.lineCards.reduce((acc, l) => acc + l.totalBundles, 0).toLocaleString()}
-              </span>
-              <span className="text-[12px] font-black text-slate-500 uppercase">Pk</span>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">Paletes Totais</p>
-            <div className="flex items-baseline gap-3">
-              <span className="text-5xl md:text-7xl font-black tracking-tighter text-blue-200">
-                {Math.floor(analytics.lineCards.reduce((acc, l) => acc + Number(l.totalPallets), 0))}
-              </span>
-              <span className="text-[12px] font-black text-slate-500 uppercase">Plt</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div className="bg-white/80 backdrop-blur-md rounded-[40px] p-10 md:p-14 shadow-xl border border-white/50 flex flex-col justify-center w-full">
-      <div className="text-center space-y-8">
-        <div className="inline-flex p-6 bg-blue-50/50 rounded-[32px] shrink-0 mx-auto border border-blue-100"><Scale className="w-12 h-12 text-blue-600 shrink-0" /></div>
-        <div>
-          <h4 className="text-base font-black text-slate-800 uppercase tracking-tighter">Acúmulo de Expedição</h4>
-          <p className="text-[11px] font-black text-slate-400 uppercase leading-relaxed max-w-[200px] mx-auto mt-3">
-            Conversão baseada nos SKUs produzidos.
-          </p>
-        </div>
-
-        <div className="space-y-4 w-full text-center">
-          <div className="text-6xl md:text-7xl font-black text-blue-600 tracking-tighter leading-none">{analytics.totalTonnage.toFixed(2)}</div>
-          <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] block">Toneladas / Hoje</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {/* Modal Glassmorphism de Logs */ }
-  {
-    selectedCategory && (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-500" onClick={() => setSelectedCategory(null)} />
-
-        <div className="bg-white/90 backdrop-blur-2xl rounded-[48px] shadow-2xl w-full max-w-3xl relative z-10 animate-in zoom-in-95 duration-500 overflow-hidden flex flex-col max-h-[85vh] border border-white/50">
-          <header className="px-10 py-10 border-b border-slate-100/50 flex items-center justify-between bg-slate-50/20 shrink-0">
-            <div className="flex items-center gap-5 shrink-0">
-              <div className={`p-4 rounded-2xl shadow-xl ${CATEGORIAS_CONFIG[selectedCategory]?.bg} ${CATEGORIAS_CONFIG[selectedCategory]?.color} shrink-0`}>
-                <Info className="w-8 h-8 shrink-0" />
-              </div>
-              <div className="shrink-0">
-                <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter leading-none">
-                  Logs: {selectedCategory}
-                </h3>
-                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2 shrink-0">Histórico de Eventos Críticos</p>
-              </div>
-            </div>
-            <button onClick={() => setSelectedCategory(null)} className="p-3 text-slate-300 hover:text-slate-600 rounded-full hover:bg-white transition-all shrink-0">
-              <X className="w-10 h-10 shrink-0" />
-            </button>
-          </header>
-
-          <div className="p-10 overflow-y-auto no-scrollbar bg-slate-50/10">
-            <div className="space-y-4">
-              {detailedOccurrences.length === 0 ? (
-                <div className="py-24 text-center text-slate-300 font-black uppercase tracking-widest text-sm">Nenhuma ocorrência registrada</div>
-              ) : (
-                detailedOccurrences.map((occ, idx) => (
-                  <div key={idx} className="bg-white p-7 rounded-[28px] border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 group hover:border-blue-200 transition-colors">
-                    <div className="flex items-start gap-5 flex-1">
-                      <div className="p-5 bg-slate-50 rounded-2xl group-hover:bg-blue-50 transition-colors">
-                        <ClockIcon className="w-6 h-6 text-slate-400 group-hover:text-blue-500" />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <span className="text-[10px] font-black text-blue-600 uppercase tracking-wider bg-blue-50 px-3 py-1 rounded-full">Linha {String(occ.linha).slice(-1)}</span>
-                          <span className="text-[10px] font-black text-slate-300">•</span>
-                          <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Turno {occ.turno}</span>
-                        </div>
-                        <p className="text-base font-black text-slate-700 leading-tight">{occ.motivo || 'Motivo Operacional'}</p>
-                        <div className="text-[11px] text-slate-400 font-mono font-bold flex items-center gap-3">
-                          <span className="flex items-center gap-1.5"><Box className="w-3.5 h-3.5" /> Lote: {occ.lote || 'N/A'}</span>
-                          <span>•</span>
-                          <span>{new Date(occ.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="shrink-0 bg-slate-900 text-white px-8 py-4 rounded-3xl text-center min-w-[120px] shadow-2xl shadow-slate-200">
-                      <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Duração</span>
-                      <span className="text-3xl font-black tracking-tighter">{occ.duracao || occ.total_min}<span className="text-sm ml-1 text-slate-500">m</span></span>
-                    </div>
+              <div className="mt-auto space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Timer className="w-3.5 h-3.5 text-rose-300" />
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">Inatividade</span>
                   </div>
-                ))
-              )}
+                  <span className={`text-xs font-black ${line.downtime > 60 ? 'text-red-500' : 'text-slate-600'}`}>{line.downtime}m</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Truck className="w-3.5 h-3.5 text-blue-300" />
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">Logística</span>
+                  </div>
+                  <span className="text-xs font-black text-slate-600">{line.totalPallets} plt</span>
+                </div>
+
+                {/* Progress Bar Elegante no rodapé do card */}
+                <div className="pt-4 border-t border-slate-100/50">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Meta OEE</span>
+                    <span className="text-[10px] font-black text-slate-800">{line.performance.toFixed(1)}%</span>
+                  </div>
+                  <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-1000 rounded-full ${line.performance >= 80 ? 'bg-emerald-500' : line.performance >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+                      style={{ width: `${Math.min(100, line.performance)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        ))}
+      </div>
 
-          <footer className="px-12 py-8 border-t border-slate-100/50 bg-white shrink-0">
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className="w-full bg-slate-900 text-white font-black py-5 rounded-[24px] transition-all uppercase text-[11px] tracking-[0.4em] shadow-2xl shadow-slate-300/50 active:scale-95"
-            >
-              Fechar Análise
-            </button>
-          </footer>
+      {/* Ranking de Inatividade - Badges Flutuantes */}
+      <div className="bg-white/80 backdrop-blur-md p-10 rounded-[40px] shadow-sm border border-white/50 w-full relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-32 h-32 bg-red-100/10 rounded-full -ml-16 -mt-16 blur-3xl pointer-events-none" />
+
+        <div className="flex items-center justify-between mb-10 relative z-10">
+          <div className="flex items-center gap-4 shrink-0">
+            <Timer className="w-7 h-7 text-red-500 shrink-0" />
+            <h3 className="text-lg font-black text-slate-800 uppercase tracking-tighter leading-none">Ocorrências por Equipamento</h3>
+          </div>
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] italic shrink-0">Ranking de Downtime Diário</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-6 md:gap-8 w-full relative z-10">
+          {analytics.kanbanDowntime.map((item) => {
+            const config = CATEGORIAS_CONFIG[item.name] || CATEGORIAS_CONFIG['OUTROS'];
+            return (
+              <div
+                key={item.name}
+                onClick={() => setSelectedCategory(item.name)}
+                className={`p-6 md:p-8 bg-white rounded-[32px] border border-slate-50 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-2 cursor-pointer group active:scale-95 shadow-lg shadow-slate-200/50 hover:shadow-2xl hover:border-blue-100`}
+              >
+                <div className={`w-14 h-14 rounded-2xl ${config.bg} mb-4 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform ${config.color} shrink-0 mx-auto`}>
+                  <Settings className="w-7 h-7" />
+                </div>
+                <h4 className={`text-[10px] font-black uppercase mb-1 truncate w-full tracking-tighter ${config.color}`}>{item.name}</h4>
+                <p className="text-3xl font-black text-slate-800 tracking-tighter leading-none">
+                  {item.value}<span className="text-[10px] ml-1 font-bold text-slate-400 uppercase">min</span>
+                </p>
+                <div className="mt-3 text-[8px] font-black text-blue-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Ver Detalhes</div>
+              </div>
+            );
+          })}
         </div>
       </div>
-    )
-  }
+
+      {/* Monitoramento Logístico - Glass Effect */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
+        <div className="lg:col-span-2 bg-slate-900 rounded-[40px] p-10 md:p-14 text-white relative overflow-hidden shadow-2xl w-full">
+          <Layers className="absolute -right-16 -top-16 w-80 h-80 text-white/5" />
+          <div className="relative z-10 h-full flex flex-col justify-center">
+            <div className="flex items-center gap-4 mb-14">
+              <div className="p-3 bg-blue-500/20 rounded-2xl shrink-0"><Truck className="w-7 h-7 text-blue-400 shrink-0" /></div>
+              <h3 className="text-2xl font-black uppercase tracking-tighter leading-none">Performance Logística & Pesagem</h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-16 w-full">
+              <div className="space-y-3">
+                <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">Peso Expedido</p>
+                <div className="flex items-baseline gap-3">
+                  <span className="text-5xl md:text-7xl font-black tracking-tighter text-emerald-400">
+                    {analytics.totalTonnage.toFixed(2)}
+                  </span>
+                  <span className="text-[12px] font-black text-slate-500 uppercase">Ton</span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">Fardos Totais</p>
+                <div className="flex items-baseline gap-3">
+                  <span className="text-5xl md:text-7xl font-black tracking-tighter text-blue-400">
+                    {analytics.lineCards.reduce((acc, l) => acc + l.totalBundles, 0).toLocaleString()}
+                  </span>
+                  <span className="text-[12px] font-black text-slate-500 uppercase">Pk</span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">Paletes Totais</p>
+                <div className="flex items-baseline gap-3">
+                  <span className="text-5xl md:text-7xl font-black tracking-tighter text-blue-200">
+                    {Math.floor(analytics.lineCards.reduce((acc, l) => acc + Number(l.totalPallets), 0))}
+                  </span>
+                  <span className="text-[12px] font-black text-slate-500 uppercase">Plt</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-md rounded-[40px] p-10 md:p-14 shadow-xl border border-white/50 flex flex-col justify-center w-full">
+          <div className="text-center space-y-8">
+            <div className="inline-flex p-6 bg-blue-50/50 rounded-[32px] shrink-0 mx-auto border border-blue-100"><Scale className="w-12 h-12 text-blue-600 shrink-0" /></div>
+            <div>
+              <h4 className="text-base font-black text-slate-800 uppercase tracking-tighter">Acúmulo de Expedição</h4>
+              <p className="text-[11px] font-black text-slate-400 uppercase leading-relaxed max-w-[200px] mx-auto mt-3">
+                Conversão baseada nos SKUs produzidos.
+              </p>
+            </div>
+
+            <div className="space-y-4 w-full text-center">
+              <div className="text-6xl md:text-7xl font-black text-blue-600 tracking-tighter leading-none">{analytics.totalTonnage.toFixed(2)}</div>
+              <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] block">Toneladas / Hoje</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal Glassmorphism de Logs */}
+      {
+        selectedCategory && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-500" onClick={() => setSelectedCategory(null)} />
+
+            <div className="bg-white/90 backdrop-blur-2xl rounded-[48px] shadow-2xl w-full max-w-3xl relative z-10 animate-in zoom-in-95 duration-500 overflow-hidden flex flex-col max-h-[85vh] border border-white/50">
+              <header className="px-10 py-10 border-b border-slate-100/50 flex items-center justify-between bg-slate-50/20 shrink-0">
+                <div className="flex items-center gap-5 shrink-0">
+                  <div className={`p-4 rounded-2xl shadow-xl ${CATEGORIAS_CONFIG[selectedCategory]?.bg} ${CATEGORIAS_CONFIG[selectedCategory]?.color} shrink-0`}>
+                    <Info className="w-8 h-8 shrink-0" />
+                  </div>
+                  <div className="shrink-0">
+                    <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter leading-none">
+                      Logs: {selectedCategory}
+                    </h3>
+                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2 shrink-0">Histórico de Eventos Críticos</p>
+                  </div>
+                </div>
+                <button onClick={() => setSelectedCategory(null)} className="p-3 text-slate-300 hover:text-slate-600 rounded-full hover:bg-white transition-all shrink-0">
+                  <X className="w-10 h-10 shrink-0" />
+                </button>
+              </header>
+
+              <div className="p-10 overflow-y-auto no-scrollbar bg-slate-50/10">
+                <div className="space-y-4">
+                  {detailedOccurrences.length === 0 ? (
+                    <div className="py-24 text-center text-slate-300 font-black uppercase tracking-widest text-sm">Nenhuma ocorrência registrada</div>
+                  ) : (
+                    detailedOccurrences.map((occ, idx) => (
+                      <div key={idx} className="bg-white p-7 rounded-[28px] border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 group hover:border-blue-200 transition-colors">
+                        <div className="flex items-start gap-5 flex-1">
+                          <div className="p-5 bg-slate-50 rounded-2xl group-hover:bg-blue-50 transition-colors">
+                            <ClockIcon className="w-6 h-6 text-slate-400 group-hover:text-blue-500" />
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-3">
+                              <span className="text-[10px] font-black text-blue-600 uppercase tracking-wider bg-blue-50 px-3 py-1 rounded-full">Linha {String(occ.linha).slice(-1)}</span>
+                              <span className="text-[10px] font-black text-slate-300">•</span>
+                              <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Turno {occ.turno}</span>
+                            </div>
+                            <p className="text-base font-black text-slate-700 leading-tight">{occ.motivo || 'Motivo Operacional'}</p>
+                            <div className="text-[11px] text-slate-400 font-mono font-bold flex items-center gap-3">
+                              <span className="flex items-center gap-1.5"><Box className="w-3.5 h-3.5" /> Lote: {occ.lote || 'N/A'}</span>
+                              <span>•</span>
+                              <span>{new Date(occ.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="shrink-0 bg-slate-900 text-white px-8 py-4 rounded-3xl text-center min-w-[120px] shadow-2xl shadow-slate-200">
+                          <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Duração</span>
+                          <span className="text-3xl font-black tracking-tighter">{occ.duracao || occ.total_min}<span className="text-sm ml-1 text-slate-500">m</span></span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <footer className="px-12 py-8 border-t border-slate-100/50 bg-white shrink-0">
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className="w-full bg-slate-900 text-white font-black py-5 rounded-[24px] transition-all uppercase text-[11px] tracking-[0.4em] shadow-2xl shadow-slate-300/50 active:scale-95"
+                >
+                  Fechar Análise
+                </button>
+              </footer>
+            </div>
+          </div>
+        )
+      }
     </div >
   );
 };
