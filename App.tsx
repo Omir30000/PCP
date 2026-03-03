@@ -13,6 +13,7 @@ import RelatorioRegistros from './RelatorioRegistros';
 import RelatorioAnaliticoPorLinha from './RelatorioAnaliticoPorLinha';
 import CalendarioVendas from './CalendarioVendas';
 import RelatorioBoletim from './RelatorioBoletim';
+import RelatoriosDowntimeHoras from './RelatoriosDowntimeHoras';
 
 import {
   LayoutDashboard,
@@ -46,6 +47,7 @@ type Tab =
   | 'relatorios'
   | 'relatorios_produtos'
   | 'relatorios_downtime'
+  | 'relatorios_downtime_horas'
   | 'relatorio_registros'
   | 'analise_gargalos'
   | 'calendario_vendas'
@@ -128,7 +130,8 @@ const App: React.FC = () => {
           <NavItem id="relatorios" icon={FileText} label="Boletim" isSubItem={isSidebarExpanded} />
           <NavItem id="relatorio_boletim" icon={Calculator} label="Boletim Turno" isSubItem={isSidebarExpanded} />
           <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" isSubItem={isSidebarExpanded} />
-          <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime" isSubItem={isSidebarExpanded} />
+          <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime (Min)" isSubItem={isSidebarExpanded} />
+          <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" isSubItem={isSidebarExpanded} />
           <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" isSubItem={isSidebarExpanded} />
         </div>
 
@@ -161,6 +164,7 @@ const App: React.FC = () => {
           {activeTab === 'relatorios_produtos' && <RelatoriosProdutos />}
           {activeTab === 'relatorio_registros' && <RelatorioRegistros />}
           {activeTab === 'relatorios_downtime' && <RelatoriosDowntime />}
+          {activeTab === 'relatorios_downtime_horas' && <RelatoriosDowntimeHoras />}
           {activeTab === 'analise_gargalos' && <RelatorioAnaliticoPorLinha />}
           {activeTab === 'calendario_vendas' && <CalendarioVendas />}
           {activeTab === 'relatorio_boletim' && <RelatorioBoletim />}
