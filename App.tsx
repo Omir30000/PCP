@@ -34,7 +34,8 @@ import {
   TrendingDown,
   Sun,
   Moon,
-  Calculator
+  Calculator,
+  Clock
 } from 'lucide-react';
 
 type Tab =
