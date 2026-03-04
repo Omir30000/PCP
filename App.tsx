@@ -57,7 +57,7 @@ type Tab =
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-  const [isBiOpen, setIsBiOpen] = useState(true);
+  const [isReportsOpen, setIsReportsOpen] = useState(true);
 
   // Forçar Dark Mode fixo
   React.useEffect(() => {
@@ -125,15 +125,24 @@ const App: React.FC = () => {
           <div className="h-px bg-white/5 my-6 mx-4" />
 
           {isSidebarExpanded && (
-            <p className="px-4 text-[8px] font-black text-slate-600 uppercase tracking-[0.4em] mb-4">Inteligência</p>
+            <button
+              onClick={() => setIsReportsOpen(!isReportsOpen)}
+              className="w-full flex items-center justify-between px-4 mb-4 group ring-0 outline-none"
+            >
+              <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] group-hover:text-slate-400 transition-colors">Relatórios de Produção</p>
+              <ChevronDown className={`w-3 h-3 text-slate-600 transition-transform duration-300 ${isReportsOpen ? '' : '-rotate-90'}`} />
+            </button>
           )}
-          <NavItem id="analise_disponibilidade" icon={Scale} label="Balanço" isSubItem={isSidebarExpanded} />
-          <NavItem id="relatorios" icon={FileText} label="Boletim" isSubItem={isSidebarExpanded} />
-          <NavItem id="relatorio_boletim" icon={Calculator} label="Boletim Turno" isSubItem={isSidebarExpanded} />
-          <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" isSubItem={isSidebarExpanded} />
-          <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime (Min)" isSubItem={isSidebarExpanded} />
-          <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" isSubItem={isSidebarExpanded} />
-          <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" isSubItem={isSidebarExpanded} />
+
+          <div className={`space-y-0.5 transition-all duration-500 overflow-hidden ${isReportsOpen || !isSidebarExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+            <NavItem id="analise_disponibilidade" icon={Scale} label="Balanço" isSubItem={isSidebarExpanded} />
+            <NavItem id="relatorios" icon={FileText} label="Boletim" isSubItem={isSidebarExpanded} />
+            <NavItem id="relatorio_boletim" icon={Calculator} label="Boletim Turno" isSubItem={isSidebarExpanded} />
+            <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" isSubItem={isSidebarExpanded} />
+            <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime (Min)" isSubItem={isSidebarExpanded} />
+            <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" isSubItem={isSidebarExpanded} />
+            <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" isSubItem={isSidebarExpanded} />
+          </div>
         </div>
 
         <div className={`p-4 mt-auto border-t border-white/5 bg-black/40 flex flex-col gap-4`}>
