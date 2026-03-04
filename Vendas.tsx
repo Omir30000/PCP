@@ -99,6 +99,7 @@ const Vendas: React.FC = () => {
     const metrics: Record<string, { currentStock: number, pendingDemand: number, forecast: number }> = {};
 
     produtos.forEach(prod => {
+      const unidadesPorFardo = prod.unidades_por_fardo || 1;
       const totalProduced = todosRegistrosProducao
         .filter(r =>
           String(r.produto_volume) === String(prod.id) ||
@@ -125,7 +126,12 @@ const Vendas: React.FC = () => {
       const currentStock = totalProduced - totalShipped;
       const forecast = currentStock - pendingDemand;
 
-      metrics[prod.id] = { currentStock, pendingDemand, forecast };
+      metrics[prod.id] = {
+        currentStock,
+        pendingDemand,
+        forecast,
+        unidadesPorFardo
+      };
     });
 
     return metrics;
@@ -158,11 +164,14 @@ const Vendas: React.FC = () => {
   const prepararEdicao = (ped: any) => {
     setNovoCliente(ped.cliente_nome);
     setNovaDataEntrega(ped.data_entrega);
-    setItensNovoPedido(ped.itens_pedido.map((item: any) => ({
-      produto_id: item.produto_id,
-      quantidade: item.quantidade,
-      nome: item.produtos?.nome
-    })));
+    setItensNovoPedido(ped.itens_pedido.map((item: any) => {
+      const unitsPerFardo = item.produtos?.unidades_por_fardo || 1;
+      return {
+        produto_id: item.produto_id,
+        quantidade: Math.ceil(item.quantidade / unitsPerFardo), // Voltar para fardos
+        nome: item.produtos?.nome
+      };
+    }));
     setEditingPedidoId(ped.id);
     setIsEditMode(true);
     setIsModalOpen(true);
@@ -248,11 +257,15 @@ const Vendas: React.FC = () => {
 
         if (deleteError) throw deleteError;
 
-        const itensPayload = itensNovoPedido.map(item => ({
-          pedido_id: editingPedidoId,
-          produto_id: item.produto_id,
-          quantidade: item.quantidade
-        }));
+        const itensPayload = itensNovoPedido.map(item => {
+          const product = produtos.find(p => p.id === item.produto_id);
+          const unitsPerFardo = product?.unidades_por_fardo || 1;
+          return {
+            pedido_id: editingPedidoId,
+            produto_id: item.produto_id,
+            quantidade: item.quantidade * unitsPerFardo // Grava UN no banco
+          };
+        });
 
         const { error: insertError } = await supabase
           .from('itens_pedido')
@@ -276,11 +289,15 @@ const Vendas: React.FC = () => {
         if (pedidoError) throw pedidoError;
 
         // 2. Inserir Itens do Pedido
-        const itensPayload = itensNovoPedido.map(item => ({
-          pedido_id: pedidoData.id,
-          produto_id: item.produto_id,
-          quantidade: item.quantidade
-        }));
+        const itensPayload = itensNovoPedido.map(item => {
+          const product = produtos.find(p => p.id === item.produto_id);
+          const unitsPerFardo = product?.unidades_por_fardo || 1;
+          return {
+            pedido_id: pedidoData.id,
+            produto_id: item.produto_id,
+            quantidade: item.quantidade * unitsPerFardo // Grava UN no banco
+          };
+        });
 
         const { error: itensError } = await supabase
           .from('itens_pedido')
@@ -388,19 +405,21 @@ const Vendas: React.FC = () => {
                 </div>
                 <div className="flex items-baseline gap-1 my-4">
                   <span className={`text-2xl font-black tracking-tighter ${isCritical ? 'text-rose-500 animate-pulse' : 'text-white'}`}>
-                    {m.currentStock.toLocaleString('pt-BR')}
+                    {Math.floor(m.currentStock / (m.unidadesPorFardo || 1)).toLocaleString('pt-BR')}
                   </span>
-                  <span className="text-[8px] font-bold text-slate-600 uppercase">UN DISP.</span>
+                  <span className="text-[8px] font-bold text-slate-600 uppercase">Fardos Disp.</span>
                 </div>
                 <div className="flex items-center justify-between border-t border-white/[0.03] pt-4 mt-2">
                   <div className="flex flex-col">
                     <span className="text-[7px] font-black text-slate-600 uppercase tracking-widest">Fila Demandas</span>
-                    <span className="text-[10px] font-black text-blue-400">{m.pendingDemand.toLocaleString('pt-BR')}</span>
+                    <span className="text-[10px] font-black text-blue-400">
+                      {Math.ceil(m.pendingDemand / (m.unidadesPorFardo || 1)).toLocaleString('pt-BR')} <span className="text-[7px]">F</span>
+                    </span>
                   </div>
                   <div className="flex flex-col items-end">
                     <span className="text-[7px] font-black text-slate-600 uppercase tracking-widest">Saldo Pós-Fila</span>
                     <span className={`text-[10px] font-black ${m.forecast < 0 ? 'text-rose-500 font-black' : 'text-emerald-500'}`}>
-                      {m.forecast >= 0 ? '+' : ''}{m.forecast.toLocaleString('pt-BR')}
+                      {m.forecast >= 0 ? '+' : ''}{Math.floor(m.forecast / (m.unidadesPorFardo || 1)).toLocaleString('pt-BR')} <span className="text-[7px]">F</span>
                     </span>
                   </div>
                 </div>
@@ -467,7 +486,16 @@ const Vendas: React.FC = () => {
                 </div>
                 <div className="bg-white/5 p-4 rounded-xl border border-white/5 text-center">
                   <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">Total Requisitado</span>
-                  <div className="text-[#facc15] font-black text-xs">{totalRequisitado.toLocaleString('pt-BR')} <span className="text-[8px] text-slate-500">UN</span></div>
+                  <div className="text-[#facc15] font-black text-xs">
+                    {(() => {
+                      // Cálculo aproximativo por fardos no card (soma dos fardos de cada item)
+                      const totalFardos = ped.itens_pedido?.reduce((acc: number, item: any) => {
+                        const unitsPerFardo = item.produtos?.unidades_por_fardo || 1;
+                        return acc + Math.ceil(item.quantidade / unitsPerFardo);
+                      }, 0) || 0;
+                      return totalFardos.toLocaleString('pt-BR');
+                    })()} <span className="text-[8px] text-slate-500">FARDOS</span>
+                  </div>
                 </div>
               </div>
               <button
@@ -556,10 +584,10 @@ const Vendas: React.FC = () => {
                   <div className="sm:col-span-1">
                     <input
                       type="number"
-                      placeholder="QTD"
+                      placeholder="FARDOS"
                       value={tempQuantidade || ''}
                       onChange={(e) => setTempQuantidade(Number(e.target.value))}
-                      className="w-full p-4 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black text-white outline-none text-center focus:border-[#facc15]/50 transition-all"
+                      className="w-full p-4 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black text-white outline-none text-center focus:border-[#facc15]/50 transition-all font-mono"
                     />
                   </div>
                   <button
@@ -579,7 +607,7 @@ const Vendas: React.FC = () => {
                         <span className="text-[10px] font-black text-white uppercase">{item.nome}</span>
                       </div>
                       <div className="flex items-center gap-8">
-                        <span className="text-[11px] font-black text-[#facc15]">{item.quantidade.toLocaleString('pt-BR')} <span className="text-[8px] text-slate-500">UN</span></span>
+                        <span className="text-[11px] font-black text-[#facc15]">{item.quantidade.toLocaleString('pt-BR')} <span className="text-[8px] text-slate-500">FARDOS</span></span>
                         <button onClick={() => removerItemDoPedido(idx)} className="text-slate-700 hover:text-rose-500 transition-colors">
                           <Trash className="w-4 h-4" />
                         </button>
@@ -641,8 +669,9 @@ const Vendas: React.FC = () => {
                     <thead className="bg-white/5 text-[9px] text-slate-500 font-black uppercase tracking-widest border-b border-white/5">
                       <tr>
                         <th className="px-8 py-5">Ativo SKU</th>
-                        <th className="px-8 py-5 text-center">Requisitado (Pedido)</th>
-                        <th className="px-8 py-5 text-center">Produzido (Acumulado)</th>
+                        <th className="px-8 py-5 text-center">Req. (FARDOS)</th>
+                        <th className="px-8 py-5 text-center">Disp. (FARDOS)</th>
+                        <th className="px-8 py-5 text-center">Saldo em UN</th>
                         <th className="px-8 py-5 text-right">Prontidão</th>
                       </tr>
                     </thead>
@@ -653,8 +682,15 @@ const Vendas: React.FC = () => {
                         return (
                           <tr key={idx} className={pronto ? 'bg-green-500/5' : 'bg-transparent'}>
                             <td className="px-8 py-5 font-black text-white uppercase">{item.produtos?.nome || 'SKU'}</td>
-                            <td className="px-8 py-5 text-center font-bold">{item.quantidade.toLocaleString('pt-BR')}</td>
-                            <td className="px-8 py-5 text-center font-black text-[#facc15] text-lg">{produzido.toLocaleString('pt-BR')}</td>
+                            <td className="px-8 py-5 text-center font-bold text-white">
+                              {Math.ceil(item.quantidade / (item.produtos?.unidades_por_fardo || 1)).toLocaleString('pt-BR')}
+                            </td>
+                            <td className="px-8 py-5 text-center font-black text-[#facc15] text-lg">
+                              {Math.floor(produzido / (item.produtos?.unidades_por_fardo || 1)).toLocaleString('pt-BR')}
+                            </td>
+                            <td className="px-8 py-5 text-center font-bold text-slate-500">
+                              {produzido.toLocaleString('pt-BR')} <span className="text-[8px]">UN</span>
+                            </td>
                             <td className="px-8 py-5 text-right">
                               {pronto ? (
                                 <span className="text-[#22c55e] font-black uppercase text-[10px] flex items-center justify-end gap-2">OK <CheckCircle className="w-4 h-4" /></span>
