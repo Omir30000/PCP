@@ -482,12 +482,92 @@ const RelatoriosDowntimeHoras: React.FC = () => {
                     </div>
                 </section>
 
+                {/* Pareto de Equipamentos Críticos */}
+                <div className="flex items-center gap-4 mb-2 mt-12 pb-4">
+                    <div className="h-8 w-1.5 bg-slate-900 rounded-full" />
+                    <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.3em]">
+                        I. ANÁLISE DE IMPACTO E PARETO DE EQUIPAMENTOS
+                    </h3>
+                </div>
+
+                {/* Gráficos em Horas (Barras) */}
+                <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="border border-slate-200 rounded-3xl p-8 bg-white h-[450px] flex flex-col">
+                        <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <BarChart2 className="w-4 h-4 text-cyan-600" /> Impacto por Tipo de Parada (H)
+                        </h3>
+                        <div className="flex-1 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={analytics.typeBarData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                    <XAxis
+                                        dataKey="name"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fontSize: 9, fontWeight: 800, fill: '#64748b' }}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }}
+                                        label={{ value: 'Horas', angle: -90, position: 'insideLeft', fontSize: 10, fontWeight: 800 }}
+                                    />
+                                    <RechartsTooltip
+                                        cursor={{ fill: '#f8fafc' }}
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px', color: '#1e293b' }}
+                                    />
+                                    <Bar dataKey="horas" radius={[6, 6, 0, 0]} fill="#0891b2">
+                                        {analytics.typeBarData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={index === 0 ? '#0891b2' : '#0e7490'} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    <div className="border border-slate-200 rounded-3xl p-8 bg-white h-[450px] flex flex-col">
+                        <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-blue-600" /> Pareto de Equipamentos Críticos (H)
+                        </h3>
+                        <div className="flex-1 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart
+                                    data={analytics.equipBarData}
+                                    layout="vertical"
+                                    margin={{ top: 5, right: 50, left: 20, bottom: 5 }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                                    <XAxis type="number" hide />
+                                    <YAxis
+                                        dataKey="name"
+                                        type="category"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fontSize: 9, fontWeight: 800, fill: '#64748b' }}
+                                        width={100}
+                                    />
+                                    <RechartsTooltip
+                                        cursor={{ fill: '#f8fafc' }}
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px' }}
+                                    />
+                                    <Bar dataKey="horas" radius={[0, 6, 6, 0]} fill="#2563eb" barSize={20}>
+                                        {analytics.equipBarData.map((entry, index) => (
+                                            <Cell key={`cell-e-${index}`} fill={index < 3 ? '#2563eb' : '#3b82f6'} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </section>
+
                 {/* DESEMPENHO E EVOLUÇÃO POR CT */}
-                <section className="space-y-8 pt-8">
+                <section className="space-y-8 pt-12">
                     <div className="flex items-center gap-4 mb-2">
                         <div className="h-8 w-1.5 bg-blue-600 rounded-full" />
                         <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.3em]">
-                            I. DESEMPENHO E EVOLUÇÃO DE DISPONIBILIDADE POR LINHA
+                            II. DESEMPENHO E EVOLUÇÃO DE DISPONIBILIDADE POR LINHA
                         </h3>
                     </div>
 
@@ -576,86 +656,6 @@ const RelatoriosDowntimeHoras: React.FC = () => {
                                 </div>
                             </div>
                         ))}
-                    </div>
-                </section>
-
-                {/* Pareto de Equipamentos Críticos */}
-                <div className="flex items-center gap-4 mb-2 mt-12 pb-4">
-                    <div className="h-8 w-1.5 bg-slate-900 rounded-full" />
-                    <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.3em]">
-                        II. ANÁLISE DE IMPACTO E PARETO DE EQUIPAMENTOS
-                    </h3>
-                </div>
-
-                {/* Gráficos em Horas (Barras) */}
-                <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="border border-slate-200 rounded-3xl p-8 bg-white h-[450px] flex flex-col">
-                        <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-6 flex items-center gap-2">
-                            <BarChart2 className="w-4 h-4 text-cyan-600" /> Impacto por Tipo de Parada (H)
-                        </h3>
-                        <div className="flex-1 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={analytics.typeBarData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                    <XAxis
-                                        dataKey="name"
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tick={{ fontSize: 9, fontWeight: 800, fill: '#64748b' }}
-                                    />
-                                    <YAxis
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }}
-                                        label={{ value: 'Horas', angle: -90, position: 'insideLeft', fontSize: 10, fontWeight: 800 }}
-                                    />
-                                    <RechartsTooltip
-                                        cursor={{ fill: '#f8fafc' }}
-                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px', color: '#1e293b' }}
-                                    />
-                                    <Bar dataKey="horas" radius={[6, 6, 0, 0]} fill="#0891b2">
-                                        {analytics.typeBarData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={index === 0 ? '#0891b2' : '#0e7490'} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    <div className="border border-slate-200 rounded-3xl p-8 bg-white h-[450px] flex flex-col">
-                        <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-6 flex items-center gap-2">
-                            <Activity className="w-4 h-4 text-blue-600" /> Pareto de Equipamentos Críticos (H)
-                        </h3>
-                        <div className="flex-1 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart
-                                    data={analytics.equipBarData}
-                                    layout="vertical"
-                                    margin={{ top: 5, right: 50, left: 20, bottom: 5 }}
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                                    <XAxis type="number" hide />
-                                    <YAxis
-                                        dataKey="name"
-                                        type="category"
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tick={{ fontSize: 9, fontWeight: 800, fill: '#64748b' }}
-                                        width={100}
-                                    />
-                                    <RechartsTooltip
-                                        cursor={{ fill: '#f8fafc' }}
-                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px' }}
-                                    />
-                                    <Bar dataKey="horas" radius={[0, 6, 6, 0]} fill="#2563eb" barSize={20}>
-                                        {analytics.equipBarData.map((entry, index) => (
-                                            <Cell key={`cell-e-${index}`} fill={index < 3 ? '#2563eb' : '#3b82f6'} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
                     </div>
                 </section>
 
