@@ -270,12 +270,18 @@ const CalendarioVendas: React.FC = () => {
                           <div className="flex items-center gap-1.5">
                             <Box className="w-3 h-3 text-slate-500" />
                             <span className="text-[9px] font-black text-slate-400">
-                              {totalItens.toLocaleString()} <span className="text-[7px]">UN</span>
+                              {(() => {
+                                const totalFardos = ped.itens_pedido?.reduce((acc: number, item: any) => {
+                                  const unitsPerFardo = item.produtos?.unidades_por_fardo || 1;
+                                  return acc + Math.ceil(item.quantidade / unitsPerFardo);
+                                }, 0) || 0;
+                                return totalFardos.toLocaleString('pt-BR');
+                              })()} <span className="text-[7px]">FARDOS</span>
                             </span>
                           </div>
                           <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${isPronto ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
                             }`}>
-                            {status}
+                            {isPronto ? 'Pronto' : 'Pendente'}
                           </span>
                         </div>
                       </div>
