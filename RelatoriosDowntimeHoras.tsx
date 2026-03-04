@@ -35,6 +35,8 @@ import {
     Cell,
     Legend,
     ComposedChart,
+    AreaChart,
+    Area,
     Line
 } from 'recharts';
 
@@ -151,6 +153,71 @@ const RelatoriosDowntimeHoras: React.FC = () => {
         const byTypeMin: Record<string, number> = {};
         const detailedFailures: any[] = [];
 
+        // Lógica para Resumo por Linha (inspirado no Boletim)
+        const d1 = new Date(dataInicio);
+        const d2 = new Date(dataFim);
+        const diffTime = Math.abs(d2.getTime() - d1.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+        const diasNoPeriodo: string[] = [];
+        for (let i = 0; i < diffDays; i++) {
+            const d = new Date(d1);
+            d.setDate(d1.getDate() + i);
+            diasNoPeriodo.push(d.toISOString().split('T')[0]);
+        }
+
+        const linesSummary = linhas.map(linha => {
+            const regsDaLinha = registros.filter(r => r.linha_id === linha.id);
+
+            let totalDowntimeLinha = 0;
+            let totalProducedLinha = 0;
+            let totalNominalLinha = 0;
+            let status: 'active' | 'inactive' = 'inactive';
+
+            const serieHistorica = diasNoPeriodo.map(dia => {
+                const regsDoDia = regsDaLinha.filter(r => r.data_registro === dia);
+                const hrsParadaDia = regsDoDia.reduce((acc, r) => {
+                    const ps = Array.isArray(r.paradas) ? r.paradas : [];
+                    return acc + ps.reduce((pAcc: number, p: any) => {
+                        const dur = parseMinutos(p.duracao || p.tempo || p.total_min || 0);
+                        return ((p.tipo || '').toUpperCase() !== 'PARADA PROGRAMADA') ? pAcc + dur : pAcc;
+                    }, 0);
+                }, 0);
+
+                return {
+                    data: dia.split('-').reverse().join('/'),
+                    horasParada: Number((hrsParadaDia / 60).toFixed(2))
+                };
+            });
+
+            regsDaLinha.forEach(reg => {
+                const paradas = Array.isArray(reg.paradas) ? reg.paradas : [];
+                totalProducedLinha += Number(reg.quantidade_produzida) || 0;
+                totalNominalLinha += Number(reg.produtos?.capacidade_nominal) || Number(reg.capacidade_producao) || 7200;
+
+                paradas.forEach((p: any) => {
+                    const dur = parseMinutos(p.duracao || p.tempo || p.total_min || 0);
+                    if (dur > 0 && (p.tipo || '').toUpperCase() !== 'PARADA PROGRAMADA') {
+                        totalDowntimeLinha += dur;
+                    }
+                });
+            });
+
+            if (regsDaLinha.length > 0) status = 'active';
+
+            const dispPercent = totalNominalLinha > 0 ? (totalProducedLinha / totalNominalLinha) * 100 : 0;
+
+            return {
+                id: linha.id,
+                nome: linha.nome,
+                status,
+                totalHrsParada: Number((totalDowntimeLinha / 60).toFixed(2)),
+                producaoTotal: totalProducedLinha,
+                disponibilidade: Math.min(100, dispPercent),
+                serieHistorica
+            };
+        });
+
         registros.forEach(reg => {
             const paradasRaw = reg.paradas;
             const paradas = Array.isArray(paradasRaw) ? paradasRaw : [];
@@ -234,6 +301,7 @@ const RelatoriosDowntimeHoras: React.FC = () => {
             equipBarData,
             topEquipments,
             somaNominal: Math.round(totalNominal) || 0,
+            linesSummary,
             detailedFailures: detailedFailures.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
         };
     }, [registros, maquinas]);
@@ -414,6 +482,111 @@ const RelatoriosDowntimeHoras: React.FC = () => {
                     </div>
                 </section>
 
+                {/* DESEMPENHO E EVOLUÇÃO POR CT */}
+                <section className="space-y-8 pt-8">
+                    <div className="flex items-center gap-4 mb-2">
+                        <div className="h-8 w-1.5 bg-blue-600 rounded-full" />
+                        <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.3em]">
+                            I. DESEMPENHO E EVOLUÇÃO DE DISPONIBILIDADE POR LINHA
+                        </h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-8">
+                        {analytics.linesSummary.map(line => (
+                            <div
+                                key={line.id}
+                                className={`p-8 border-2 rounded-[40px] flex flex-col lg:flex-row gap-10 break-inside-avoid shadow-sm transition-all ${line.status === 'active' ? 'border-slate-100 bg-white' : 'border-slate-50 bg-slate-50/50 opacity-60 grayscale'
+                                    }`}
+                            >
+                                <div className="lg:w-1/3 space-y-6">
+                                    <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+                                        <div>
+                                            <h4 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none">{line.nome}</h4>
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1 italic">
+                                                {line.status === 'active' ? 'Linha em Operação' : 'Sem Registros no Período'}
+                                            </p>
+                                        </div>
+                                        <div className={`p-3 rounded-xl ${line.disponibilidade >= 80 ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
+                                            <Activity className="w-6 h-6" />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-slate-50 p-6 rounded-3xl">
+                                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Downtime (H)</p>
+                                            <p className="text-2xl font-black text-red-600">{line.totalHrsParada}h</p>
+                                        </div>
+                                        <div className="bg-slate-50 p-6 rounded-3xl">
+                                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Disponibilidade</p>
+                                            <p className={`text-2xl font-black ${line.disponibilidade >= 80 ? 'text-emerald-500' : 'text-blue-600'}`}>
+                                                {line.disponibilidade.toFixed(1)}%
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                                            <span className="text-slate-400 flex items-center gap-1.5"><Package className="w-3.5 h-3.5" /> {line.producaoTotal.toLocaleString()} un Produzidas</span>
+                                        </div>
+                                        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full rounded-full ${line.disponibilidade >= 80 ? 'bg-emerald-500' : 'bg-blue-600'}`}
+                                                style={{ width: `${Math.min(100, line.disponibilidade)}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="lg:w-2/3 h-[220px] bg-slate-50/50 rounded-3xl p-4 border border-slate-100">
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] mb-6 text-center">
+                                        <TrendingUp className="w-3 h-3 inline mr-2 text-blue-500" /> Tendência de Inatividade (Horas / Dia)
+                                    </p>
+                                    <ResponsiveContainer width="100%" height="80%">
+                                        <AreaChart data={line.serieHistorica} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
+                                            <defs>
+                                                <linearGradient id={`colorDowntime-${line.id}`} x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                                                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                            <XAxis
+                                                dataKey="data"
+                                                axisLine={false}
+                                                tickLine={false}
+                                                tick={{ fontSize: 8, fontWeight: 900, fill: '#94a3b8' }}
+                                                interval={'preserveStartEnd'}
+                                            />
+                                            <YAxis hide={true} />
+                                            <RechartsTooltip
+                                                contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', fontSize: '9px', fontWeight: 900, color: '#fff' }}
+                                                itemStyle={{ color: '#ef4444' }}
+                                            />
+                                            <Area
+                                                type="monotone"
+                                                dataKey="horasParada"
+                                                stroke="#ef4444"
+                                                strokeWidth={3}
+                                                fillOpacity={1}
+                                                fill={`url(#colorDowntime-${line.id})`}
+                                                animationDuration={1500}
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Pareto de Equipamentos Críticos */}
+                <div className="flex items-center gap-4 mb-2 mt-12 pb-4">
+                    <div className="h-8 w-1.5 bg-slate-900 rounded-full" />
+                    <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.3em]">
+                        II. ANÁLISE DE IMPACTO E PARETO DE EQUIPAMENTOS
+                    </h3>
+                </div>
+
                 {/* Gráficos em Horas (Barras) */}
                 <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="border border-slate-200 rounded-3xl p-8 bg-white h-[450px] flex flex-col">
@@ -486,40 +659,6 @@ const RelatoriosDowntimeHoras: React.FC = () => {
                     </div>
                 </section>
 
-                {/* Registro Detalhado */}
-                <section className="space-y-4 pt-6">
-                    <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em] flex items-center gap-2">
-                        <History className="w-3.5 h-3.5 text-slate-400" /> III. Auditoria de Eventos de Parada
-                    </h3>
-                    <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-900 text-white">
-                                    <th className="p-3 text-[8px] font-black uppercase tracking-widest">Data</th>
-                                    <th className="p-3 text-[8px] font-black uppercase tracking-widest">Máquina</th>
-                                    <th className="p-3 text-[8px] font-black uppercase tracking-widest">Motivo</th>
-                                    <th className="p-3 text-[8px] font-black uppercase tracking-widest text-right">Duração (Min)</th>
-                                    <th className="p-3 text-[8px] font-black uppercase tracking-widest text-right">Duração (Horas)</th>
-                                    <th className="p-3 text-[8px] font-black uppercase tracking-widest text-right">Perda Real</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 text-[9px]">
-                                {analytics.detailedFailures.map((fail, idx) => (
-                                    <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                                        <td className="p-3 font-bold text-slate-500">{formatarDataBR(fail.data)}</td>
-                                        <td className="p-3 font-black text-slate-900 uppercase">{fail.equipamento}</td>
-                                        <td className="p-3 font-bold text-slate-700 uppercase">{fail.motivo}</td>
-                                        <td className="p-3 text-right text-slate-400 font-bold">{fail.duracaoMin}m</td>
-                                        <td className={`p-3 text-right font-black ${Number(fail.duracaoHoras) > 0.5 ? 'text-red-600' : 'text-slate-900'}`}>
-                                            {fail.duracaoHoras}h
-                                        </td>
-                                        <td className="p-3 text-right font-bold text-blue-700">{fail.volumePerdido.toLocaleString('pt-BR')} un</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
 
                 <footer className="pt-10 border-t-2 border-slate-900 flex justify-between items-end">
                     <div className="flex items-center gap-4">
