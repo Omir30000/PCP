@@ -168,6 +168,36 @@ const CalendarioVendas: React.FC = () => {
         </div>
       </div>
 
+      {/* Resumo de Estoque Rápido */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 px-1">
+        {produtos
+          .map(prod => ({
+            ...prod,
+            estoque: inventoryMetrics[prod.id]?.currentStock || 0,
+            fardos: Math.floor((inventoryMetrics[prod.id]?.currentStock || 0) / (prod.unidades_por_fardo || 1))
+          }))
+          .filter(p => p.estoque > 0)
+          .map(prod => (
+            <div key={prod.id} className="bg-slate-900/40 border border-white/5 p-4 rounded-2xl flex flex-col justify-between hover:border-[#facc15]/30 transition-all group">
+              <div className="flex justify-between items-start mb-2">
+                <Box className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#facc15] transition-colors" />
+                <span className="text-[7px] font-black text-slate-600 uppercase tracking-widest leading-none">Status: OK</span>
+              </div>
+              <div>
+                <h5 className="text-[9px] font-black text-slate-400 uppercase truncate mb-1">{prod.nome}</h5>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-xl font-black text-white">{prod.fardos.toLocaleString('pt-BR')}</span>
+                  <span className="text-[8px] font-black text-[#facc15] uppercase">Fardos</span>
+                </div>
+              </div>
+              <div className="mt-3 pt-2 border-t border-white/[0.03] flex justify-between items-center">
+                <span className="text-[7px] font-bold text-slate-600 uppercase tracking-widest">Total UN</span>
+                <span className="text-[9px] font-black text-slate-400">{prod.estoque.toLocaleString('pt-BR')}</span>
+              </div>
+            </div>
+          ))}
+      </div>
+
       {/* Grade do Calendário */}
       <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
         {getDiasSemana.map((dia) => {
