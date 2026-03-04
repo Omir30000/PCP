@@ -12,7 +12,8 @@ import {
     AlertTriangle,
     Clock,
     Plus,
-    AlertOctagon
+    AlertOctagon,
+    History
 } from 'lucide-react';
 import { RegistroProducao, Linha, Produto } from './types/database';
 
