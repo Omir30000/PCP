@@ -14,7 +14,8 @@ import {
   Clock,
   User,
   Box,
-  LayoutGrid
+  LayoutGrid,
+  X
 } from 'lucide-react';
 
 const CalendarioVendas: React.FC = () => {
@@ -126,9 +127,9 @@ const CalendarioVendas: React.FC = () => {
     <div className="space-y-8 animate-in fade-in duration-700">
 
       {/* Cabeçalho */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-[#141414] p-8 rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
         <div className="flex items-center gap-6 relative z-10">
-          <div className="bg-[#facc15] p-4 rounded-2xl shadow-[0_0_20px_rgba(250,204,21,0.2)]">
+          <div className="bg-[#facc15] p-4 rounded-xl shadow-lg shadow-[#facc15]/20">
             <Calendar className="text-black w-7 h-7" />
           </div>
           <div>
@@ -174,7 +175,7 @@ const CalendarioVendas: React.FC = () => {
           return (
             <div
               key={dia.iso}
-              className={`flex flex-col min-h-[500px] rounded-[24px] border transition-all duration-300 ${isHoje ? 'bg-[#facc15]/5 border-[#facc15]/20' : 'bg-[#0d0d0d] border-white/5'
+              className={`flex flex-col min-h-[500px] rounded-2xl border transition-all duration-300 ${isHoje ? 'bg-[#facc15]/5 border-[#facc15]/20' : 'bg-slate-900/40 border-white/5'
                 }`}
             >
               {/* Header do Dia */}
@@ -198,7 +199,7 @@ const CalendarioVendas: React.FC = () => {
                     <div
                       key={ped.id}
                       onClick={() => setSelectedPedido(ped)}
-                      className={`p-4 rounded-2xl border bg-[#141414] hover:scale-[1.02] transition-all cursor-pointer group relative overflow-hidden ${isPronto ? 'border-emerald-500/20' : 'border-white/5 shadow-lg'
+                      className={`p-4 rounded-xl border bg-slate-900/60 hover:scale-[1.02] transition-all cursor-pointer group relative overflow-hidden ${isPronto ? 'border-emerald-500/20' : 'border-white/5 shadow-lg'
                         }`}
                     >
                       <div className="flex flex-col gap-2">
@@ -267,11 +268,11 @@ const CalendarioVendas: React.FC = () => {
       {/* Modal de Detalhes do Pedido */}
       {selectedPedido && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={() => setSelectedPedido(null)} />
-          <div className="bg-[#141414] rounded-[40px] shadow-2xl w-full max-w-4xl relative z-10 border border-white/10 overflow-hidden animate-in zoom-in-95">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setSelectedPedido(null)} />
+          <div className="bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl relative z-10 border border-white/10 overflow-hidden animate-in zoom-in-95">
             <header className="px-10 py-10 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-6">
-                <div className="p-4 bg-[#facc15] rounded-2xl">
+                <div className="p-4 bg-[#facc15] rounded-xl">
                   <Package className="w-8 h-8 text-black" />
                 </div>
                 <div>
@@ -285,16 +286,16 @@ const CalendarioVendas: React.FC = () => {
                 </div>
               </div>
               <button onClick={() => setSelectedPedido(null)} className="p-4 text-slate-500 hover:text-white transition-colors">
-                <LayoutGrid className="w-10 h-10" />
+                <X className="w-10 h-10" />
               </button>
             </header>
 
             <div className="p-10 space-y-10 max-h-[70vh] overflow-y-auto no-scrollbar">
               <div className="space-y-4">
                 <h6 className="text-[10px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
-                  <Box className="w-4 h-4 text-[#facc15]" /> Verificação de Intens e Saldo Industrial
+                  <Box className="w-4 h-4 text-[#facc15]" /> Verificação de Itens e Saldo Industrial
                 </h6>
-                <div className="border border-white/5 rounded-[32px] overflow-hidden bg-black/40">
+                <div className="border border-white/5 rounded-2xl overflow-hidden bg-black/20">
                   <table className="w-full text-left">
                     <thead className="bg-white/5 text-[9px] text-slate-500 font-black uppercase tracking-widest border-b border-white/5">
                       <tr>
@@ -329,10 +330,10 @@ const CalendarioVendas: React.FC = () => {
               </div>
             </div>
 
-            <footer className="px-10 py-10 bg-black/60 border-t border-white/5 flex justify-end">
+            <footer className="px-10 py-10 bg-black/20 border-t border-white/5 flex justify-end">
               <button
                 onClick={() => setSelectedPedido(null)}
-                className="px-10 py-5 bg-white/5 border border-white/10 rounded-3xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
+                className="px-10 py-5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
               >
                 Fechar Detalhes
               </button>

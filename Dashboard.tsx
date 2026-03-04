@@ -229,14 +229,14 @@ const Dashboard: React.FC = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
       {/* Header Nexus Premium */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-3xl border border-white/10 shadow-2xl mb-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-2xl mb-4">
         <div className="flex items-center gap-5">
-          <div className="bg-[#facc15] p-4 rounded-2xl shadow-[0_0_20px_rgba(250,204,21,0.3)]">
-            <Zap className="text-black w-7 h-7" />
+          <div className="bg-[#facc15] p-4 rounded-xl shadow-[0_0_20px_rgba(250,204,21,0.3)] text-black">
+            <Zap className="w-7 h-7" />
           </div>
           <div>
             <h2 className="text-3xl font-black text-white uppercase tracking-tighter leading-none">Nexus Command</h2>
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
+            <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#facc15] animate-pulse" /> Gestão de Planta em Tempo Real
             </p>
           </div>
@@ -253,14 +253,17 @@ const Dashboard: React.FC = () => {
           }} className="p-2 hover:bg-[#facc15] hover:text-black rounded-xl text-slate-400 transition-all bg-white/5 border border-white/5">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border border-white/5 focus-within:border-[#facc15] transition-all shadow-sm">
+          <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border-2 border-white/5 focus-within:border-[#facc15] transition-all shadow-sm">
             <Calendar className="w-5 h-5 text-[#facc15]" />
-            <input
-              type="date"
-              value={filtroData}
-              onChange={(e) => setFiltroData(e.target.value)}
-              className="bg-transparent text-xs font-black outline-none uppercase text-white cursor-pointer"
-            />
+            <div className="flex flex-col">
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Data de Operação</span>
+              <input
+                type="date"
+                value={filtroData}
+                onChange={(e) => setFiltroData(e.target.value)}
+                className="bg-transparent text-[11px] font-black outline-none uppercase text-white cursor-pointer hover:text-[#facc15] transition-colors"
+              />
+            </div>
           </div>
           <button onClick={() => {
             const d = new Date(filtroData);
@@ -270,12 +273,12 @@ const Dashboard: React.FC = () => {
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
-        <div className="flex gap-2">
+        <div className="flex bg-white/10 p-1 rounded-xl border border-white/10 backdrop-blur-sm">
           {['GLOBAL', 'MANHÃ', 'TARDE'].map((t) => (
             <button
               key={t}
               onClick={() => setFiltroTurno(t as any)}
-              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filtroTurno === t ? 'bg-[#facc15] text-black shadow-[0_0_15px_#facc15]' : 'bg-white/5 text-slate-500 hover:text-white'
+              className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filtroTurno === t ? 'bg-[#facc15] text-black shadow-[0_0_15px_rgba(250,204,21,0.3)]' : 'text-slate-400 hover:text-white'
                 }`}
             >
               {t}

@@ -171,39 +171,41 @@ const RelatoriosProdutos: React.FC = () => {
       {/* Controles de Geração e Filtro Premium */}
       <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-2xl print:hidden">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-500/20">
+          <div className="p-3 bg-[#facc15] rounded-xl text-black shadow-lg shadow-[#facc15]/20">
             <PieIcon className="w-6 h-6" />
           </div>
           <div>
             <h2 className="text-xl font-bold uppercase tracking-tight text-white leading-tight">Mix e Movimentação por SKU</h2>
-            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Análise de Cubagem e Proporcionalidade Técnica</p>
+            <p className="text-[#facc15] text-[10px] font-black uppercase tracking-widest leading-none mt-1 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#facc15] animate-pulse" /> Análise de Cubagem e Proporcionalidade Técnica
+            </p>
           </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
           <div className="flex flex-col sm:flex-row items-center gap-3">
-            <div className="flex-1 flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 focus-within:border-blue-500 transition-all shadow-sm w-full">
-              <Calendar className="w-5 h-5 text-blue-600" />
+            <div className="flex-1 flex items-center gap-3 bg-white/5 px-4 py-2 rounded-xl border border-white/5 focus-within:border-[#facc15]/50 transition-all shadow-sm w-full">
+              <Calendar className="w-5 h-5 text-slate-500" />
               <div className="flex flex-col">
-                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Início</span>
+                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Início</span>
                 <input
                   type="date"
                   value={dataInicio}
                   onChange={e => setDataInicio(e.target.value)}
-                  className="bg-transparent text-[11px] font-black uppercase outline-none text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                  className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-[#facc15] transition-colors"
                 />
               </div>
             </div>
 
-            <div className="flex-1 flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 focus-within:border-blue-500 transition-all shadow-sm w-full">
-              <Calendar className="w-5 h-5 text-blue-600" />
+            <div className="flex-1 flex items-center gap-3 bg-white/5 px-4 py-2 rounded-xl border border-white/5 focus-within:border-[#facc15]/50 transition-all shadow-sm w-full">
+              <Calendar className="w-5 h-5 text-slate-500" />
               <div className="flex flex-col">
-                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Fim</span>
+                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Fim</span>
                 <input
                   type="date"
                   value={dataFim}
                   onChange={e => setDataFim(e.target.value)}
-                  className="bg-transparent text-[11px] font-black uppercase outline-none text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                  className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-[#facc15] transition-colors"
                 />
               </div>
             </div>
@@ -212,7 +214,7 @@ const RelatoriosProdutos: React.FC = () => {
           <button
             onClick={fetchData}
             disabled={loading}
-            className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-[#facc15] text-black rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-[#facc15]/10 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             {loading ? 'Sincronizando...' : 'Sincronizar SKUs'}
@@ -220,7 +222,7 @@ const RelatoriosProdutos: React.FC = () => {
 
           <button
             onClick={handlePrint}
-            className="px-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg shadow-slate-200"
+            className="px-6 py-3 bg-white/5 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2 shadow-lg border border-white/10"
           >
             <Printer className="w-4 h-4" />
             Imprimir Mix

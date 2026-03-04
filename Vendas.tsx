@@ -316,9 +316,9 @@ const Vendas: React.FC = () => {
     <div className="space-y-8 animate-in fade-in duration-700">
 
       {/* Nexus Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-[#141414] p-8 rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
         <div className="flex items-center gap-6 relative z-10">
-          <div className="bg-[#facc15] p-4 rounded-2xl shadow-[0_0_20px_rgba(250,204,21,0.2)]">
+          <div className="bg-[#facc15] p-4 rounded-xl shadow-[0_0_20px_rgba(250,204,21,0.2)]">
             <ShoppingCart className="text-black w-7 h-7" />
           </div>
           <div>
@@ -330,14 +330,14 @@ const Vendas: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4 relative z-10">
-          <div className="relative bg-white/5 rounded-2xl border border-white/5 focus-within:border-[#facc15]/50 transition-all">
+          <div className="relative bg-white/5 rounded-xl border border-white/5 focus-within:border-[#facc15]/50 transition-all">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
               type="text"
               placeholder="Localizar cliente..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-11 pr-4 py-3 bg-transparent rounded-2xl outline-none text-xs font-black text-white w-64 uppercase tracking-widest"
+              className="pl-11 pr-4 py-3 bg-transparent rounded-xl outline-none text-xs font-black text-white w-64 uppercase tracking-widest"
             />
           </div>
           <button
@@ -349,7 +349,7 @@ const Vendas: React.FC = () => {
               setItensNovoPedido([]);
               setIsModalOpen(true);
             }}
-            className="px-8 py-3 bg-[#facc15] text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl"
+            className="px-8 py-3 bg-[#facc15] text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#facc15]/10"
           >
             Novo Pedido
           </button>
@@ -357,7 +357,7 @@ const Vendas: React.FC = () => {
       </div>
 
       {/* ⚠️ NEXUS STOCK // SALDO REAL */}
-      <section className="bg-black/40 border border-white/5 rounded-[32px] p-6 shadow-xl relative overflow-hidden">
+      <section className="bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-2xl p-6 shadow-xl relative overflow-hidden">
         <div className="flex items-center gap-3 mb-6">
           <Database className="w-4 h-4 text-[#facc15]" />
           <h3 className="text-[10px] font-black text-white uppercase tracking-[0.4em]">Nexus Stock // Saldo Acumulado Histórico</h3>
@@ -372,7 +372,7 @@ const Vendas: React.FC = () => {
             return (
               <div
                 key={prod.id}
-                className={`nexus-stock-card bg-[#0d0d0d] border ${isWarning ? 'border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'border-white/5'} rounded-2xl p-5 flex flex-col justify-between group hover:border-[#facc15]/20 transition-all relative overflow-hidden`}
+                className={`nexus-stock-card bg-black/20 border ${isWarning ? 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border-white/5'} rounded-xl p-5 flex flex-col justify-between group hover:border-[#facc15]/20 transition-all relative overflow-hidden`}
               >
                 {isWarning && <div className="absolute top-0 left-0 w-full h-1 bg-rose-500 animate-pulse" />}
                 <div className="flex justify-between items-start mb-3">
@@ -422,19 +422,19 @@ const Vendas: React.FC = () => {
           const estaPronto = progresso >= 100;
 
           return (
-            <div key={ped.id} className="bg-[#141414] rounded-[32px] p-8 border border-white/5 group hover:border-[#facc15]/30 transition-all duration-500 relative overflow-hidden">
+            <div key={ped.id} className="bg-slate-900/40 backdrop-blur-md rounded-2xl p-8 border border-white/5 group hover:border-[#facc15]/30 transition-all duration-500 relative overflow-hidden">
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <span className="text-[9px] font-mono text-slate-600 font-bold mb-1 block tracking-widest">REF: {ped.id.slice(0, 8).toUpperCase()}</span>
                   <h5 className="text-xl font-black text-white uppercase tracking-tighter truncate max-w-[200px]">{ped.cliente_nome}</h5>
                 </div>
                 <div className="flex gap-2">
-                  <div className={`px-4 py-1.5 rounded-lg text-[9px] font-black border uppercase tracking-widest ${ped.status === 'Finalizado' ? 'bg-[#22c55e]/10 text-[#22c55e] border-[#22c55e]/20' : 'bg-[#facc15]/10 text-[#facc15] border-[#facc15]/20'}`}>
+                  <div className={`px-4 py-1.5 rounded-lg text-[9px] font-black border uppercase tracking-widest ${ped.status === 'Finalizado' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-[#facc15]/10 text-[#facc15] border-[#facc15]/20'}`}>
                     {ped.status}
                   </div>
                   <button
                     onClick={() => handleDeletePedido(ped.id)}
-                    className="p-1.5 bg-rose-500/10 text-rose-500 rounded-lg border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all"
+                    className="p-1.5 bg-red-500/10 text-red-500 rounded-lg border border-red-500/20 hover:bg-red-500 hover:text-white transition-all"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
@@ -448,31 +448,31 @@ const Vendas: React.FC = () => {
               </div>
               <div className="mb-8 space-y-3">
                 <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest">
-                  <span className={estaPronto ? 'text-[#22c55e] flex items-center gap-1' : 'text-slate-500'}>
+                  <span className={estaPronto ? 'text-green-500 flex items-center gap-1' : 'text-slate-500'}>
                     {estaPronto ? <><CheckCircle className="w-3 h-3" /> Carga Validada</> : 'Processamento Industrial'}
                   </span>
                   <span className="text-white">{progresso.toFixed(0)}%</span>
                 </div>
                 <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
                   <div
-                    className={`h-full transition-all duration-1000 ${estaPronto ? 'bg-[#22c55e] shadow-[0_0_10px_#22c55e]' : 'bg-[#facc15] shadow-[0_0_10px_#facc15]'}`}
+                    className={`h-full transition-all duration-1000 ${estaPronto ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-[#facc15] shadow-[0_0_10px_#facc15]'}`}
                     style={{ width: `${progresso}%` }}
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 mb-8">
-                <div className="bg-white/5 p-4 rounded-2xl border border-white/5 text-center">
+                <div className="bg-white/5 p-4 rounded-xl border border-white/5 text-center">
                   <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">Previsão Entrega</span>
                   <div className="text-white font-black text-xs">{new Date(ped.data_entrega).toLocaleDateString('pt-BR')}</div>
                 </div>
-                <div className="bg-white/5 p-4 rounded-2xl border border-white/5 text-center">
+                <div className="bg-white/5 p-4 rounded-xl border border-white/5 text-center">
                   <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">Total Requisitado</span>
                   <div className="text-[#facc15] font-black text-xs">{totalRequisitado.toLocaleString('pt-BR')} <span className="text-[8px] text-slate-500">UN</span></div>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedPedido(ped)}
-                className="w-full py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#facc15] transition-all group-hover:shadow-[0_0_30px_rgba(250,204,21,0.2)]"
+                className="w-full py-4 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#facc15] transition-all group-hover:shadow-[0_0_30px_rgba(250,204,21,0.2)]"
               >
                 Detalhes & Saldo <ChevronRight className="w-4 h-4" />
               </button>
@@ -484,11 +484,11 @@ const Vendas: React.FC = () => {
       {/* 🌑 MODAL: NOVO PEDIDO (DESIGN NEXUS) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={() => !saving && setIsModalOpen(false)} />
-          <div className="bg-[#141414] rounded-[40px] shadow-2xl w-full max-w-2xl relative z-10 border border-[#facc15]/20 overflow-hidden animate-in zoom-in-95">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => !saving && setIsModalOpen(false)} />
+          <div className="bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl relative z-10 border border-white/10 overflow-hidden animate-in zoom-in-95">
             <header className="px-10 py-10 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-6">
-                <div className="p-4 bg-[#facc15] rounded-2xl shadow-[0_0_15px_rgba(250,204,21,0.3)]">
+                <div className="p-4 bg-[#facc15] rounded-xl shadow-[0_0_15px_rgba(250,204,21,0.3)]">
                   <ShoppingCart className="w-8 h-8 text-black" />
                 </div>
                 <div>
@@ -516,7 +516,7 @@ const Vendas: React.FC = () => {
                     placeholder="NOME DO CLIENTE..."
                     value={novoCliente}
                     onChange={(e) => setNovoCliente(e.target.value)}
-                    className="w-full p-5 bg-white/5 border border-white/10 rounded-2xl text-xs font-black text-white outline-none focus:border-[#facc15]/50 transition-all"
+                    className="w-full p-5 bg-white/5 border border-white/10 rounded-xl text-xs font-black text-white outline-none focus:border-[#facc15]/50 transition-all"
                   />
                 </div>
                 <div className="space-y-3">
@@ -527,13 +527,13 @@ const Vendas: React.FC = () => {
                     type="date"
                     value={novaDataEntrega}
                     onChange={(e) => setNovaDataEntrega(e.target.value)}
-                    className="w-full p-5 bg-white/5 border border-white/10 rounded-2xl text-xs font-black text-white outline-none focus:border-[#facc15]/50 transition-all uppercase"
+                    className="w-full p-5 bg-white/5 border border-white/10 rounded-xl text-xs font-black text-white outline-none focus:border-[#facc15]/50 transition-all uppercase"
                   />
                 </div>
               </div>
 
               {/* Seção de Adição de Itens */}
-              <div className="bg-black/40 border border-white/5 rounded-[32px] p-8 space-y-6">
+              <div className="bg-white/5 border border-white/5 rounded-2xl p-8 space-y-6">
                 <h4 className="text-[10px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
                   <Package className="w-4 h-4 text-[#facc15]" /> Grade de SKUs Requisitados
                 </h4>
@@ -595,17 +595,17 @@ const Vendas: React.FC = () => {
               </div>
             </div>
 
-            <footer className="px-10 py-10 bg-black/60 border-t border-white/5 flex gap-6">
+            <footer className="px-10 py-10 bg-black/40 border-t border-white/5 flex gap-6">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="flex-1 py-5 border border-white/10 rounded-3xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors"
+                className="flex-1 py-5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={salvarNovoPedido}
                 disabled={saving || itensNovoPedido.length === 0}
-                className="flex-[2] py-5 bg-[#facc15] text-black rounded-3xl text-[10px] font-black uppercase tracking-[0.4em] transition-all hover:scale-[1.02] active:scale-95 shadow-[0_0_40px_rgba(250,204,21,0.2)] disabled:opacity-50 flex items-center justify-center gap-3"
+                className="flex-[2] py-5 bg-[#facc15] text-black rounded-xl text-[10px] font-black uppercase tracking-[0.4em] transition-all hover:scale-[1.02] active:scale-95 shadow-[0_0_40px_rgba(250,204,21,0.2)] disabled:opacity-50 flex items-center justify-center gap-3"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckIcon className="w-4 h-4" />}
                 {saving ? 'Gravando...' : 'Finalizar Pedido'}
@@ -618,11 +618,11 @@ const Vendas: React.FC = () => {
       {/* Modal Inteligente de Saldo (Visualização de Detalhes) */}
       {selectedPedido && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={() => setSelectedPedido(null)} />
-          <div className="bg-[#141414] rounded-[40px] shadow-2xl w-full max-w-4xl relative z-10 border border-white/10 overflow-hidden animate-in zoom-in-95">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setSelectedPedido(null)} />
+          <div className="bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl relative z-10 border border-white/10 overflow-hidden animate-in zoom-in-95">
             <header className="px-10 py-10 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-6">
-                <div className="p-4 bg-[#facc15] rounded-2xl"><Package className="w-8 h-8 text-black" /></div>
+                <div className="p-4 bg-[#facc15] rounded-xl"><Package className="w-8 h-8 text-black" /></div>
                 <div>
                   <h3 className="text-3xl font-black text-white uppercase tracking-tighter leading-none">{selectedPedido.cliente_nome}</h3>
                   <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-2">Validação de Saldo Industrial Consolidado</p>
@@ -636,7 +636,7 @@ const Vendas: React.FC = () => {
                 <h6 className="text-[10px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
                   <Box className="w-4 h-4 text-[#facc15]" /> Cruzamento de Saldo por SKU
                 </h6>
-                <div className="border border-white/5 rounded-[32px] overflow-hidden bg-black/40">
+                <div className="border border-white/5 rounded-2xl overflow-hidden bg-black/20">
                   <table className="w-full text-left">
                     <thead className="bg-white/5 text-[9px] text-slate-500 font-black uppercase tracking-widest border-b border-white/5">
                       <tr>
@@ -651,7 +651,7 @@ const Vendas: React.FC = () => {
                         const produzido = getProducaoParaPedido(item.produto_id);
                         const pronto = produzido >= item.quantidade;
                         return (
-                          <tr key={idx} className={pronto ? 'bg-[#22c55e]/5' : 'bg-transparent'}>
+                          <tr key={idx} className={pronto ? 'bg-green-500/5' : 'bg-transparent'}>
                             <td className="px-8 py-5 font-black text-white uppercase">{item.produtos?.nome || 'SKU'}</td>
                             <td className="px-8 py-5 text-center font-bold">{item.quantidade.toLocaleString('pt-BR')}</td>
                             <td className="px-8 py-5 text-center font-black text-[#facc15] text-lg">{produzido.toLocaleString('pt-BR')}</td>
@@ -671,16 +671,16 @@ const Vendas: React.FC = () => {
               </div>
             </div>
 
-            <footer className="px-10 py-10 bg-black/60 border-t border-white/5 flex gap-6">
-              <button onClick={() => setSelectedPedido(null)} className="flex-1 py-5 border border-white/10 rounded-3xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors">Fechar Painel</button>
+            <footer className="px-10 py-10 bg-black/40 border-t border-white/5 flex gap-6">
+              <button onClick={() => setSelectedPedido(null)} className="flex-1 py-5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors">Fechar Painel</button>
               {(() => {
                 const todosProntos = selectedPedido.itens_pedido?.every((item: any) => getProducaoParaPedido(item.produto_id) >= item.quantidade);
                 return (
                   <button
                     onClick={() => handleFinalizarPedido(selectedPedido.id)}
                     disabled={saving || selectedPedido.status === 'Finalizado' || !todosProntos}
-                    className={`flex-[2] py-5 rounded-3xl text-[10px] font-black uppercase tracking-[0.4em] transition-all ${todosProntos && selectedPedido.status !== 'Finalizado'
-                      ? 'bg-[#22c55e] text-black shadow-[0_0_40px_rgba(34,197,94,0.3)] hover:scale-[1.02]'
+                    className={`flex-[2] py-5 rounded-xl text-[10px] font-black uppercase tracking-[0.4em] transition-all ${todosProntos && selectedPedido.status !== 'Finalizado'
+                      ? 'bg-green-500 text-black shadow-[0_0_40px_rgba(34,197,94,0.3)] hover:scale-[1.02]'
                       : 'bg-slate-800 text-slate-500 opacity-50 cursor-not-allowed'
                       }`}
                   >
@@ -696,11 +696,11 @@ const Vendas: React.FC = () => {
       {/* Modal de Ajuste Rápido (Somente Visualização do Saldo Real Nexus) */}
       {editingStock && (
         <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => !saving && setEditingStock(null)} />
-          <div className="bg-[#0d0d0d] rounded-[40px] shadow-2xl w-full max-w-md relative z-10 border border-[#facc15]/20 flex flex-col p-10 animate-in zoom-in-95">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => !saving && setEditingStock(null)} />
+          <div className="bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md relative z-10 border border-white/10 flex flex-col p-10 animate-in zoom-in-95">
             <header className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-[#facc15] rounded-2xl">
+                <div className="p-3 bg-[#facc15] rounded-xl">
                   <Database className="w-6 h-6 text-black" />
                 </div>
                 <div>
@@ -716,7 +716,7 @@ const Vendas: React.FC = () => {
             <div className="space-y-6 text-center">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Saldo Acumulado Real</label>
-                <div className="py-8 bg-white/5 rounded-3xl border border-white/10">
+                <div className="py-8 bg-white/5 rounded-2xl border border-white/10">
                   <span className="text-5xl font-black text-white">{adjustmentValue.toLocaleString('pt-BR')}</span>
                   <p className="text-[9px] font-bold text-slate-500 uppercase mt-2 tracking-widest">Unidades Disponíveis</p>
                 </div>
@@ -729,7 +729,7 @@ const Vendas: React.FC = () => {
             <footer className="mt-10 flex gap-4">
               <button
                 onClick={() => setEditingStock(null)}
-                className="w-full py-4 bg-[#facc15] text-black rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-95"
+                className="w-full py-4 bg-[#facc15] text-black rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-95"
               >
                 <CheckIcon className="w-4 h-4" /> Validado Nexus
               </button>

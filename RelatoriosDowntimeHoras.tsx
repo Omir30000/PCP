@@ -250,38 +250,40 @@ const RelatoriosDowntimeHoras: React.FC = () => {
             {/* Header Premium Nexus */}
             <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-2xl print:hidden">
                 <div className="flex items-center gap-4 w-full xl:w-auto">
-                    <div className="p-3 bg-cyan-600 rounded-xl text-white shadow-lg shadow-cyan-500/20">
+                    <div className="p-3 bg-[#facc15] rounded-xl text-black shadow-lg shadow-[#facc15]/20">
                         <Clock className="w-6 h-6" />
                     </div>
                     <div>
                         <h2 className="text-xl font-bold uppercase tracking-tight text-white leading-tight">Downtime Analytics (Horas)</h2>
-                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest leading-none mt-1">Visão Gerencial de Disponibilidade Industrial</p>
+                        <p className="text-[#facc15] text-[10px] font-black uppercase tracking-widest leading-none mt-1 flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#facc15] animate-pulse" /> Visão Gerencial de Disponibilidade Industrial
+                        </p>
                     </div>
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
                     <div className="flex flex-col sm:flex-row items-center gap-3">
-                        <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border-2 border-white/5 focus-within:border-cyan-500 transition-all shadow-sm">
-                            <Calendar className="w-5 h-5 text-cyan-400" />
+                        <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-xl border border-white/5 focus-within:border-[#facc15]/50 transition-all shadow-sm">
+                            <Calendar className="w-5 h-5 text-slate-500" />
                             <div className="flex flex-col">
-                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Início</span>
+                                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Início</span>
                                 <input
                                     type="date"
                                     value={dataInicio}
                                     onChange={e => setDataInicio(e.target.value)}
-                                    className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-cyan-400"
+                                    className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-[#facc15]"
                                 />
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border-2 border-white/5 focus-within:border-cyan-500 transition-all shadow-sm">
-                            <Calendar className="w-5 h-5 text-cyan-400" />
+                        <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-xl border border-white/5 focus-within:border-[#facc15]/50 transition-all shadow-sm">
+                            <Calendar className="w-5 h-5 text-slate-500" />
                             <div className="flex flex-col">
-                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Fim</span>
+                                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Fim</span>
                                 <input
                                     type="date"
                                     value={dataFim}
                                     onChange={e => setDataFim(e.target.value)}
-                                    className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-cyan-400"
+                                    className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-[#facc15]"
                                 />
                             </div>
                         </div>
@@ -290,7 +292,7 @@ const RelatoriosDowntimeHoras: React.FC = () => {
                     <select
                         value={turno}
                         onChange={e => setTurno(e.target.value)}
-                        className="bg-white/10 border border-white/10 p-2 rounded-xl text-xs font-bold uppercase outline-none cursor-pointer text-white"
+                        className="bg-white/5 border border-white/10 p-2.5 rounded-xl text-[10px] font-black uppercase outline-none cursor-pointer text-white"
                     >
                         <option value="todos" className="bg-slate-900">Todos os Turnos</option>
                         <option value="1º Turno" className="bg-slate-900">1º Turno</option>
@@ -300,7 +302,7 @@ const RelatoriosDowntimeHoras: React.FC = () => {
                     <select
                         value={linhaId}
                         onChange={e => setLinhaId(e.target.value)}
-                        className="bg-white/10 border border-white/10 p-2 rounded-xl text-xs font-bold uppercase outline-none cursor-pointer text-white"
+                        className="bg-white/5 border border-white/10 p-2.5 rounded-xl text-[10px] font-black uppercase outline-none cursor-pointer text-white"
                     >
                         <option value="todos" className="bg-slate-900">Grade Completa</option>
                         {linhas.map(l => <option key={l.id} value={l.id} className="bg-slate-900">{l.nome}</option>)}
@@ -309,7 +311,7 @@ const RelatoriosDowntimeHoras: React.FC = () => {
                     <button
                         onClick={fetchData}
                         disabled={loading}
-                        className="px-6 py-3 bg-cyan-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-cyan-700 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-cyan-500/20 disabled:opacity-50"
+                        className="px-6 py-3 bg-[#facc15] text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-[#facc15]/10 disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                         {loading ? 'Sincronizando...' : 'Consolidar'}
@@ -317,7 +319,7 @@ const RelatoriosDowntimeHoras: React.FC = () => {
 
                     <button
                         onClick={handlePrint}
-                        className="px-6 py-3 bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-all flex items-center gap-2 border border-white/10 shadow-xl"
+                        className="px-6 py-3 bg-white/5 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2 border border-white/10 shadow-xl"
                     >
                         <Printer className="w-4 h-4" />
                         Imprimir A4

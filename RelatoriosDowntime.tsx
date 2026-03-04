@@ -273,41 +273,41 @@ const RelatoriosDowntime: React.FC = () => {
     <div className="w-full max-w-[98%] mx-auto space-y-8 animate-in fade-in duration-500 pb-12 font-sans text-slate-100 print:text-black">
 
       {/* Controles Nexus */}
-      <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/50 p-4 lg:p-6 rounded-2xl border border-white/10 shadow-sm print:hidden">
+      <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-2xl print:hidden">
         <div className="flex items-center gap-4 w-full xl:w-auto">
-          <div className="p-3 bg-red-600 rounded-xl text-white shadow-lg shadow-red-200">
+          <div className="p-3 bg-red-600 rounded-xl text-white shadow-lg shadow-red-500/20">
             <Timer className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-xl font-bold uppercase tracking-tight">Analítica de Downtime</h2>
-            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Sincronização de Inatividade JSONB</p>
+            <h2 className="text-xl font-bold uppercase tracking-tight text-white leading-tight">Analítica de Downtime</h2>
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest leading-none mt-1">Sincronização de Inatividade JSONB</p>
           </div>
         </div>
 
         <div className="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
           <div className="flex flex-col sm:flex-row items-center gap-3">
-            <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 focus-within:border-blue-500 transition-all shadow-sm">
-              <Calendar className="w-5 h-5 text-blue-600" />
+            <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border-2 border-white/5 focus-within:border-red-500 transition-all shadow-sm">
+              <Calendar className="w-5 h-5 text-red-400" />
               <div className="flex flex-col">
                 <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Início</span>
                 <input
                   type="date"
                   value={dataInicio}
                   onChange={e => setDataInicio(e.target.value)}
-                  className="bg-transparent text-[11px] font-black uppercase outline-none text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                  className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-red-400 transition-colors"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 focus-within:border-blue-500 transition-all shadow-sm">
-              <Calendar className="w-5 h-5 text-blue-600" />
+            <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border-2 border-white/5 focus-within:border-red-500 transition-all shadow-sm">
+              <Calendar className="w-5 h-5 text-red-400" />
               <div className="flex flex-col">
                 <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Fim</span>
                 <input
                   type="date"
                   value={dataFim}
                   onChange={e => setDataFim(e.target.value)}
-                  className="bg-transparent text-[11px] font-black uppercase outline-none text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
+                  className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-red-400 transition-colors"
                 />
               </div>
             </div>
@@ -316,25 +316,25 @@ const RelatoriosDowntime: React.FC = () => {
           <select
             value={turno}
             onChange={e => setTurno(e.target.value)}
-            className="bg-slate-50 border border-slate-200 p-2 rounded-xl text-xs font-bold uppercase outline-none cursor-pointer text-slate-900"
+            className="bg-white/10 border border-white/10 p-2 rounded-xl text-xs font-bold uppercase outline-none cursor-pointer text-white"
           >
-            <option value="todos">Todos os Turnos</option>
-            <option value="1º Turno">1º Turno</option>
-            <option value="2º Turno">2º Turno</option>
+            <option value="todos" className="bg-slate-900">Todos os Turnos</option>
+            <option value="1º Turno" className="bg-slate-900">1º Turno</option>
+            <option value="2º Turno" className="bg-slate-900">2º Turno</option>
           </select>
 
           <select
             value={linhaId}
             onChange={e => setLinhaId(e.target.value)}
-            className="bg-slate-50 border border-slate-200 p-2 rounded-xl text-xs font-bold uppercase outline-none cursor-pointer text-slate-900"
+            className="bg-white/10 border border-white/10 p-2 rounded-xl text-xs font-bold uppercase outline-none cursor-pointer text-white"
           >
-            <option value="todos">Grade Completa</option>
-            {linhas.map(l => <option key={l.id} value={l.id}>{l.nome}</option>)}
+            <option value="todos" className="bg-slate-900">Grade Completa</option>
+            {linhas.map(l => <option key={l.id} value={l.id} className="bg-slate-900">{l.nome}</option>)}
           </select>
 
           <button
             onClick={fetchData}
-            className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-200"
+            className="px-6 py-3 bg-red-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-700 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-red-500/20"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             Consolidar
@@ -342,7 +342,7 @@ const RelatoriosDowntime: React.FC = () => {
 
           <button
             onClick={handlePrint}
-            className="px-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg shadow-slate-200"
+            className="px-6 py-3 bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-all flex items-center gap-2 border border-white/10 shadow-xl"
           >
             <Printer className="w-4 h-4" />
             Imprimir A4

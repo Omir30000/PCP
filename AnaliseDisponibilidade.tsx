@@ -118,29 +118,28 @@ const AnaliseDisponibilidade: React.FC = () => {
     <div className="space-y-8 animate-in fade-in duration-700 pb-20 w-full max-w-[98%] mx-auto font-sans">
 
       {/* Header Analítico */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white/70 backdrop-blur-xl p-8 rounded-[40px] border border-white/20 shadow-2xl shadow-slate-200/50 w-full relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-100/30 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-slate-900/90 backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-2xl w-full relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
 
         <div className="flex items-center gap-6 relative z-10">
-          <div className="bg-slate-900 p-4 rounded-[28px] shadow-2xl shadow-slate-400/20 shrink-0">
-            <Scale className="text-blue-400 w-8 h-8" />
+          <div className="bg-blue-600 p-4 rounded-xl shadow-lg shadow-blue-500/20 shrink-0 text-white">
+            <Scale className="w-8 h-8" />
           </div>
           <div>
-            <h2 className="text-2xl md:text-3xl font-black text-slate-800 uppercase tracking-tighter leading-none">Balanço de Disponibilidade</h2>
+            <h2 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter leading-none">Balanço de Disponibilidade</h2>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-2 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-500" /> Inteligência de Backlog e Inventário
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" /> Inteligência de Backlog e Inventário
             </p>
           </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto relative z-10">
-          <div className="flex bg-slate-100/50 p-1 rounded-2xl border border-slate-200/50">
+          <div className="flex bg-white/10 p-1 rounded-xl border border-white/10 backdrop-blur-sm">
             {CATEGORIAS.map(cat => (
               <button
                 key={cat}
                 onClick={() => setFiltroCategoria(cat)}
-                className={`px-5 py-2 text-[10px] font-black rounded-xl transition-all uppercase tracking-widest ${filtroCategoria === cat ? 'bg-white text-blue-600 shadow-md' : 'text-slate-500 hover:text-slate-800'
-                  }`}
+                className={`px-5 py-2 text-[10px] font-black rounded-lg transition-all uppercase tracking-widest ${filtroCategoria === cat ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-slate-400 hover:text-white'}`}
               >
                 {cat}
               </button>
@@ -148,7 +147,7 @@ const AnaliseDisponibilidade: React.FC = () => {
           </div>
           <button
             onClick={fetchData}
-            className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 rounded-full flex items-center justify-center gap-3 font-black uppercase text-[10px] tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-slate-200"
+            className="bg-slate-800 border border-white/10 hover:bg-slate-700 text-white px-8 py-3 rounded-xl flex items-center justify-center gap-3 font-black uppercase text-[10px] tracking-[0.2em] transition-all active:scale-95 shadow-xl"
           >
             <RefreshCw className="w-4 h-4" /> Atualizar Dados
           </button>
@@ -198,8 +197,8 @@ const AnaliseDisponibilidade: React.FC = () => {
                 <tr
                   key={p.id}
                   className={`transition-all ${p.status === 'critico' ? 'bg-red-50/40' :
-                      p.status === 'excesso' ? 'bg-amber-50/40' :
-                        'hover:bg-slate-50'
+                    p.status === 'excesso' ? 'bg-amber-50/40' :
+                      'hover:bg-slate-50'
                     }`}
                 >
                   <td className="px-10 py-6">
@@ -219,14 +218,14 @@ const AnaliseDisponibilidade: React.FC = () => {
                   <td className="px-10 py-6 text-right">
                     <div className="flex flex-col items-end">
                       <span className={`text-lg font-black tracking-tighter ${p.status === 'critico' ? 'text-red-600' :
-                          p.status === 'excesso' ? 'text-amber-600' :
-                            'text-emerald-600'
+                        p.status === 'excesso' ? 'text-amber-600' :
+                          'text-emerald-600'
                         }`}>
                         {p.saldoFinal.toLocaleString()}
                       </span>
                       <span className={`text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-widest ${p.status === 'critico' ? 'bg-red-600 text-white animate-pulse' :
-                          p.status === 'excesso' ? 'bg-amber-100 text-amber-700' :
-                            'bg-emerald-100 text-emerald-700'
+                        p.status === 'excesso' ? 'bg-amber-100 text-amber-700' :
+                          'bg-emerald-100 text-emerald-700'
                         }`}>
                         {p.status === 'critico' ? 'Ruptura' : p.status === 'excesso' ? 'Excesso' : 'Equilibrado'}
                       </span>

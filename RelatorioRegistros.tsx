@@ -441,23 +441,23 @@ const RelatorioRegistros: React.FC = () => {
         <div className="space-y-6 animate-in fade-in duration-500">
 
             {/* Header */}
-            <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-3xl border border-white/10 shadow-2xl mb-8">
+            <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-2xl mb-8">
                 <div className="flex items-center gap-4 w-full xl:w-auto">
-                    <div className="p-3 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-500/20">
+                    <div className="p-3 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-500/20">
                         <History className="w-6 h-6" />
                     </div>
                     <div>
                         <h2 className="text-xl font-bold uppercase tracking-tight text-white leading-tight">Registros de Produção</h2>
-                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Auditoria e Rastreabilidade Industrial</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest leading-none mt-1">Auditoria e Rastreabilidade Industrial</p>
                     </div>
                 </div>
             </div>
 
             {/* Filtros Premium */}
-            <form onSubmit={handleSearch} className="bg-slate-900/50 backdrop-blur-md p-6 rounded-3xl border border-white/10 grid grid-cols-1 md:grid-cols-4 gap-6 items-end shadow-xl">
+            <form onSubmit={handleSearch} className="bg-slate-900/50 backdrop-blur-md p-6 rounded-2xl border border-white/10 grid grid-cols-1 md:grid-cols-4 gap-6 items-end shadow-xl">
                 <div className="flex flex-col sm:flex-row items-center gap-3 md:col-span-2">
-                    <div className="flex-1 flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border-2 border-white/10 focus-within:border-blue-500 transition-all shadow-sm w-full">
-                        <Calendar className="w-5 h-5 text-blue-500" />
+                    <div className="flex-1 flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border-2 border-white/5 focus-within:border-blue-500 transition-all shadow-sm w-full">
+                        <Calendar className="w-5 h-5 text-blue-400" />
                         <div className="flex flex-col">
                             <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Início</span>
                             <input
@@ -469,8 +469,8 @@ const RelatorioRegistros: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="flex-1 flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border-2 border-white/10 focus-within:border-blue-500 transition-all shadow-sm w-full">
-                        <Calendar className="w-5 h-5 text-blue-500" />
+                    <div className="flex-1 flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border-2 border-white/5 focus-within:border-blue-500 transition-all shadow-sm w-full">
+                        <Calendar className="w-5 h-5 text-blue-400" />
                         <div className="flex flex-col">
                             <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Fim</span>
                             <input
@@ -485,16 +485,16 @@ const RelatorioRegistros: React.FC = () => {
 
                 <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Filter className="w-3 h-3 text-blue-500" /> Linha (Opcional)
+                        <Filter className="w-3 h-3 text-blue-400" /> Linha (Opcional)
                     </label>
                     <select
                         value={linhaFiltro}
                         onChange={(e) => setLinhaFiltro(e.target.value)}
-                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                        className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
                     >
-                        <option value="">Todas as Linhas</option>
+                        <option value="" className="bg-slate-900">Todas as Linhas</option>
                         {linhasOpcoes.map(l => (
-                            <option key={l.id} value={l.id}>{l.nome}</option>
+                            <option key={l.id} value={l.id} className="bg-slate-900">{l.nome}</option>
                         ))}
                     </select>
                 </div>

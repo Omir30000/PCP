@@ -359,14 +359,14 @@ const PaginaRegistro: React.FC = () => {
   return (
     <div className="max-w-[98%] mx-auto space-y-8 w-full animate-in fade-in duration-700 pb-20 font-sans text-slate-900 dark:text-slate-100">
 
-      <header className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/50 backdrop-blur-xl p-6 lg:p-8 rounded-[32px] border border-white/5 shadow-2xl w-full relative overflow-hidden">
+      <header className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 lg:p-8 rounded-2xl border border-white/10 shadow-2xl w-full relative overflow-hidden">
         <div className="absolute top-0 left-0 w-64 h-64 bg-[#facc15]/10 rounded-full -ml-32 -mt-32 blur-3xl pointer-events-none" />
-        <div className="flex items-center gap-6 relative z-10">
-          <div className="bg-[#facc15] p-4 rounded-[24px] shadow-2xl shadow-nexus/10 shrink-0">
-            <Activity className="w-8 h-8 text-black" />
+        <div className="flex items-center gap-6 relative z-10 w-full xl:w-auto">
+          <div className="bg-[#facc15] p-4 rounded-xl shadow-lg shadow-[#facc15]/20 shrink-0 text-black">
+            <Activity className="w-8 h-8" />
           </div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter leading-none uppercase">Apontamento Industrial</h1>
+            <h1 className="text-3xl md:text-3xl font-black text-white tracking-tighter leading-none uppercase">Apontamento Industrial</h1>
             <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
               <Layers className="w-3 h-3 text-[#facc15]" /> Nexus Production Intelligence
             </p>
@@ -374,22 +374,22 @@ const PaginaRegistro: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4 relative z-10 w-full xl:w-auto overflow-x-auto no-scrollbar pb-2 xl:pb-0">
-          <div className="flex items-center gap-3 bg-black/20 px-6 py-4 rounded-2xl border border-white/5 shadow-sm min-w-fit">
+          <div className="flex items-center gap-3 bg-white/10 px-6 py-3 rounded-xl border border-white/10 shadow-sm min-w-fit">
             <User className="w-4 h-4 text-[#facc15]" />
             <div className="flex flex-col leading-none">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Colaborador</span>
-              <span className="text-xs font-black text-slate-200">OPERADOR NEXUS</span>
+              <span className="text-xs font-black text-white uppercase">OPERADOR NEXUS</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-black/20 px-4 py-3 rounded-2xl border border-white/5 shadow-sm min-w-fit">
+          <div className="flex items-center gap-3 bg-white/10 px-4 py-2.5 rounded-xl border border-white/10 shadow-sm min-w-fit">
             <MessageSquare className={`w-4 h-4 ${enviarWhatsApp ? 'text-emerald-400' : 'text-slate-500'}`} />
             <div className="flex flex-col leading-none">
               <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Enviar WhatsApp?</span>
               <select
                 value={enviarWhatsApp ? 'sim' : 'nao'}
                 onChange={e => setEnviarWhatsApp(e.target.value === 'sim')}
-                className="bg-transparent text-[11px] font-black text-slate-200 outline-none uppercase cursor-pointer"
+                className="bg-transparent text-[11px] font-black text-white outline-none uppercase cursor-pointer"
               >
                 <option value="sim" className="bg-slate-900">Sim</option>
                 <option value="nao" className="bg-slate-900">Não</option>
@@ -399,7 +399,7 @@ const PaginaRegistro: React.FC = () => {
         </div>
 
         {message && (
-          <div className={`px-6 py-3 rounded-2xl flex items-center gap-3 animate-in slide-in-from-right duration-500 relative z-10 ${message.type === 'success' ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-200' : 'bg-red-500 text-white shadow-xl shadow-red-200'
+          <div className={`px-6 py-3 rounded-xl flex items-center gap-3 animate-in slide-in-from-right duration-500 relative z-10 ${message.type === 'success' ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-500/20' : 'bg-red-600 text-white shadow-xl shadow-red-500/20'
             }`}>
             {message.type === 'success' ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertTriangle className="w-5 h-5 shrink-0" />}
             <span className="font-black text-[10px] uppercase tracking-widest">{message.text}</span>
@@ -417,8 +417,8 @@ const PaginaRegistro: React.FC = () => {
         className="space-y-8 w-full"
       >
         {/* I. Contexto da Operação */}
-        <section className="bg-slate-900/40 backdrop-blur-md p-8 lg:p-12 rounded-[40px] border border-white/5 shadow-xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-900/10 rounded-full -mr-48 -mt-48 blur-3xl pointer-events-none group-hover:bg-blue-100/30 transition-all duration-700" />
+        <section className="bg-slate-900/40 backdrop-blur-md p-8 lg:p-12 rounded-2xl border border-white/5 shadow-xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full -mr-48 -mt-48 blur-3xl pointer-events-none group-hover:bg-blue-500/10 transition-all duration-700" />
 
           <div className="relative z-10 space-y-12">
             <div className="flex items-center gap-4 border-l-4 border-[#facc15] pl-6">
@@ -428,13 +428,13 @@ const PaginaRegistro: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-8 gap-6 lg:gap-4 w-full">
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                  <Calendar className="w-3 h-3" /> Data
+                  <Calendar className="w-3 h-3 text-[#facc15]" /> Data
                 </label>
                 <input
                   type="date"
                   value={formData.data_registro}
                   onChange={e => setFormData({ ...formData, data_registro: e.target.value })}
-                  className="w-full bg-slate-100 dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-slate-900 dark:text-white transition-all outline-none focus:border-[#facc15]"
+                  className="w-full bg-white/10 border-2 border-white/5 p-4 rounded-xl text-[11px] font-black uppercase text-white transition-all outline-none focus:border-[#facc15]"
                   required
                 />
               </div>
@@ -446,10 +446,10 @@ const PaginaRegistro: React.FC = () => {
                 <select
                   value={formData.turno}
                   onChange={e => setFormData({ ...formData, turno: e.target.value })}
-                  className="w-full bg-slate-100 dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-slate-900 dark:text-white transition-all outline-none focus:border-[#facc15]"
+                  className="w-full bg-white/10 border-2 border-white/5 p-4 rounded-xl text-[11px] font-black uppercase text-white transition-all outline-none focus:border-[#facc15]"
                 >
-                  <option value="1º Turno" className="bg-white dark:bg-slate-900">1º TURNO</option>
-                  <option value="2º Turno" className="bg-white dark:bg-slate-900">2º TURNO</option>
+                  <option value="1º Turno" className="bg-slate-900">1º TURNO</option>
+                  <option value="2º Turno" className="bg-slate-900">2º TURNO</option>
                 </select>
               </div>
 
@@ -461,7 +461,7 @@ const PaginaRegistro: React.FC = () => {
                   type="time"
                   value={formData.hora_inicio_turno}
                   onChange={e => setFormData({ ...formData, hora_inicio_turno: e.target.value })}
-                  className="w-full bg-slate-100 dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-slate-900 dark:text-white transition-all outline-none focus:border-[#facc15]"
+                  className="w-full bg-white/10 border-2 border-white/5 p-4 rounded-xl text-[11px] font-black uppercase text-white transition-all outline-none focus:border-[#facc15]"
                 />
               </div>
 
@@ -473,7 +473,7 @@ const PaginaRegistro: React.FC = () => {
                   type="time"
                   value={formData.hora_fim_turno}
                   onChange={e => setFormData({ ...formData, hora_fim_turno: e.target.value })}
-                  className="w-full bg-slate-100 dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-slate-900 dark:text-white transition-all outline-none focus:border-[#facc15]"
+                  className="w-full bg-white/10 border-2 border-white/5 p-4 rounded-xl text-[11px] font-black uppercase text-white transition-all outline-none focus:border-[#facc15]"
                 />
               </div>
 
@@ -485,7 +485,7 @@ const PaginaRegistro: React.FC = () => {
                   type="number"
                   value={formData.carga_horaria}
                   readOnly
-                  className="w-full bg-slate-50 dark:bg-black/20 border-2 border-slate-100 dark:border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-slate-400 dark:text-slate-500 outline-none cursor-not-allowed"
+                  className="w-full bg-white/5 border-2 border-white/5 p-4 rounded-xl text-[11px] font-black uppercase text-slate-500 outline-none cursor-not-allowed"
                 />
               </div>
 
@@ -498,7 +498,7 @@ const PaginaRegistro: React.FC = () => {
                   placeholder="REF LOTE"
                   value={formData.lote}
                   onChange={e => setFormData({ ...formData, lote: e.target.value })}
-                  className="w-full bg-slate-100 dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-slate-900 dark:text-white transition-all outline-none focus:border-[#facc15]"
+                  className="w-full bg-white/10 border-2 border-white/5 p-4 rounded-xl text-[11px] font-black uppercase text-white transition-all outline-none focus:border-[#facc15]"
                 />
               </div>
 
@@ -509,11 +509,11 @@ const PaginaRegistro: React.FC = () => {
                 <select
                   value={formData.linha_producao}
                   onChange={e => setFormData({ ...formData, linha_producao: e.target.value })}
-                  className="w-full bg-slate-100 dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-slate-900 dark:text-white transition-all outline-none focus:border-[#facc15]"
+                  className="w-full bg-white/10 border-2 border-white/5 p-4 rounded-xl text-[11px] font-black uppercase text-white transition-all outline-none focus:border-[#facc15]"
                   required
                 >
-                  <option value="" className="bg-white dark:bg-slate-900">Selecione...</option>
-                  {linhas.map(l => (<option key={l.id} value={l.id} className="bg-white dark:bg-slate-900">{l.nome}</option>))}
+                  <option value="" className="bg-slate-900">Selecione...</option>
+                  {linhas.map(l => (<option key={l.id} value={l.id} className="bg-slate-900">{l.nome}</option>))}
                 </select>
               </div>
 
@@ -524,10 +524,10 @@ const PaginaRegistro: React.FC = () => {
                 <select
                   value={formData.produto_volume}
                   onChange={e => setFormData({ ...formData, produto_volume: e.target.value })}
-                  className="w-full bg-slate-100 dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 p-4 rounded-2xl text-[11px] font-black uppercase text-slate-900 dark:text-white transition-all outline-none focus:border-[#facc15]"
+                  className="w-full bg-white/10 border-2 border-white/5 p-4 rounded-xl text-[11px] font-black uppercase text-white transition-all outline-none focus:border-[#facc15]"
                   required
                 >
-                  <option value="" className="bg-white dark:bg-slate-900">Selecione...</option>
+                  <option value="" className="bg-slate-900">Selecione...</option>
                   {produtos
                     .filter(p => {
                       if (!formData.linha_producao) return true;
@@ -535,20 +535,20 @@ const PaginaRegistro: React.FC = () => {
                       const allowedProducts = LINHA_PRODUTO_MAP[linhaNome] || [];
                       return allowedProducts.includes(p.nome);
                     })
-                    .map(p => (<option key={p.id} value={p.id} className="bg-white dark:bg-slate-900">{p.nome}</option>))}
+                    .map(p => (<option key={p.id} value={p.id} className="bg-slate-900">{p.nome}</option>))}
                 </select>
               </div>
             </div>
           </div>
         </section>
         {/* II. Fluxo de Volumes */}
-        <section className="bg-white/80 dark:bg-slate-900/40 backdrop-blur-md p-8 lg:p-12 rounded-[40px] border border-white dark:border-white/5 shadow-xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-50/50 dark:bg-blue-900/10 rounded-full -mr-48 -mt-48 blur-3xl pointer-events-none group-hover:bg-blue-100/30 transition-all duration-700" />
+        <section className="bg-slate-900/40 backdrop-blur-md p-8 lg:p-12 rounded-2xl border border-white/5 shadow-xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full -mr-48 -mt-48 blur-3xl pointer-events-none group-hover:bg-blue-500/10 transition-all duration-700" />
           <div className="relative z-10 space-y-6">
             <div className="flex items-center gap-4 border-l-4 border-blue-500 pl-6">
-              <h2 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-[0.2em]">Volume Produzido</h2>
+              <h2 className="text-sm font-black text-slate-200 uppercase tracking-[0.2em]">Volume Produzido</h2>
             </div>
-            <div className="bg-slate-900/50 p-8 rounded-3xl border border-white/10">
+            <div className="bg-white/5 p-8 rounded-2xl border border-white/10">
               <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
                 Digite a quantidade produzida:
               </label>
@@ -559,7 +559,7 @@ const PaginaRegistro: React.FC = () => {
                   const val = e.target.value;
                   setFormData({ ...formData, quantidade_produced: val === '' ? 0 : Number(val) });
                 }}
-                className="w-full bg-black/40 border-2 border-white/10 p-6 rounded-2xl text-6xl font-black text-blue-400 outline-none focus:border-blue-500 transition-all text-center"
+                className="w-full bg-black/20 border-2 border-white/5 p-6 rounded-xl text-6xl font-black text-blue-400 outline-none focus:border-blue-500 transition-all text-center"
                 placeholder="0"
                 required
               />
@@ -568,14 +568,14 @@ const PaginaRegistro: React.FC = () => {
         </section>
 
         {/* III. Registro de Inatividade */}
-        <section className="bg-white/80 dark:bg-slate-900/40 backdrop-blur-md p-8 lg:p-12 rounded-[40px] border border-white dark:border-white/5 shadow-xl relative overflow-hidden group">
+        <section className="bg-slate-900/40 backdrop-blur-md p-8 lg:p-12 rounded-2xl border border-white/5 shadow-xl relative overflow-hidden group">
           <div className="relative z-10 space-y-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6 border-l-4 border-red-500 pl-6">
-              <h2 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-[0.2em]">Registro de Inatividade</h2>
+              <h2 className="text-sm font-black text-slate-200 uppercase tracking-[0.2em]">Registro de Inatividade</h2>
               <button
                 type="button"
                 onClick={handleAddParada}
-                className="bg-slate-900 dark:bg-[#facc15] text-white dark:text-black px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-slate-200 dark:shadow-nexus/10"
+                className="bg-[#facc15] text-black px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#facc15]/10"
               >
                 + Adicionar Parada
               </button>
@@ -583,31 +583,31 @@ const PaginaRegistro: React.FC = () => {
 
             <div className="space-y-6">
               {paradas.length === 0 ? (
-                <div className="bg-slate-50 dark:bg-black/20 border-2 border-dashed border-slate-200 dark:border-white/5 rounded-[32px] p-20 text-center group hover:border-[#facc15] transition-colors">
-                  <ZapOff className="w-16 h-16 text-slate-200 dark:text-slate-800 mx-auto mb-6 group-hover:scale-110 transition-transform" />
-                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Nenhuma parada registrada para este turno</p>
+                <div className="bg-white/5 border-2 border-dashed border-white/5 rounded-2xl p-20 text-center group hover:border-[#facc15]/30 transition-colors">
+                  <ZapOff className="w-16 h-16 text-slate-800 mx-auto mb-6 group-hover:scale-110 transition-transform" />
+                  <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Nenhuma parada registrada para este turno</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-4">
                   {paradas.map((parada, index) => (
                     <div
                       key={index}
-                      className="bg-white dark:bg-slate-900/60 p-4 lg:p-6 rounded-3xl border border-slate-100 dark:border-white/5 shadow-sm flex flex-col xl:flex-row items-center gap-6 relative group hover:border-red-200 dark:hover:border-red-900/30 transition-all"
+                      className="bg-white/5 p-4 lg:p-6 rounded-xl border border-white/5 shadow-sm flex flex-col xl:flex-row items-center gap-6 relative group hover:border-red-500/30 transition-all"
                     >
                       <div className="w-full lg:w-40">
                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Equipamento</label>
                         <select
                           value={parada.maquina_id}
                           onChange={e => updateParada(index, 'maquina_id', e.target.value)}
-                          className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-3 rounded-xl text-[11px] font-bold uppercase outline-none focus:border-red-500 dark:text-white"
+                          className="w-full bg-white/10 border-2 border-white/5 p-3 rounded-xl text-[11px] font-bold uppercase outline-none focus:border-red-500 text-white"
                         >
-                          <option value="" className="dark:bg-slate-900">Selecione</option>
+                          <option value="" className="bg-slate-900">Selecione</option>
                           {LISTA_EQUIPAMENTOS.map(m => (
-                            <option key={m} value={m} className="dark:bg-slate-900">{m}</option>
+                            <option key={m} value={m} className="bg-slate-900">{m}</option>
                           ))}
                           {maquinasDaLinha.length > 0 && <option disabled className="text-slate-500">--- Máquinas da Linha ---</option>}
                           {maquinasDaLinha.map(m => (
-                            <option key={m.id} value={m.id} className="dark:bg-slate-900">{m.nome}</option>
+                            <option key={m.id} value={m.id} className="bg-slate-900">{m.nome}</option>
                           ))}
                         </select>
                       </div>
@@ -618,7 +618,7 @@ const PaginaRegistro: React.FC = () => {
                           type="text"
                           value={parada.motivo}
                           onChange={e => updateParada(index, 'motivo', e.target.value)}
-                          className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-3 rounded-xl text-[11px] font-bold uppercase text-slate-800 dark:text-white focus:border-red-500 outline-none"
+                          className="w-full bg-white/10 border-2 border-white/5 p-3 rounded-xl text-[11px] font-bold uppercase text-white focus:border-red-500 outline-none"
                           placeholder="EX: FALHA NO SENSOR"
                         />
                       </div>
@@ -628,11 +628,11 @@ const PaginaRegistro: React.FC = () => {
                         <select
                           value={parada.tipo}
                           onChange={e => updateParada(index, 'tipo', e.target.value)}
-                          className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-3 rounded-xl text-[11px] font-bold uppercase outline-none focus:border-red-500 dark:text-white"
+                          className="w-full bg-white/10 border-2 border-white/5 p-3 rounded-xl text-[11px] font-bold uppercase outline-none focus:border-red-500 text-white"
                         >
-                          <option value="" className="dark:bg-slate-900">Selecione...</option>
+                          <option value="" className="bg-slate-900">Selecione...</option>
                           {Object.keys(MOTIVOS_COMUNS).map(t => (
-                            <option key={t} value={t} className="dark:bg-slate-900">{t}</option>
+                            <option key={t} value={t} className="bg-slate-900">{t}</option>
                           ))}
                         </select>
                       </div>
@@ -644,7 +644,7 @@ const PaginaRegistro: React.FC = () => {
                             type="time"
                             value={parada.hora_inicio}
                             onChange={e => updateParada(index, 'hora_inicio', e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-3 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white outline-none"
+                            className="w-full bg-white/10 border-2 border-white/5 p-3 rounded-xl text-[11px] font-bold text-white outline-none"
                           />
                         </div>
                         <div className="space-y-2">
@@ -653,22 +653,22 @@ const PaginaRegistro: React.FC = () => {
                             type="time"
                             value={parada.hora_fim}
                             onChange={e => updateParada(index, 'hora_fim', e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-3 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white outline-none"
+                            className="w-full bg-white/10 border-2 border-white/5 p-3 rounded-xl text-[11px] font-bold text-white outline-none"
                           />
                         </div>
                       </div>
 
                       <div className="w-full lg:w-24">
                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 text-center">Duração</label>
-                        <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-xl text-center">
-                          <span className="text-base font-black text-red-600 dark:text-red-400">{parada.duracao}m</span>
+                        <div className="bg-red-500/10 p-3 rounded-xl text-center">
+                          <span className="text-base font-black text-red-500">{parada.duracao}m</span>
                         </div>
                       </div>
 
                       <button
                         type="button"
                         onClick={() => handleRemoveParada(index)}
-                        className="p-3 text-slate-300 hover:text-red-500 transition-all shrink-0"
+                        className="p-3 text-slate-600 hover:text-red-500 transition-all shrink-0"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
@@ -681,15 +681,15 @@ const PaginaRegistro: React.FC = () => {
         </section>
 
         {/* IV. Observações / Ocorrências */}
-        <section className="bg-white/80 dark:bg-slate-900/40 backdrop-blur-md p-8 lg:p-12 rounded-[40px] border border-white dark:border-white/5 shadow-xl relative">
-          <div className="flex items-center gap-4 mb-8 border-l-4 border-slate-400 pl-6">
-            <h2 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-[0.2em]">Observações / Ocorrências</h2>
+        <section className="bg-slate-900/40 backdrop-blur-md p-8 lg:p-12 rounded-2xl border border-white/5 shadow-xl relative">
+          <div className="flex items-center gap-4 mb-8 border-l-4 border-slate-500 pl-6">
+            <h2 className="text-sm font-black text-slate-200 uppercase tracking-[0.2em]">Observações / Ocorrências</h2>
           </div>
           <textarea
             value={formData.observacoes}
             onChange={e => setFormData({ ...formData, observacoes: e.target.value })}
             placeholder="Registre aqui observações relevantes, ocorrências ou detalhes adicionais do turno..."
-            className="w-full p-6 bg-slate-50 dark:bg-black/20 border-2 border-slate-200 dark:border-white/5 focus:border-[#facc15] focus:bg-white dark:focus:bg-slate-800 rounded-[24px] text-xs font-bold text-slate-700 dark:text-slate-300 transition-all outline-none min-h-[150px] shadow-inner"
+            className="w-full p-6 bg-white/5 border-2 border-white/5 focus:border-[#facc15] focus:bg-white/10 rounded-xl text-xs font-bold text-slate-300 transition-all outline-none min-h-[150px] shadow-inner"
           />
         </section>
 
@@ -697,36 +697,36 @@ const PaginaRegistro: React.FC = () => {
           <button
             type="submit"
             disabled={saving}
-            className="w-full relative group overflow-hidden bg-slate-900 dark:bg-[#facc15] text-white dark:text-black font-black py-8 md:py-10 rounded-[40px] shadow-2xl hover:scale-[1.01] transition-all flex items-center justify-center gap-6 disabled:opacity-50"
+            className="w-full relative group overflow-hidden bg-[#facc15] text-black font-black py-8 md:py-10 rounded-2xl shadow-2xl hover:scale-[1.01] transition-all flex items-center justify-center gap-6 disabled:opacity-50"
           >
             <div className="relative z-10 flex items-center gap-6">
-              {saving ? <Loader2 className="animate-spin w-10 h-10 text-[#facc15] dark:text-black" /> : <Save className="w-10 h-10 text-[#facc15] dark:text-black" />}
+              {saving ? <Loader2 className="animate-spin w-10 h-10 text-black" /> : <Save className="w-10 h-10 text-black" />}
               <span className="text-sm md:text-lg tracking-[0.5em] uppercase font-black">
                 {saving ? 'Publicando...' : 'Gravar Apontamento Industrial'}
               </span>
             </div>
-            <div className="absolute inset-0 bg-blue-600 dark:bg-nexus scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 opacity-10 dark:opacity-20" />
+            <div className="absolute inset-0 bg-white/20 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 opacity-20" />
           </button>
         </footer>
       </form>
 
       {/* Modal de Registro de Paradas */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-white/20 dark:border-white/5">
-            <div className="p-8 border-b-2 border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50/50 dark:bg-black/20">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-white/10">
+            <div className="p-8 border-b border-white/10 flex justify-between items-center bg-white/5">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-red-200 dark:shadow-red-900/20">
+                <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-red-500/20">
                   <Timer className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Detalhamento de Parada</h3>
+                  <h3 className="text-xl font-black text-white uppercase tracking-tighter">Detalhamento de Parada</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sincronização de Motivo e Sugestões</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-3 hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 rounded-2xl transition-all"
+                className="p-3 hover:bg-white/5 text-slate-400 hover:text-white rounded-xl transition-all"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -739,11 +739,11 @@ const PaginaRegistro: React.FC = () => {
                   <select
                     value={tempParada.tipo}
                     onChange={e => setTempParada({ ...tempParada, tipo: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-4 rounded-2xl text-[11px] font-bold uppercase outline-none focus:border-red-500 transition-all dark:text-slate-200"
+                    className="w-full bg-white/10 border-2 border-white/5 p-4 rounded-xl text-[11px] font-bold uppercase outline-none focus:border-red-500 transition-all text-white"
                   >
-                    <option value="" className="dark:bg-slate-900">Selecione...</option>
+                    <option value="" className="bg-slate-900">Selecione...</option>
                     {Object.keys(MOTIVOS_COMUNS).map(t => (
-                      <option key={t} value={t} className="dark:bg-slate-900">{t}</option>
+                      <option key={t} value={t} className="bg-slate-900">{t}</option>
                     ))}
                   </select>
                 </div>
@@ -753,15 +753,15 @@ const PaginaRegistro: React.FC = () => {
                   <select
                     value={tempParada.maquina_id}
                     onChange={e => setTempParada({ ...tempParada, maquina_id: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-4 rounded-2xl text-[11px] font-bold uppercase outline-none focus:border-red-500 transition-all dark:text-slate-200"
+                    className="w-full bg-white/10 border-2 border-white/5 p-4 rounded-xl text-[11px] font-bold uppercase outline-none focus:border-red-500 transition-all text-white"
                   >
-                    <option value="" className="dark:bg-slate-900">Selecione</option>
+                    <option value="" className="bg-slate-900">Selecione</option>
                     {LISTA_EQUIPAMENTOS.map(m => (
-                      <option key={m} value={m} className="dark:bg-slate-900">{m}</option>
+                      <option key={m} value={m} className="bg-slate-900">{m}</option>
                     ))}
                     {maquinasDaLinha.length > 0 && <option disabled className="text-slate-500">--- Máquinas da Linha ---</option>}
                     {maquinasDaLinha.map(m => (
-                      <option key={m.id} value={m.nome} className="dark:bg-slate-900">{m.nome}</option>
+                      <option key={m.id} value={m.nome} className="bg-slate-900">{m.nome}</option>
                     ))}
                   </select>
                 </div>
@@ -770,19 +770,19 @@ const PaginaRegistro: React.FC = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                    <Clock className="w-3 h-3" /> Início
+                    <Clock className="w-3 h-3 text-red-500" /> Início
                   </label>
                   <input
                     type="time"
                     value={tempParada.hora_inicio}
                     onChange={e => updateTempParadaTime('hora_inicio', e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && horaFimRef.current?.focus()}
-                    className="w-full p-4 bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 rounded-2xl text-[11px] font-black text-slate-900 dark:text-white outline-none focus:border-red-500 transition-all"
+                    className="w-full p-4 bg-white/10 border-2 border-white/5 rounded-xl text-[11px] font-black text-white outline-none focus:border-red-500 transition-all"
                   />
                 </div>
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                    <Clock className="w-3 h-3" /> Término
+                    <Clock className="w-3 h-3 text-red-500" /> Término
                   </label>
                   <input
                     type="time"
@@ -790,7 +790,7 @@ const PaginaRegistro: React.FC = () => {
                     value={tempParada.hora_fim}
                     onChange={e => updateTempParadaTime('hora_fim', e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && motivoRef.current?.focus()}
-                    className="w-full p-4 bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 rounded-2xl text-[11px] font-black text-slate-900 dark:text-white outline-none focus:border-red-500 transition-all"
+                    className="w-full p-4 bg-white/10 border-2 border-white/5 rounded-xl text-[11px] font-black text-white outline-none focus:border-red-500 transition-all"
                   />
                 </div>
               </div>
@@ -802,9 +802,9 @@ const PaginaRegistro: React.FC = () => {
                     type="number"
                     value={tempParada.duracao}
                     readOnly
-                    className="w-full bg-red-50 dark:bg-red-900/20 border-2 border-transparent p-6 text-4xl font-black text-center text-red-600 dark:text-red-400 rounded-3xl outline-none"
+                    className="w-full bg-red-500/10 border-2 border-transparent p-6 text-4xl font-black text-center text-red-500 rounded-xl outline-none"
                   />
-                  <Timer className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-red-300 dark:text-red-900/40" />
+                  <Timer className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-red-500/30" />
                 </div>
               </div>
 
@@ -820,7 +820,7 @@ const PaginaRegistro: React.FC = () => {
                   value={tempParada.motivo}
                   onChange={e => setTempParada({ ...tempParada, motivo: e.target.value.toUpperCase() })}
                   onKeyDown={e => e.key === 'Enter' && handleSaveParada()}
-                  className="w-full bg-slate-50 dark:bg-black/30 border-2 border-slate-100 dark:border-white/5 p-5 text-sm font-bold placeholder-slate-300 dark:placeholder-slate-600 dark:text-white rounded-2xl outline-none focus:border-red-500 transition-all"
+                  className="w-full bg-white/10 border-2 border-white/5 p-5 text-sm font-bold placeholder-slate-600 text-white rounded-xl outline-none focus:border-red-500 transition-all"
                   placeholder="EX: FALHA NA BOMBA DE SUCÇÃO"
                 />
 
@@ -834,13 +834,13 @@ const PaginaRegistro: React.FC = () => {
                         key={motivo}
                         type="button"
                         onClick={() => setTempParada({ ...tempParada, motivo: motivo.toUpperCase() })}
-                        className="px-4 py-2 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-white/5 rounded-full text-[10px] font-bold text-slate-600 dark:text-slate-400 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400 transition-all active:scale-95"
+                        className="px-4 py-2 bg-white/5 border-2 border-white/5 rounded-full text-[10px] font-bold text-slate-400 hover:border-red-500 hover:text-red-500 transition-all active:scale-95"
                       >
                         {motivo.toUpperCase()}
                       </button>
                     ))}
                     {!tempParada.tipo && (
-                      <p className="text-[9px] text-slate-300 dark:text-slate-700 italic">Selecione o tipo para ver sugestões...</p>
+                      <p className="text-[9px] text-slate-700 italic">Selecione o tipo para ver sugestões...</p>
                     )}
                   </div>
                 </div>
@@ -850,14 +850,14 @@ const PaginaRegistro: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 px-8 py-4 border-2 border-slate-200 dark:border-white/10 text-slate-400 dark:text-slate-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-all"
+                  className="flex-1 px-8 py-4 border-2 border-white/10 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all"
                 >
                   Cancelar
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveParada}
-                  className="flex-1 px-8 py-4 bg-slate-900 dark:bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center gap-3 shadow-xl shadow-slate-200 dark:shadow-red-900/20"
+                  className="flex-1 px-8 py-4 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center gap-3 shadow-xl shadow-red-500/20"
                 >
                   <CheckCircle2 className="w-4 h-4 ml-1" /> Confirmar Parada
                 </button>

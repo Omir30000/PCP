@@ -196,47 +196,50 @@ const RelatorioBoletim: React.FC = () => {
 
       {/* Controles do Relatório Premium */}
       <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-2xl print:hidden">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 w-full lg:w-auto">
           <div className="p-3 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-500/20">
             <Calculator className="w-6 h-6" />
           </div>
           <div>
             <h2 className="text-xl font-bold uppercase tracking-tight text-white leading-tight">Gerador de Boletim</h2>
-            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Consolidação Industrial em A4</p>
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest leading-none mt-1">Consolidação Industrial em A4</p>
           </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
-          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <div className="flex bg-white/10 p-1 rounded-xl border border-white/10 backdrop-blur-sm">
             {(['GLOBAL', '1º Turno', '2º Turno'] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setFiltroTurno(t)}
-                className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${filtroTurno === t ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}
+                className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${filtroTurno === t ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-slate-400 hover:text-white'}`}
               >
                 {t}
               </button>
             ))}
           </div>
 
-          <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border-2 border-slate-200 focus-within:border-blue-500 transition-all shadow-sm">
-            <Calendar className="w-5 h-5 text-blue-600" />
-            <div className="flex items-center gap-2">
-              <input
-                type="date"
-                value={dataInicio}
-                onChange={e => setDataInicio(e.target.value)}
-                className="bg-transparent text-xs font-black outline-none uppercase text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
-                title="Data Inicial"
-              />
-              <span className="text-slate-300 font-bold">/</span>
-              <input
-                type="date"
-                value={dataFim}
-                onChange={e => setDataFim(e.target.value)}
-                className="bg-transparent text-xs font-black outline-none uppercase text-slate-700 cursor-pointer hover:text-blue-600 transition-colors"
-                title="Data Final"
-              />
+          <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border-2 border-white/5 focus-within:border-blue-500 transition-all shadow-sm">
+            <Calendar className="w-5 h-5 text-blue-400" />
+            <div className="flex flex-col">
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Início / Fim</span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={dataInicio}
+                  onChange={e => setDataInicio(e.target.value)}
+                  className="bg-transparent text-[11px] font-black outline-none uppercase text-white cursor-pointer hover:text-blue-400 transition-colors"
+                  title="Data Inicial"
+                />
+                <span className="text-slate-500 font-bold">-</span>
+                <input
+                  type="date"
+                  value={dataFim}
+                  onChange={e => setDataFim(e.target.value)}
+                  className="bg-transparent text-[11px] font-black outline-none uppercase text-white cursor-pointer hover:text-blue-400 transition-colors"
+                  title="Data Final"
+                />
+              </div>
             </div>
           </div>
 
@@ -251,7 +254,7 @@ const RelatorioBoletim: React.FC = () => {
 
           <button
             onClick={handlePrint}
-            className="px-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg shadow-slate-200"
+            className="px-6 py-3 bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-all flex items-center gap-2 border border-white/10 shadow-xl"
           >
             <Printer className="w-4 h-4" />
             Imprimir A4
