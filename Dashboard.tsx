@@ -180,6 +180,7 @@ const Dashboard: React.FC = () => {
       let somaProduzido = 0;
       let somaMetaTurnosLinha = 0;
       let totalDowntimeLinha = 0;
+      let somaFardos = 0;
       const skus = new Set<string>();
       const allParadas: any[] = [];
       const motivosAgregados: Record<string, number> = {};
