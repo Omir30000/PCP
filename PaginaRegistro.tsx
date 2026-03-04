@@ -155,11 +155,10 @@ const PaginaRegistro: React.FC = () => {
 
   // Sincroniza o campo lote com a data do registro (formato DDMMYYYY)
   useEffect(() => {
-    if (formData.data_registro) {
-      const [year, month, day] = formData.data_registro.split('-');
-      const formattedDate = `${day}${month}${year}`;
-      setFormData(prev => ({ ...prev, lote: formattedDate }));
-    }
+    const [year, month, day] = formData.data_registro.split('-');
+    // Mantém o padrão DDMMYYYY sem separadores
+    const formattedDate = `${day}${month}${year}`;
+    setFormData(prev => ({ ...prev, lote: formattedDate }));
   }, [formData.data_registro]);
 
   // Cálculo Automático da Carga Horária Líquida (Desconto de 1h de intervalo)

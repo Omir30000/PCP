@@ -141,7 +141,7 @@ const RelatorioBoletim: React.FC = () => {
         const regsDoDia = regsDaLinha.filter(r => r.data_registro === dia);
         const qtdDia = regsDoDia.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
         return {
-          data: dia.split('-').reverse().slice(0, 2).join('/'),
+          data: dia.split('-').reverse().join('/'),
           quantidade: qtdDia
         };
       });
