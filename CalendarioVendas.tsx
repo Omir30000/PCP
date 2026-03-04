@@ -80,7 +80,7 @@ const CalendarioVendas: React.FC = () => {
 
   // Lógica de Estoque (Reutilizada de Vendas.tsx para consistência)
   const inventoryMetrics = useMemo(() => {
-    const metrics: Record<string, { currentStock: number, pendingDemand: number }> = {};
+    const metrics: Record<string, { currentStock: number, pendingDemand: number, unidadesPorFardo: number }> = {};
 
     produtos.forEach(prod => {
       const totalProduced = todosRegistrosProducao
@@ -91,9 +91,11 @@ const CalendarioVendas: React.FC = () => {
         )
         .reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
 
-      // Aqui precisaria idealmente de todos os pedidos finalizados históricos para o saldo real
-      // Mas para o calendário vamos focar na prontidão do pedido específico
-      metrics[prod.id] = { currentStock: totalProduced, pendingDemand: 0 };
+      metrics[prod.id] = {
+        currentStock: totalProduced,
+        pendingDemand: 0,
+        unidadesPorFardo: prod.unidades_por_fardo || 1
+      };
     });
 
     return metrics;
@@ -153,7 +155,7 @@ const CalendarioVendas: React.FC = () => {
                 {getDiasSemana[0].dataCurta} — {getDiasSemana[6].dataCurta}
               </span>
               <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest block mt-1">
-                Fevereiro 2026
+                {dataReferencia.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase()}
               </span>
             </div>
             <button
@@ -300,8 +302,10 @@ const CalendarioVendas: React.FC = () => {
                     <thead className="bg-white/5 text-[9px] text-slate-500 font-black uppercase tracking-widest border-b border-white/5">
                       <tr>
                         <th className="px-8 py-5">Ativo SKU</th>
-                        <th className="px-8 py-5 text-center">Requisitado</th>
-                        <th className="px-8 py-5 text-center">Saldo em Estoque</th>
+                        <th className="px-8 py-5 text-center">Req. (UN)</th>
+                        <th className="px-8 py-5 text-center">Req. (Fardos)</th>
+                        <th className="px-8 py-5 text-center">Estoque (UN)</th>
+                        <th className="px-8 py-5 text-center">Estoque (Fardos)</th>
                         <th className="px-8 py-5 text-right">Status</th>
                       </tr>
                     </thead>
@@ -309,11 +313,18 @@ const CalendarioVendas: React.FC = () => {
                       {selectedPedido.itens_pedido?.map((item: any, idx: number) => {
                         const produzido = getEstoqueAtual(item.produto_id);
                         const pronto = produzido >= item.quantidade;
+                        const unidadesPorFardo = inventoryMetrics[item.produto_id]?.unidadesPorFardo || 1;
                         return (
                           <tr key={idx} className={pronto ? 'bg-emerald-500/5' : 'bg-transparent'}>
                             <td className="px-8 py-5 font-black text-white uppercase">{item.produtos?.nome || 'SKU'}</td>
-                            <td className="px-8 py-5 text-center font-bold">{item.quantidade.toLocaleString('pt-BR')}</td>
-                            <td className="px-8 py-5 text-center font-black text-[#facc15] text-lg">{produzido.toLocaleString('pt-BR')}</td>
+                            <td className="px-8 py-5 text-center font-bold text-slate-400">{item.quantidade.toLocaleString('pt-BR')}</td>
+                            <td className="px-8 py-5 text-center font-black text-white">
+                              {Math.ceil(item.quantidade / unidadesPorFardo).toLocaleString('pt-BR')}
+                            </td>
+                            <td className="px-8 py-5 text-center font-bold text-slate-400">{produzido.toLocaleString('pt-BR')}</td>
+                            <td className="px-8 py-5 text-center font-black text-[#facc15] text-lg">
+                              {Math.floor(produzido / unidadesPorFardo).toLocaleString('pt-BR')}
+                            </td>
                             <td className="px-8 py-5 text-right">
                               {pronto ? (
                                 <span className="text-emerald-500 font-black uppercase text-[10px] flex items-center justify-end gap-2">DISPONÍVEL <CheckCircle2 className="w-4 h-4" /></span>
