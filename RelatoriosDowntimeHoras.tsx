@@ -124,7 +124,7 @@ const RelatoriosDowntimeHoras: React.FC = () => {
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
             body { font-family: 'Inter', sans-serif; background: white !important; color: #1e293b; padding: 0; margin: 0; }
             @media print {
-              @page { size: A4 landscape; margin: 1cm; }
+              @page { size: A4 portrait; margin: 1cm; }
               body { zoom: 0.85; -webkit-print-color-adjust: exact; }
               .bg-red-500 { background-color: #ef4444 !important; color: white !important; }
             }
@@ -147,6 +147,7 @@ const RelatoriosDowntimeHoras: React.FC = () => {
         let totalProduced = 0;
         let totalNominal = 0;
         const byEquipmentMin: Record<string, number> = {};
+        const byEquipmentCount: Record<string, number> = {};
         const byTypeMin: Record<string, number> = {};
         const detailedFailures: any[] = [];
 
@@ -174,6 +175,7 @@ const RelatoriosDowntimeHoras: React.FC = () => {
 
                 if (type !== 'PARADA PROGRAMADA') {
                     byEquipmentMin[equipName] = (byEquipmentMin[equipName] || 0) + dur;
+                    byEquipmentCount[equipName] = (byEquipmentCount[equipName] || 0) + 1;
                     byTypeMin[type] = (byTypeMin[type] || 0) + dur;
                 }
 
@@ -216,6 +218,12 @@ const RelatoriosDowntimeHoras: React.FC = () => {
 
         const mttrHoras = totalStopsCount > 0 ? (totalDowntimeMin / totalStopsCount) / 60 : 0;
 
+        // Detecção de Top 3 Equipamentos Críticos (Por Frequência - Ignorando Programadas)
+        const topEquipments = Object.entries(byEquipmentCount)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([name, count]) => ({ name, count }));
+
         return {
             totalDowntimeHoras: totalDowntimeHoras || 0,
             totalStopsCount: totalStopsCount || 0,
@@ -224,6 +232,7 @@ const RelatoriosDowntimeHoras: React.FC = () => {
             mttrHoras: mttrHoras || 0,
             typeBarData,
             equipBarData,
+            topEquipments,
             somaNominal: Math.round(totalNominal) || 0,
             detailedFailures: detailedFailures.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
         };
@@ -254,23 +263,48 @@ const RelatoriosDowntimeHoras: React.FC = () => {
                     <div className="flex flex-col sm:flex-row items-center gap-3">
                         <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border-2 border-white/5 focus-within:border-cyan-500 transition-all shadow-sm">
                             <Calendar className="w-5 h-5 text-cyan-400" />
-                            <input
-                                type="date"
-                                value={dataInicio}
-                                onChange={e => setDataInicio(e.target.value)}
-                                className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-cyan-400"
-                            />
+                            <div className="flex flex-col">
+                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Início</span>
+                                <input
+                                    type="date"
+                                    value={dataInicio}
+                                    onChange={e => setDataInicio(e.target.value)}
+                                    className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-cyan-400"
+                                />
+                            </div>
                         </div>
                         <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border-2 border-white/5 focus-within:border-cyan-500 transition-all shadow-sm">
                             <Calendar className="w-5 h-5 text-cyan-400" />
-                            <input
-                                type="date"
-                                value={dataFim}
-                                onChange={e => setDataFim(e.target.value)}
-                                className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-cyan-400"
-                            />
+                            <div className="flex flex-col">
+                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Fim</span>
+                                <input
+                                    type="date"
+                                    value={dataFim}
+                                    onChange={e => setDataFim(e.target.value)}
+                                    className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-cyan-400"
+                                />
+                            </div>
                         </div>
                     </div>
+
+                    <select
+                        value={turno}
+                        onChange={e => setTurno(e.target.value)}
+                        className="bg-white/10 border border-white/10 p-2 rounded-xl text-xs font-bold uppercase outline-none cursor-pointer text-white"
+                    >
+                        <option value="todos" className="bg-slate-900">Todos os Turnos</option>
+                        <option value="1º Turno" className="bg-slate-900">1º Turno</option>
+                        <option value="2º Turno" className="bg-slate-900">2º Turno</option>
+                    </select>
+
+                    <select
+                        value={linhaId}
+                        onChange={e => setLinhaId(e.target.value)}
+                        className="bg-white/10 border border-white/10 p-2 rounded-xl text-xs font-bold uppercase outline-none cursor-pointer text-white"
+                    >
+                        <option value="todos" className="bg-slate-900">Grade Completa</option>
+                        {linhas.map(l => <option key={l.id} value={l.id} className="bg-slate-900">{l.nome}</option>)}
+                    </select>
 
                     <button
                         onClick={fetchData}
@@ -278,7 +312,7 @@ const RelatoriosDowntimeHoras: React.FC = () => {
                         className="px-6 py-3 bg-cyan-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-cyan-700 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-cyan-500/20 disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                        {loading ? 'Sincronizando...' : 'Consolidar Horas'}
+                        {loading ? 'Sincronizando...' : 'Consolidar'}
                     </button>
 
                     <button
@@ -305,32 +339,76 @@ const RelatoriosDowntimeHoras: React.FC = () => {
                     <div className="text-right">
                         <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-1">RELATÓRIO DE IMPACTO PRODUTIVO (HORAS)</h2>
                         <p className="text-[10px] font-bold text-slate-400 uppercase">
-                            Período: {formatarDataBR(dataInicio)} - {formatarDataBR(dataFim)}
+                            Período: {formatarDataBR(dataInicio) === formatarDataBR(dataFim) ? formatarDataBR(dataInicio) : `${formatarDataBR(dataInicio)} - ${formatarDataBR(dataFim)}`}
                         </p>
                     </div>
                 </header>
 
                 {/* KPIs Consolidados em Horas */}
-                <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:scale-110 transition-transform"><Timer className="w-8 h-8 text-slate-400" /></div>
                         <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Inatividade Total</p>
-                        <h4 className="text-3xl font-black text-slate-900 leading-none">{analytics.totalDowntimeHoras.toFixed(2)} <span className="text-sm">horas</span></h4>
-                        <p className="text-[8px] text-slate-400 font-bold uppercase mt-2 italic">Duração Acumulada no Período</p>
+                        <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.totalDowntimeHoras.toFixed(2)} <span className="text-xs font-bold text-slate-500">horas</span></h4>
+                        <p className="text-[8px] text-slate-400 font-bold uppercase mt-2 italic">Duração Bruta Acumulada</p>
                     </div>
-                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+
+                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+                        <div className="absolute top-0 right-0 p-2"><AlertCircle className="w-8 h-8 text-red-100" /></div>
+                        <div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase mb-2">Top 3 Máquinas Críticas</p>
+                            <div className="space-y-2">
+                                {analytics.topEquipments.length > 0 ? (
+                                    analytics.topEquipments.map((equip, idx) => (
+                                        <div key={idx} className="flex items-center justify-between group">
+                                            <div className="flex items-center gap-2">
+                                                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${idx === 0 ? 'bg-red-600 text-white' : 'bg-slate-200 text-slate-600'
+                                                    }`}>
+                                                    {idx + 1}
+                                                </span>
+                                                <span className={`text-[11px] font-bold uppercase truncate max-w-[120px] ${idx === 0 ? 'text-red-700' : 'text-slate-600'
+                                                    }`}>
+                                                    {equip.name}
+                                                </span>
+                                            </div>
+                                            <span className="text-[9px] font-black text-slate-400 group-hover:text-slate-600 transition-colors">
+                                                {equip.count} paradas
+                                            </span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-xl font-black text-slate-300">--</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:scale-110 transition-transform"><Activity className="w-8 h-8 text-slate-400" /></div>
                         <p className="text-[10px] font-black text-slate-400 uppercase mb-1">MTTR (Médio)</p>
-                        <h4 className="text-3xl font-black text-slate-900 leading-none">{analytics.mttrHoras.toFixed(2)} <span className="text-sm">h/evento</span></h4>
-                        <p className="text-[8px] text-slate-400 font-bold uppercase mt-2 italic">Média de Recuperação por Parada</p>
+                        <h4 className="text-2xl font-black text-slate-900 leading-none">{analytics.mttrHoras.toFixed(2)} <span className="text-xs font-bold text-slate-500">h/parada</span></h4>
+                        <p className="text-[8px] text-slate-400 font-bold uppercase mt-2 italic">Média de Recuperação</p>
                     </div>
-                    <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
-                        <p className="text-[10px] font-black text-blue-600 uppercase mb-1">Volume Perdido</p>
-                        <h4 className="text-3xl font-black text-blue-900 leading-none">{Math.abs(analytics.volumeLost).toLocaleString('pt-BR')} <span className="text-sm">un</span></h4>
-                        <p className="text-[8px] text-blue-400 font-bold uppercase mt-2 italic">Impacto na Capacidade Nominal</p>
+
+                    <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-2 opacity-20"><Box className="w-8 h-8 text-blue-600" /></div>
+                        <p className="text-[10px] font-black text-blue-600 uppercase mb-1">Volume Produzido</p>
+                        <h4 className="text-2xl font-black text-blue-900 leading-none">{analytics.totalProduced.toLocaleString('pt-BR')} <span className="text-xs font-bold opacity-60">un</span></h4>
+                        <p className="text-[8px] text-blue-400 font-bold uppercase mt-2 italic">Produção Efetiva</p>
                     </div>
-                    <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
-                        <p className="text-[10px] font-black text-emerald-600 uppercase mb-1">Eventos Reportados</p>
-                        <h4 className="text-3xl font-black text-emerald-900 leading-none">{analytics.totalStopsCount} <span className="text-sm">paradas</span></h4>
-                        <p className="text-[8px] text-emerald-400 font-bold uppercase mt-2 italic">Total de Atividades Corretivas</p>
+
+                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 relative overflow-hidden group font-bold">
+                        <div className="absolute top-0 right-0 p-2 opacity-10"><Package className="w-8 h-8 text-slate-400" /></div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Impacto Produtivo</p>
+                        <h4 className="text-2xl font-black text-slate-900 leading-none">{Math.abs(analytics.volumeLost).toLocaleString('pt-BR')} <span className="text-xs font-bold opacity-60">un</span></h4>
+                        <p className="text-[8px] text-slate-400 font-bold uppercase mt-2 italic">Perda Volumétrica Est.</p>
+                    </div>
+
+                    <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-2 opacity-20"><TrendingUp className="w-8 h-8 text-emerald-600" /></div>
+                        <p className="text-[10px] font-black text-emerald-600 uppercase mb-1">Soma Nominal</p>
+                        <h4 className="text-2xl font-black text-emerald-900 leading-none">{analytics.somaNominal.toLocaleString('pt-BR')} <span className="text-xs font-bold opacity-60">un</span></h4>
+                        <p className="text-[8px] text-emerald-400 font-bold uppercase mt-2 italic">Capacidade Teórica</p>
                     </div>
                 </section>
 
