@@ -113,6 +113,7 @@ const PaginaRegistro: React.FC = () => {
 
   const horaFimRef = useRef<HTMLInputElement>(null);
   const motivoRef = useRef<HTMLInputElement>(null);
+  const dataInputRef = useRef<HTMLInputElement>(null);
 
 
 
@@ -339,6 +340,11 @@ const PaginaRegistro: React.FC = () => {
         observacoes: ''
       }));
       setParadas([]);
+
+      // Retorna o foco para o campo de data após o reset
+      setTimeout(() => {
+        dataInputRef.current?.focus();
+      }, 100);
     } catch (err: any) {
       console.error("Erro completo do Supabase:", err);
       const detail = err.details || err.hint || err.message || "Erro desconhecido";
@@ -433,6 +439,7 @@ const PaginaRegistro: React.FC = () => {
                 </label>
                 <input
                   type="date"
+                  ref={dataInputRef}
                   value={formData.data_registro}
                   onChange={e => setFormData({ ...formData, data_registro: e.target.value })}
                   className="w-full bg-white/10 border-2 border-white/5 p-4 rounded-xl text-[11px] font-black uppercase text-white transition-all outline-none focus:border-[#facc15]"
