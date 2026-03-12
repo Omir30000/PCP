@@ -306,7 +306,9 @@ const PaginaRegistro: React.FC = () => {
         lote: formData.lote || null,
         carga_horaria: Number(formData.carga_horaria),
         quantidade_produzida: Number(formData.quantidade_produced),
-        capacidade_producao: produtoSelecionado?.capacidade_nominal || null,
+        capacidade_producao: produtoSelecionado?.capacidade_nominal 
+          ? Number(((produtoSelecionado.capacidade_nominal / 8) * Number(formData.carga_horaria)).toFixed(2))
+          : null,
         observacoes: formData.observacoes || null,
         paradas: paradas.map(p => ({
           tipo: p.tipo || 'Não Planejada',
