@@ -200,36 +200,22 @@ const RelatoriosDowntime: React.FC = () => {
       });
     });
 
-    // Construção do Pareto de Tipos de Parada -> Agora para Pizza
-    const totalDowntimeValue = Object.values(byType).reduce((a, b) => a + b, 0);
-    const typePieData = Object.entries(byType)
+    // Gráfico 1: Minutos por Tipo (Barra Vertical)
+    const typeBarData = Object.entries(byType)
       .map(([name, value]) => ({
         name,
-        value,
-        percentage: totalDowntimeValue > 0 ? ((value / totalDowntimeValue) * 100).toFixed(1) : 0
+        minutos: value
       }))
-      .sort((a, b) => b.value - a.value);
+      .sort((a, b) => b.minutos - a.minutos);
 
-    // Identificar o tipo mais crítico para o segundo gráfico
-    const mostCriticalType = typePieData[0]?.name || null;
-
-    // Filtrar máquinas que contribuíram para o tipo mais crítico
-    const machineByCriticalType: Record<string, number> = {};
-    if (mostCriticalType) {
-      detailedFailures.forEach(fail => {
-        if (fail.tipo === mostCriticalType) {
-          machineByCriticalType[fail.equipamento] = (machineByCriticalType[fail.equipamento] || 0) + fail.duracao;
-        }
-      });
-    }
-
-    const machinePieData = Object.entries(machineByCriticalType)
+    // Gráfico 2: Minutos por Equipamento (Barra Horizontal / Pareto)
+    const equipBarData = Object.entries(byEquipment)
       .map(([name, value]) => ({
         name,
-        value,
-        percentage: byType[mostCriticalType] > 0 ? ((value / byType[mostCriticalType]) * 100).toFixed(1) : 0
+        minutos: value
       }))
-      .sort((a, b) => b.value - a.value);
+      .sort((a, b) => b.minutos - a.minutos)
+      .slice(0, 10);
 
     // Indicadores de Manutenção
     const mttr = totalStopsCount > 0 ? totalDowntime / totalStopsCount : 0;
@@ -254,9 +240,8 @@ const RelatoriosDowntime: React.FC = () => {
       volumeLost: Math.round(totalProduced - totalNominal) || 0,
       totalProduced: totalProduced || 0,
       mttr: mttr || 0,
-      typePieData,
-      machinePieData,
-      mostCriticalType,
+      typeBarData,
+      equipBarData,
       topEquipments,
       somaNominal: Math.round(totalNominal) || 0,
       detailedFailures: detailedFailures.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
@@ -453,74 +438,83 @@ const RelatoriosDowntime: React.FC = () => {
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            {/* Gráfico 1: Tipos de Parada */}
-            <div className="border border-slate-200 rounded-2xl p-6 h-[400px] bg-white shadow-sm flex flex-col">
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-4">Distribuição por Tipo de Parada (%)</p>
-              {analytics.typePieData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={analytics.typePieData}
-                      cx="50%"
-                      cy="45%"
-                      innerRadius={50}
-                      outerRadius={75}
-                      paddingAngle={5}
-                      dataKey="value"
-                      label={({ name, percentage }) => `${name}: ${percentage}%`}
-                      labelLine={true}
-                    >
-                      {analytics.typePieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={['#ef4444', '#1e293b', '#334155', '#64748b', '#94a3b8'][index % 5]} />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip
-                      contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', fontSize: '10px', color: '#0f172a' }}
-                      formatter={(value: any, name: string, props: any) => [`${value} min (${props.payload.percentage}%)`, name]}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <EmptyChartState />
-              )}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Gráfico 1: Minutos por Tipo */}
+            <div className="border border-slate-200 rounded-3xl p-8 bg-white h-[450px] flex flex-col shadow-sm">
+              <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-6 flex items-center gap-2">
+                <BarChart2 className="w-4 h-4 text-cyan-600" /> Impacto por Tipo de Parada (M)
+              </h3>
+              <div className="flex-1 w-full">
+                {analytics.typeBarData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={analytics.typeBarData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis
+                        dataKey="name"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 9, fontWeight: 800, fill: '#64748b' }}
+                      />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }}
+                      />
+                      <RechartsTooltip
+                        cursor={{ fill: '#f8fafc' }}
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px', color: '#1e293b' }}
+                      />
+                      <Bar dataKey="minutos" radius={[6, 6, 0, 0]} fill="#0891b2">
+                        {analytics.typeBarData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={index === 0 ? '#0891b2' : '#0e7490'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <EmptyChartState />
+                )}
+              </div>
             </div>
 
-            {/* Gráfico 2: Máquinas do Tipo Crítico */}
-            <div className="border border-slate-200 rounded-2xl p-6 h-[400px] bg-white shadow-sm flex flex-col">
-              <div className="mb-4">
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Impacto por Máquina</p>
-                <p className="text-[10px] font-black text-red-600 uppercase truncate">
-                  Filtro: {analytics.mostCriticalType || 'N/A'}
-                </p>
-              </div>
-              {analytics.machinePieData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={analytics.machinePieData}
-                      cx="50%"
-                      cy="45%"
-                      innerRadius={50}
-                      outerRadius={75}
-                      paddingAngle={5}
-                      dataKey="value"
-                      label={({ name, percentage }) => `${name}: ${percentage}%`}
-                      labelLine={true}
+            {/* Gráfico 2: Minutos por Equipamento */}
+            <div className="border border-slate-200 rounded-3xl p-8 bg-white h-[450px] flex flex-col shadow-sm">
+              <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-6 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-blue-600" /> Pareto de Equipamentos Críticos (M)
+              </h3>
+              <div className="flex-1 w-full">
+                {analytics.equipBarData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={analytics.equipBarData}
+                      layout="vertical"
+                      margin={{ top: 5, right: 50, left: 10, bottom: 5 }}
                     >
-                      {analytics.machinePieData.map((entry, index) => (
-                        <Cell key={`cell-m-${index}`} fill={['#3b82f6', '#1d4ed8', '#2563eb', '#60a5fa', '#93c5fd'][index % 5]} />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip
-                      contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', fontSize: '10px', color: '#0f172a' }}
-                      formatter={(value: any, name: string, props: any) => [`${value} min (${props.payload.percentage}%)`, name]}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <EmptyChartState />
-              )}
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                      <XAxis type="number" hide />
+                      <YAxis
+                        dataKey="name"
+                        type="category"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 9, fontWeight: 800, fill: '#64748b' }}
+                        width={100}
+                      />
+                      <RechartsTooltip
+                        cursor={{ fill: '#f8fafc' }}
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px' }}
+                      />
+                      <Bar dataKey="minutos" radius={[0, 6, 6, 0]} fill="#2563eb" barSize={20}>
+                        {analytics.equipBarData.map((entry, index) => (
+                          <Cell key={`cell-e-${index}`} fill={index < 3 ? '#2563eb' : '#3b82f6'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <EmptyChartState />
+                )}
+              </div>
             </div>
           </div>
         </section>
