@@ -148,8 +148,7 @@ const Dashboard: React.FC = () => {
     let totalMetaAcumuladaGlobal = 0;
     const motivosMap: Record<string, number> = {};
     registrosFiltrados.forEach(r => {
-      const prod = produtos.find(p => p.id === r.produto_volume || p.nome === r.produto_volume);
-      const capNominal = prod ? (Number(prod.capacidade_nominal) || 0) : 0;
+      const capNominal = Number(r.capacidade_producao) || 0;
       totalMetaAcumuladaGlobal += capNominal;
       const paradasArr = Array.isArray(r.paradas) ? r.paradas : [];
       totalIncidentes += paradasArr.length;
@@ -187,7 +186,7 @@ const Dashboard: React.FC = () => {
       lineRegsContext.forEach(reg => {
         somaProduzido += (Number(reg.quantidade_produzida) || 0);
         const produto = produtos.find(p => p.id === reg.produto_volume || p.nome === reg.produto_volume);
-        const capNominal = produto ? (Number(produto.capacidade_nominal) || 0) : 0;
+        const capNominal = Number(reg.capacidade_producao) || 0;
         somaMetaTurnosLinha += capNominal;
         if (produto) skus.add(produto.nome.toUpperCase());
         else skus.add(String(reg.produto_volume).toUpperCase());
