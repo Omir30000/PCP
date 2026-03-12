@@ -178,6 +178,7 @@ const Dashboard: React.FC = () => {
         : lineRegsAll.filter(r => String(r.turno || '').toLowerCase().trim().includes(dbValueTarget || ''));
       let somaProduzido = 0;
       let somaMetaTurnosLinha = 0;
+      let somaCargaHorariaLinha = 0;
       let totalDowntimeLinha = 0;
       let somaFardos = 0;
       const skus = new Set<string>();
@@ -188,6 +189,7 @@ const Dashboard: React.FC = () => {
         const produto = produtos.find(p => p.id === reg.produto_volume || p.nome === reg.produto_volume);
         const capNominal = Number(reg.capacidade_producao) || 0;
         somaMetaTurnosLinha += capNominal;
+        somaCargaHorariaLinha += (Number(reg.carga_horaria) || 0);
         if (produto) skus.add(produto.nome.toUpperCase());
         else skus.add(String(reg.produto_volume).toUpperCase());
         const paradas = Array.isArray(reg.paradas) ? reg.paradas : [];
@@ -219,6 +221,7 @@ const Dashboard: React.FC = () => {
         oee,
         produzido: somaProduzido,
         metaPCP: Math.round(somaMetaTurnosLinha),
+        cargaHoraria: somaCargaHorariaLinha,
         progresso: Math.min(100, oee),
         paradas: allParadas,
         produto: skus.size > 0 ? Array.from(skus).join(' / ') : 'AGUARDANDO SKU'
@@ -357,7 +360,10 @@ const Dashboard: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex justify-between items-center text-[10px] font-black text-slate-400">
                   <span className="text-[#facc15] uppercase tracking-widest">{line.produto}</span>
-                  <span className="uppercase">Meta: {line.metaPCP.toLocaleString()}</span>
+                  <div className="flex items-center gap-4 uppercase font-black">
+                    <span className="text-slate-500">CARGA: {line.cargaHoraria}H</span>
+                    <span>Meta: {line.metaPCP.toLocaleString()}</span>
+                  </div>
                 </div>
                 <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
                   <div className={`h-full ${line.alertSeverity === 'CRITICAL' ? 'bg-rose-500' : 'bg-[#22c55e]'}`} style={{ width: `${line.progresso}%` }} />

@@ -135,6 +135,7 @@ const RelatorioBoletim: React.FC = () => {
 
       let totalQty = 0;
       let totalCapNominalLinha = 0;
+      let totalCargaHorariaLinha = 0;
       let status: 'active' | 'inactive' = 'inactive';
 
       const serieHistorica = diasNoPeriodo.map(dia => {
@@ -153,6 +154,7 @@ const RelatorioBoletim: React.FC = () => {
           const cap = Number(r.capacidade_producao) || 0;
           return acc + cap;
         }, 0);
+        totalCargaHorariaLinha = regsDaLinha.reduce((acc, r) => acc + (Number(r.carga_horaria) || 0), 0);
       }
 
       // SINCRO COM DASHBOARD: Eficiência = Produzido / Capacidade Nominal
@@ -172,6 +174,7 @@ const RelatorioBoletim: React.FC = () => {
         totalPallets: parseFloat((totalBundles / bundlesPerPallet).toFixed(1)),
         eficiencia,
         capNominal: totalCapNominalLinha,
+        cargaHoraria: totalCargaHorariaLinha,
         serieHistorica
       };
     });
@@ -385,8 +388,8 @@ const RelatorioBoletim: React.FC = () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-slate-50 p-6 rounded-3xl">
-                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Volume Real</p>
-                      <p className="text-2xl font-black text-slate-900">{line.producaoTotal.toLocaleString()}</p>
+                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Carga / Meta</p>
+                      <p className="text-sm font-black text-slate-900">{line.cargaHoraria}h / {line.capNominal.toLocaleString()}</p>
                     </div>
                     <div className="bg-slate-50 p-6 rounded-3xl">
                       <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Eficiência (Sincro)</p>

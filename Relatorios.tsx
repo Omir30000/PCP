@@ -124,6 +124,7 @@ const Relatorios: React.FC = () => {
       let totalQty = 0;
       let totalDowntimeLinha = 0;
       let totalCapNominalLinha = 0;
+      let totalCargaHorariaLinha = 0;
       let status: 'active' | 'inactive' = 'inactive';
 
       if (regsDaLinha.length > 0) {
@@ -133,6 +134,7 @@ const Relatorios: React.FC = () => {
         regsDaLinha.forEach(r => {
           const cap = Number(r.capacidade_producao) || 0;
           totalCapNominalLinha += cap;
+          totalCargaHorariaLinha += (Number(r.carga_horaria) || 0);
 
           const paradas = Array.isArray(r.paradas) ? r.paradas : [];
           const downtimeRegMin = paradas.reduce((a, b: any) => {
@@ -165,6 +167,7 @@ const Relatorios: React.FC = () => {
         totalPallets: parseFloat((totalBundles / bundlesPerPallet).toFixed(1)),
         eficiencia,
         capNominal: totalCapNominalLinha,
+        cargaHoraria: totalCargaHorariaLinha,
         downtime: totalDowntimeLinha || 0
       };
     });
@@ -313,6 +316,10 @@ const Relatorios: React.FC = () => {
                     <p className="text-xl font-black text-slate-900 leading-none">
                       {line.producaoTotal.toLocaleString()} <span className="text-[10px] text-slate-400 uppercase font-bold">un</span>
                     </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[8px] font-black text-slate-400 uppercase mb-0.5">Carga</p>
+                    <p className="text-sm font-bold text-slate-900 leading-none">{line.cargaHoraria}h</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[8px] font-black text-slate-400 uppercase mb-0.5">Downtime JSONB</p>
