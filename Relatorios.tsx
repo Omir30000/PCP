@@ -131,7 +131,7 @@ const Relatorios: React.FC = () => {
         totalQty = regsDaLinha.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
 
         regsDaLinha.forEach(r => {
-          const cap = Number(r.produtos?.capacidade_nominal) || 0;
+          const cap = Number(r.capacidade_producao) || 0;
           totalCapNominalLinha += cap;
 
           const paradas = Array.isArray(r.paradas) ? r.paradas : [];

@@ -150,7 +150,7 @@ const RelatorioBoletim: React.FC = () => {
         status = 'active';
         totalQty = regsDaLinha.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
         totalCapNominalLinha = regsDaLinha.reduce((acc, r) => {
-          const cap = Number(r.produtos?.capacidade_nominal) || 0;
+          const cap = Number(r.capacidade_producao) || 0;
           return acc + cap;
         }, 0);
       }
