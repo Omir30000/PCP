@@ -234,13 +234,13 @@ const Dashboard: React.FC = () => {
       {/* Header Nexus Premium */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-2xl mb-4">
         <div className="flex items-center gap-5">
-          <div className="bg-[#facc15] p-4 rounded-xl shadow-[0_0_20px_rgba(250,204,21,0.3)] text-black">
-            <Zap className="w-7 h-7" />
+          <div className="bg-[#facc15] p-3 sm:p-4 rounded-xl shadow-[0_0_20px_rgba(250,204,21,0.3)] text-black">
+            <Zap className="w-6 h-6 sm:w-7 sm:h-7" />
           </div>
           <div>
-            <h2 className="text-3xl font-black text-white uppercase tracking-tighter leading-none">Nexus Command</h2>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#facc15] animate-pulse" /> Gestão de Planta em Tempo Real
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white uppercase tracking-tighter leading-none">Nexus Command</h2>
+            <p className="text-slate-400 text-[8px] font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#facc15] animate-pulse" /> Gestão de Planta
             </p>
           </div>
         </div>
@@ -248,7 +248,7 @@ const Dashboard: React.FC = () => {
 
       {/* Bar de Controle Premium */}
       <div className="bg-slate-900/50 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-4 w-full md:w-auto">
+        <div className="flex items-center justify-center gap-4 w-full md:w-auto">
           <button onClick={() => {
             const d = new Date(filtroData);
             d.setDate(d.getDate() - 1);
@@ -259,7 +259,7 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border-2 border-white/5 focus-within:border-[#facc15] transition-all shadow-sm">
             <Calendar className="w-5 h-5 text-[#facc15]" />
             <div className="flex flex-col">
-              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Data de Operação</span>
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Operação</span>
               <input
                 type="date"
                 value={filtroData}
@@ -276,12 +276,12 @@ const Dashboard: React.FC = () => {
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
-        <div className="flex bg-white/10 p-1 rounded-xl border border-white/10 backdrop-blur-sm">
+        <div className="flex w-full md:w-auto bg-white/10 p-1 rounded-xl border border-white/10 backdrop-blur-sm">
           {['GLOBAL', 'MANHÃ', 'TARDE'].map((t) => (
             <button
               key={t}
               onClick={() => setFiltroTurno(t as any)}
-              className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filtroTurno === t ? 'bg-[#facc15] text-black shadow-[0_0_15px_rgba(250,204,21,0.3)]' : 'text-slate-400 hover:text-white'
+              className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${filtroTurno === t ? 'bg-[#facc15] text-black shadow-[0_0_15px_rgba(250,204,21,0.3)]' : 'text-slate-400 hover:text-white'
                 }`}
             >
               {t}
@@ -291,41 +291,41 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* KPIs Globais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-[#141414] border border-white/5 p-6 rounded-2xl relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-4">
-            <BarChart3 className="w-5 h-5 text-[#facc15]" />
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Rendimento</span>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="bg-[#141414] border border-white/5 p-4 sm:p-6 rounded-2xl relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-2 sm:mb-4">
+            <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-[#facc15]" />
+            <span className="text-[8px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest">Rendimento</span>
           </div>
-          <h3 className="text-4xl font-black text-white tracking-tighter leading-none mb-1">
+          <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tighter leading-none mb-1">
             {metrics.oeeMedio.toFixed(1)}%
           </h3>
-          <p className="text-[10px] font-bold text-[#22c55e] flex items-center gap-1 uppercase tracking-widest">
-            <Activity className="w-3 h-3" /> Eficiência Consolidada
+          <p className="text-[7px] sm:text-[10px] font-bold text-[#22c55e] flex items-center gap-1 uppercase tracking-widest">
+            <Activity className="w-2.5 h-2.5 sm:w-3 h-3" /> Eficiência
           </p>
         </div>
-        <div className="bg-[#141414] border border-white/5 p-6 rounded-2xl relative overflow-hidden">
-          <div className="flex items-center justify-between mb-4">
-            <AlertCircle className={`w-5 h-5 ${metrics.totalIncidentes > 0 ? 'text-rose-500 animate-pulse' : 'text-slate-600'}`} />
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Incidentes</span>
+        <div className="bg-[#141414] border border-white/5 p-4 sm:p-6 rounded-2xl relative overflow-hidden">
+          <div className="flex items-center justify-between mb-2 sm:mb-4">
+            <AlertCircle className={`w-4 h-4 sm:w-5 sm:h-5 ${metrics.totalIncidentes > 0 ? 'text-rose-500 animate-pulse' : 'text-slate-600'}`} />
+            <span className="text-[8px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest">Incidentes</span>
           </div>
-          <h3 className={`text-4xl font-black tracking-tighter leading-none mb-1 ${metrics.totalIncidentes > 0 ? 'text-rose-500' : 'text-white'}`}>
+          <h3 className={`text-2xl sm:text-4xl font-black tracking-tighter leading-none mb-1 ${metrics.totalIncidentes > 0 ? 'text-rose-500' : 'text-white'}`}>
             {metrics.totalIncidentes}
           </h3>
         </div>
-        <div className="bg-[#141414] border border-white/5 p-6 rounded-2xl relative overflow-hidden">
-          <div className="flex items-center justify-between mb-4">
-            <Clock className="w-5 h-5 text-blue-400" />
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Downtime</span>
+        <div className="bg-[#141414] border border-white/5 p-4 sm:p-6 rounded-2xl relative overflow-hidden">
+          <div className="flex items-center justify-between mb-2 sm:mb-4">
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+            <span className="text-[8px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest">Downtime</span>
           </div>
-          <h3 className="text-4xl font-black text-white tracking-tighter leading-none mb-1">{metrics.totalDowntime}m</h3>
+          <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tighter leading-none mb-1">{metrics.totalDowntime}m</h3>
         </div>
-        <div className="bg-[#141414] border border-white/5 p-6 rounded-2xl relative overflow-hidden">
-          <div className="flex items-center justify-between mb-4">
-            <Package className="w-5 h-5 text-[#facc15]" />
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Produzido</span>
+        <div className="bg-[#141414] border border-white/5 p-4 sm:p-6 rounded-2xl relative overflow-hidden">
+          <div className="flex items-center justify-between mb-2 sm:mb-4">
+            <Package className="w-4 h-4 sm:w-5 sm:h-5 text-[#facc15]" />
+            <span className="text-[8px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest">Produzido</span>
           </div>
-          <h3 className="text-4xl font-black text-white tracking-tighter leading-none mb-1">{metrics.totalProduzido.toLocaleString()}</h3>
+          <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tighter leading-none mb-1">{(metrics.totalProduzido / 1000).toFixed(1)}K</h3>
         </div>
       </div>
 
@@ -334,34 +334,34 @@ const Dashboard: React.FC = () => {
         <h2 className="text-xl font-black text-white uppercase tracking-tighter border-l-4 border-[#facc15] pl-4">Cockpit de Produção</h2>
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {lineMonitor.map(line => (
-            <div key={line.id} className={`bg-[#141414] border p-8 rounded-[32px] transition-all duration-500 shadow-xl ${line.alertSeverity === 'CRITICAL' ? 'border-rose-500 shadow-[0_0_30px_rgba(244,63,94,0.15)]' : 'border-white/5 hover:border-[#facc15]/20'
+            <div key={line.id} className={`bg-[#141414] border p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] transition-all duration-500 shadow-xl ${line.alertSeverity === 'CRITICAL' ? 'border-rose-500 shadow-[0_0_30px_rgba(244,63,94,0.15)]' : 'border-white/5 hover:border-[#facc15]/20'
               }`}>
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-6">
-                  <div className={`p-5 rounded-2xl ${line.alertSeverity === 'CRITICAL' ? 'bg-rose-500/20 text-rose-500' : 'bg-[#22c55e]/10 text-[#22c55e]'}`}>
-                    <Cpu className="w-8 h-8" />
+              <div className="flex items-center justify-between mb-6 sm:mb-8">
+                <div className="flex items-center gap-4 sm:gap-6">
+                  <div className={`p-4 sm:p-5 rounded-2xl ${line.alertSeverity === 'CRITICAL' ? 'bg-rose-500/20 text-rose-500' : 'bg-[#22c55e]/10 text-[#22c55e]'}`}>
+                    <Cpu className="w-6 h-6 sm:w-8 sm:h-8" />
                   </div>
-                  <div>
-                    <h4 className="text-2xl font-black text-white uppercase tracking-tighter">{line.nome}</h4>
-                    <div className="flex items-center gap-2 mt-2">
+                  <div className="min-w-0">
+                    <h4 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tighter truncate">{line.nome}</h4>
+                    <div className="flex items-center gap-2 mt-1 sm:mt-2">
                       <div className={`w-2 h-2 rounded-full ${line.alertSeverity === 'CRITICAL' ? 'bg-rose-500' : 'bg-[#22c55e]'}`} />
-                      <span className="text-[10px] font-black uppercase text-slate-500">{line.status}</span>
+                      <span className="text-[8px] sm:text-[10px] font-black uppercase text-slate-500 truncate max-w-[120px]">{line.status}</span>
                       <button onClick={() => setModalLinha(line)} className="p-1 bg-white/5 text-slate-500 hover:text-[#facc15] rounded-md transition-all">
                         <History className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-[9px] font-black text-slate-500 uppercase">Eficiência</p>
-                  <p className="text-3xl font-black text-white">{line.oee.toFixed(1)}%</p>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-[8px] sm:text-[9px] font-black text-slate-500 uppercase">Eficiência</p>
+                  <p className="text-xl sm:text-3xl font-black text-white">{line.oee.toFixed(1)}%</p>
                 </div>
               </div>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center text-[10px] font-black text-slate-400">
-                  <span className="text-[#facc15] uppercase tracking-widest">{line.produto}</span>
-                  <div className="flex items-center gap-4 uppercase font-black">
-                    <span className="text-slate-500">CARGA: {line.cargaHoraria}H</span>
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex justify-between items-center text-[8px] sm:text-[10px] font-black text-slate-400">
+                  <span className="text-[#facc15] uppercase tracking-widest truncate max-w-[150px]">{line.produto}</span>
+                  <div className="flex items-center gap-2 sm:gap-4 uppercase font-black">
+                    <span className="text-slate-500 hidden sm:inline">CARGA: {line.cargaHoraria}H</span>
                     <span>Meta: {line.metaPCP.toLocaleString()}</span>
                   </div>
                 </div>
@@ -425,32 +425,36 @@ const Dashboard: React.FC = () => {
       {modalLinha && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setModalLinha(null)} />
-          <div className="bg-[#1a1a1a] rounded-[40px] shadow-2xl w-full max-w-2xl relative z-10 border border-white/10 overflow-hidden">
-            <header className="px-10 py-10 border-b border-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className={`p-4 rounded-2xl ${modalLinha.alertSeverity === 'CRITICAL' ? 'bg-rose-500' : 'bg-[#facc15]'} text-black`}>
-                  <Timer className="w-8 h-8" />
+          <div className="bg-[#1a1a1a] rounded-t-[32px] sm:rounded-[40px] shadow-2xl w-full max-w-2xl relative z-10 border border-white/10 overflow-hidden mt-auto sm:mt-0">
+            <header className="px-6 py-8 sm:px-10 sm:py-10 border-b border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-4 sm:gap-6">
+                <div className={`p-3 sm:p-4 rounded-2xl ${modalLinha.alertSeverity === 'CRITICAL' ? 'bg-rose-500' : 'bg-[#facc15]'} text-black`}>
+                  <Timer className="w-6 h-6 sm:w-8 sm:h-8" />
                 </div>
                 <div>
-                  <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Eventos do Dia</h3>
-                  <p className="text-slate-500 text-[10px] font-black uppercase mt-2">{modalLinha.nome}</p>
+                  <h3 className="text-xl sm:text-3xl font-black text-white uppercase tracking-tighter">Eventos</h3>
+                  <p className="text-slate-500 text-[8px] sm:text-[10px] font-black uppercase mt-1 sm:mt-2 truncate max-w-[150px] sm:max-w-none">{modalLinha.nome}</p>
                 </div>
               </div>
-              <button onClick={() => setModalLinha(null)} className="p-4 text-slate-500 hover:text-white"><X className="w-10 h-10" /></button>
+              <button onClick={() => setModalLinha(null)} className="p-2 text-slate-500 hover:text-white"><X className="w-8 h-8 sm:w-10 sm:h-10" /></button>
             </header>
-            <div className="p-10 space-y-4 max-h-[60vh] overflow-y-auto">
-              {modalLinha.paradas.map((p: any, idx: number) => (
-                <div key={idx} className="bg-black/40 border border-white/5 p-6 rounded-[24px] flex items-center justify-between">
-                  <div className="flex items-center gap-5">
-                    <AlertTriangle className="w-6 h-6 text-slate-500" />
-                    <div>
-                      <p className="text-[10px] font-black text-slate-500 uppercase">Motivo</p>
-                      <h5 className="text-sm font-black text-white uppercase">{p.motivo || 'NÃO ESPECIFICADO'}</h5>
+            <div className="p-6 sm:p-10 space-y-4 max-h-[60vh] overflow-y-auto no-scrollbar">
+              {modalLinha.paradas.length === 0 ? (
+                <p className="text-center text-slate-600 font-bold uppercase tracking-widest py-10 text-[10px]">Sem registros de parada</p>
+              ) : (
+                modalLinha.paradas.map((p: any, idx: number) => (
+                  <div key={idx} className="bg-black/40 border border-white/5 p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] flex items-center justify-between">
+                    <div className="flex items-center gap-4 sm:gap-5">
+                      <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-slate-500" />
+                      <div>
+                        <p className="text-[8px] sm:text-[10px] font-black text-slate-500 uppercase">Motivo</p>
+                        <h5 className="text-[10px] sm:text-sm font-black text-white uppercase">{p.motivo || 'NÃO ESPECIFICADO'}</h5>
+                      </div>
                     </div>
+                    <span className="text-xl sm:text-2xl font-black text-white">{parseMinutos(p.duracao || p.total_min)}m</span>
                   </div>
-                  <span className="text-2xl font-black text-white">{parseMinutos(p.duracao || p.total_min)}m</span>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>

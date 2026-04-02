@@ -271,6 +271,56 @@ export type Database = {
           }
         ];
       };
+      perfis: {
+        Row: {
+          id: string;
+          nome: string;
+          email: string | null;
+          telefone: string | null;
+          foto_url: string | null;
+          cargo: string | null;
+          turno: number | null;
+          criado_at: string;
+          nivel_acesso: 'admin' | 'lider' | 'mecanico' | null;
+          especialidade: 'mecanica' | 'eletrica' | 'civil' | 'utilidades' | 'geral' | null;
+          ativo: boolean;
+        };
+        Insert: {
+          id: string;
+          nome: string;
+          email?: string | null;
+          telefone?: string | null;
+          foto_url?: string | null;
+          cargo?: string | null;
+          turno?: number | null;
+          criado_at?: string;
+          nivel_acesso?: 'admin' | 'lider' | 'mecanico' | null;
+          especialidade?: 'mecanica' | 'eletrica' | 'civil' | 'utilidades' | 'geral' | null;
+          ativo?: boolean;
+        };
+        Update: {
+          id?: string;
+          nome?: string;
+          email?: string | null;
+          telefone?: string | null;
+          foto_url?: string | null;
+          cargo?: string | null;
+          turno?: number | null;
+          criado_at?: string;
+          nivel_acesso?: 'admin' | 'lider' | 'mecanico' | null;
+          especialidade?: 'mecanica' | 'eletrica' | 'civil' | 'utilidades' | 'geral' | null;
+          ativo?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "perfis_id_fkey";
+            columns: ["id"];
+            isOneToOne: true;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
