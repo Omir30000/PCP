@@ -43,7 +43,8 @@ import {
   Clock,
   LogOut,
   Menu,
-  X
+  X,
+  Wrench
 } from 'lucide-react';
 
 type Tab =
@@ -179,6 +180,27 @@ const App: React.FC = () => {
     );
   };
 
+  const ExternalNavItem = ({ icon: Icon, label, url, isDesktopSidebar }: { icon: any, label: string, url: string, isDesktopSidebar: boolean }) => {
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`w-full flex items-center transition-all duration-300 relative group/item
+          ${isDesktopSidebar ? (isSidebarExpanded ? 'px-4 py-3 gap-4' : 'justify-center py-4') : 'px-4 py-3.5 gap-4 rounded-xl mb-1'}
+          text-slate-500 hover:text-[#facc15] hover:bg-[#facc15]/5 rounded-xl mb-1
+        `}
+      >
+        <Icon className={`${isDesktopSidebar ? (isSidebarExpanded ? 'w-5 h-5' : 'w-6 h-6') : 'w-5 h-5'} shrink-0 group-hover:scale-110 transition-transform`} />
+        {(isSidebarExpanded || !isDesktopSidebar) && (
+          <span className={`font-black uppercase tracking-[0.15em] whitespace-nowrap overflow-hidden text-[10px]`}>
+            {label}
+          </span>
+        )}
+      </a>
+    );
+  };
+
   return (
     <div className={`min-h-screen flex overflow-hidden font-sans selection:bg-[#facc15]/30 bg-[#0a0a0a] text-slate-100`}>
       
@@ -253,6 +275,15 @@ const App: React.FC = () => {
           {role === 'admin' && (
             <NavItem id="usuarios" icon={Settings} label="Gestão de Equipe" />
           )}
+
+          <div className="h-px bg-white/5 my-6 mx-4" />
+
+          <ExternalNavItem 
+            icon={Wrench} 
+            label="Nexus Manutenção" 
+            url="https://nexus-cmms.vercel.app/" 
+            isDesktopSidebar={true} 
+          />
         </div>
 
         <div className={`p-4 mt-auto border-t border-white/5 bg-black/40 flex flex-col gap-4`}>
@@ -371,6 +402,15 @@ const App: React.FC = () => {
                   <NavItem id="usuarios" icon={Settings} label="Gestão Equipe" onClick={() => setIsMobileMenuOpen(false)} />
                 </>
               )}
+              
+              <div className="h-px bg-white/5 my-4" />
+              <ExternalNavItem 
+                icon={Wrench} 
+                label="Nexus Manutenção" 
+                url="https://nexus-cmms.vercel.app/" 
+                isDesktopSidebar={false} 
+              />
+              
               {(role === 'admin' || role === 'lider') && (
                 <>
                   <div className="h-px bg-white/5 my-4" />
