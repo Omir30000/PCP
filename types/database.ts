@@ -62,6 +62,7 @@ export type Database = {
           capacidade_nominal: number | null;
           unidades_por_fardo: number | null;
           fardos_por_palete: number | null;
+          linhas_ids: string[] | null;
           created_at: string;
         };
         Insert: {
@@ -72,6 +73,7 @@ export type Database = {
           capacidade_nominal?: number | null;
           unidades_por_fardo?: number | null;
           fardos_por_palete?: number | null;
+          linhas_ids?: string[] | null;
           created_at?: string;
         };
         Update: {
@@ -82,6 +84,7 @@ export type Database = {
           capacidade_nominal?: number | null;
           unidades_por_fardo?: number | null;
           fardos_por_palete?: number | null;
+          linhas_ids?: string[] | null;
           created_at?: string;
         };
         Relationships: [];

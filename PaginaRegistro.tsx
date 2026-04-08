@@ -67,14 +67,6 @@ const LISTA_EQUIPAMENTOS = [
   'MANUTENÇÃO'
 ];
 
-// Mapeamento de Produtos por Linha (Nomes exatos do Banco)
-const LINHA_PRODUTO_MAP: Record<string, string[]> = {
-  'Linha 1': ['Galão 6 Litros', 'Galão 10 litros'],
-  'Linha 2': ['Natural 1500ml', 'Gás 1500ml', 'Natural 310ml', 'Gás 310 ml', 'Natural 510ml', 'Gás 510ml'],
-  'Linha 3': ['Natural 1500ml', 'Natural 310ml', 'Natural 510ml'],
-  'Linha 4': ['Copo 200ml', 'Copo 305ml'],
-  'Linha 5': ['Lata 355ml Natural', 'Lata 355ml Gás']
-};
 
 const PaginaRegistro: React.FC = () => {
   const [linhas, setLinhas] = useState<Linha[]>([]);
@@ -541,9 +533,7 @@ const PaginaRegistro: React.FC = () => {
                   {produtos
                     .filter(p => {
                       if (!formData.linha_producao) return true;
-                      const linhaNome = linhas.find(l => l.id === formData.linha_producao)?.nome || '';
-                      const allowedProducts = LINHA_PRODUTO_MAP[linhaNome] || [];
-                      return allowedProducts.includes(p.nome);
+                      return p.linhas_ids?.includes(formData.linha_producao);
                     })
                     .map(p => (<option key={p.id} value={p.id} className="bg-slate-900">{p.nome}</option>))}
                 </select>

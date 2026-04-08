@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
-import { Produto } from './types/database';
+import { Produto, Linha } from './types/database';
 import {
   Package,
   Plus,
@@ -23,7 +23,8 @@ import {
   CupSoda,
   Milk,
   ArrowUpRight,
-  Activity
+  Activity,
+  CheckCircle2
 } from 'lucide-react';
 
 const TIPO_CONFIG: Record<string, { bg: string, text: string, shadow: string, icon: React.ReactNode }> = {
@@ -71,6 +72,7 @@ const Produtos: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [linhas, setLinhas] = useState<Linha[]>([]);
 
   const [formData, setFormData] = useState<Partial<Produto>>({
     nome: '',
@@ -78,7 +80,8 @@ const Produtos: React.FC = () => {
     tipo: 'Natural',
     unidades_por_fardo: 0,
     fardos_por_palete: 0,
-    capacidade_nominal: 0
+    capacidade_nominal: 0,
+    linhas_ids: []
   });
 
   const fetchProdutos = async () => {
@@ -97,8 +100,19 @@ const Produtos: React.FC = () => {
     }
   };
 
-  useEffect(() => {
+  const fetchInitialData = async () => {
     fetchProdutos();
+    try {
+      const { data, error } = await supabase.from('linhas').select('*').order('nome');
+      if (error) throw error;
+      setLinhas(data || []);
+    } catch (err) {
+      console.error("Erro ao buscar linhas:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchInitialData();
   }, []);
 
   const openModal = (produto?: Produto) => {
@@ -111,7 +125,8 @@ const Produtos: React.FC = () => {
         tipo: 'Natural',
         unidades_por_fardo: 12,
         fardos_por_palete: 84,
-        capacidade_nominal: 7200
+        capacidade_nominal: 7200,
+        linhas_ids: []
       });
     }
     setIsModalOpen(true);
@@ -129,6 +144,14 @@ const Produtos: React.FC = () => {
       val = Math.max(0, Number(value));
     }
     setFormData(prev => ({ ...prev, [name]: val }));
+  };
+
+  const toggleLinhaId = (id: string) => {
+    const current = formData.linhas_ids || [];
+    const updated = current.includes(id)
+      ? current.filter(item => item !== id)
+      : [...current, id];
+    setFormData(prev => ({ ...prev, linhas_ids: updated }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -232,10 +255,23 @@ const Produtos: React.FC = () => {
                     <h3 className="text-xl md:text-2xl font-black text-white tracking-tighter leading-tight truncate">
                       {p.nome}
                     </h3>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${config.bg} ${config.text}`}>
                         {p.tipo || 'COMUM'}
                       </span>
+                      {p.linhas_ids && p.linhas_ids.length > 0 && (
+                        <div className="flex items-center gap-1">
+                          {p.linhas_ids.map(lId => {
+                            const linha = linhas.find(l => l.id === lId);
+                            if (!linha) return null;
+                            return (
+                              <span key={lId} className="px-3 py-1 bg-white/5 border border-white/5 rounded-full text-[8px] font-bold text-slate-400">
+                                {linha.nome}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -399,6 +435,55 @@ const Produtos: React.FC = () => {
                     required
                   />
                   <p className="text-[9px] text-center font-bold text-slate-600 uppercase tracking-widest">Base de cálculo para indicador de eficiência OEE</p>
+                </div>
+
+                {/* Associação de Linhas */}
+                <div className="space-y-6 pt-6 border-t border-white/5">
+                  <div className="flex items-center justify-between ml-3">
+                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">Instalações / Linhas Autorizadas</label>
+                    <Layers className="w-4 h-4 text-slate-600" />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {linhas.map(linha => {
+                      const isSelected = formData.linhas_ids?.includes(linha.id);
+                      return (
+                        <label
+                          key={linha.id}
+                          className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer group/linha ${
+                            isSelected 
+                              ? 'bg-[#facc15]/10 border-[#facc15]/30 text-[#facc15]' 
+                              : 'bg-white/5 border-white/10 text-slate-500 hover:border-white/20'
+                          }`}
+                        >
+                          <div className="flex items-center gap-4">
+                            <input
+                              type="checkbox"
+                              className="hidden"
+                              checked={isSelected}
+                              onChange={() => toggleLinhaId(linha.id)}
+                            />
+                            <div className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${
+                              isSelected 
+                                ? 'bg-[#facc15] border-[#facc15] text-black shadow-lg shadow-[#facc15]/20' 
+                                : 'border-white/10 bg-black/20 group-hover/linha:border-white/30'
+                            }`}>
+                              {isSelected && <CheckCircle2 className="w-4 h-4" />}
+                            </div>
+                            <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${isSelected ? 'text-white' : ''}`}>
+                              {linha.nome}
+                            </span>
+                          </div>
+                          {isSelected && <Plus className="w-3 h-3 animate-pulse" />}
+                        </label>
+                      );
+                    })}
+                  </div>
+                  {(!formData.linhas_ids || formData.linhas_ids.length === 0) && (
+                    <div className="flex items-center gap-3 px-6 py-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+                      <AlertCircle className="w-4 h-4 text-orange-500" />
+                      <p className="text-[9px] font-bold text-orange-500 uppercase tracking-widest">Aviso: Este produto não aparecerá em nenhuma linha até ser associado.</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
