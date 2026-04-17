@@ -137,6 +137,16 @@ const RelatorioBoletim: React.FC = () => {
       let totalCapNominalLinha = 0;
       let totalCargaHorariaLinha = 0;
       let status: 'active' | 'inactive' = 'inactive';
+      
+      // Detalhamento por SKU
+      const skusMap: Record<string, { 
+        nome: string, 
+        unidades: number, 
+        pacotes: number, 
+        paletes: number,
+        unidadesPorFardo: number,
+        fardosPorPalete: number
+      }> = {};
 
       const serieHistorica = diasNoPeriodo.map(dia => {
         const regsDoDia = regsDaLinha.filter(r => r.data_registro === dia);
@@ -155,15 +165,41 @@ const RelatorioBoletim: React.FC = () => {
           return acc + cap;
         }, 0);
         totalCargaHorariaLinha = regsDaLinha.reduce((acc, r) => acc + (Number(r.carga_horaria) || 0), 0);
+
+        // Processar cada registro para o detalhamento por SKU
+        regsDaLinha.forEach(r => {
+          const prod = r.produtos;
+          if (!prod) return;
+          
+          const skuId = prod.id;
+          if (!skusMap[skuId]) {
+            skusMap[skuId] = {
+              nome: prod.nome,
+              unidades: 0,
+              pacotes: 0,
+              paletes: 0,
+              unidadesPorFardo: Number(prod.unidades_por_fardo) || 12,
+              fardosPorPalete: Number(prod.fardos_por_palete) || 100
+            };
+          }
+          
+          const qtd = Number(r.quantidade_produzida) || 0;
+          skusMap[skuId].unidades += qtd;
+        });
+
+        // Calcular PK e PLT para cada SKU
+        Object.values(skusMap).forEach(sku => {
+          sku.pacotes = Math.floor(sku.unidades / sku.unidadesPorFardo);
+          sku.paletes = sku.pacotes / sku.fardosPorPalete;
+        });
       }
+
+      const skusSummary = Object.values(skusMap).sort((a, b) => b.unidades - a.unidades);
+      const totalBundles = skusSummary.reduce((acc, s) => acc + s.pacotes, 0);
+      const totalPallets = skusSummary.reduce((acc, s) => acc + s.paletes, 0);
 
       // SINCRO COM DASHBOARD: Eficiência = Produzido / Capacidade Nominal
       const eficiencia = totalCapNominalLinha > 0 ? (totalQty / totalCapNominalLinha) * 100 : 0;
-
-      const latestProd = regsDaLinha[0]?.produtos;
-      const unitsPerBundle = Number(latestProd?.unidades_por_fardo) || 12;
-      const bundlesPerPallet = Number(latestProd?.fardos_por_palete) || 100;
-      const totalBundles = Math.floor(totalQty / unitsPerBundle);
 
       return {
         id: num,
@@ -171,13 +207,15 @@ const RelatorioBoletim: React.FC = () => {
         status,
         producaoTotal: totalQty,
         totalBundles,
-        totalPallets: parseFloat((totalBundles / bundlesPerPallet).toFixed(1)),
+        totalPallets: parseFloat(totalPallets.toFixed(1)),
         eficiencia,
         capNominal: totalCapNominalLinha,
         cargaHoraria: totalCargaHorariaLinha,
-        serieHistorica
+        serieHistorica,
+        skusSummary
       };
     });
+
 
     // SINCRO COM DASHBOARD: OEE Médio Planta = Soma(Produzido) / Soma(Capacidade Nominal)
     const totalProduzidoGeral = linesSummary.reduce((acc, l) => acc + l.producaoTotal, 0);
@@ -413,42 +451,81 @@ const RelatorioBoletim: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="lg:w-2/3 h-[220px] bg-slate-50/50 rounded-3xl p-4 border border-slate-100">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] mb-6 text-center">
-                    <TrendingUp className="w-3 h-3 inline mr-2 text-blue-500" /> Tendência de Evolução Produtiva (Dia a Dia)
-                  </p>
-                  <ResponsiveContainer width="100%" height="80%">
-                    <AreaChart data={line.serieHistorica} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id={`colorQty-${line.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis
-                        dataKey="data"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fontSize: 8, fontWeight: 900, fill: '#94a3b8' }}
-                        interval={'preserveStartEnd'}
-                      />
-                      <YAxis hide={true} />
-                      <RechartsTooltip
-                        contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '9px', fontWeight: 900, color: '#fff' }}
-                        itemStyle={{ color: '#3b82f6' }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="quantidade"
-                        stroke="#3b82f6"
-                        strokeWidth={3}
-                        fillOpacity={1}
-                        fill={`url(#colorQty-${line.id})`}
-                        animationDuration={1500}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                <div className="lg:w-2/3 space-y-6">
+                  <div className="h-[220px] bg-slate-50/50 rounded-3xl p-4 border border-slate-100">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] mb-6 text-center">
+                      <TrendingUp className="w-3 h-3 inline mr-2 text-blue-500" /> Tendência de Evolução Produtiva (Dia a Dia)
+                    </p>
+                    <ResponsiveContainer width="100%" height="80%">
+                      <AreaChart data={line.serieHistorica} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id={`colorQty-${line.id}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                        <XAxis
+                          dataKey="data"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 8, fontWeight: 900, fill: '#94a3b8' }}
+                          interval={'preserveStartEnd'}
+                        />
+                        <YAxis hide={true} />
+                        <RechartsTooltip
+                          contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '9px', fontWeight: 900, color: '#fff' }}
+                          itemStyle={{ color: '#3b82f6' }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="quantidade"
+                          stroke="#3b82f6"
+                          strokeWidth={3}
+                          fillOpacity={1}
+                          fill={`url(#colorQty-${line.id})`}
+                          animationDuration={1500}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {line.status === 'active' && line.skusSummary.length > 0 && (
+                    <div className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden">
+                      <div className="bg-slate-50 px-6 py-3 border-b border-slate-100 flex justify-between items-center text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                        <div className="flex items-center gap-2 text-slate-900">
+                          <Package className="w-3.5 h-3.5 text-blue-600" /> Detalhamento por SKU
+                        </div>
+                        <div className="flex gap-6 pr-4">
+                          <span className="w-16 text-right">UN</span>
+                          <span className="w-12 text-right">PK</span>
+                          <span className="w-12 text-right">PLT</span>
+                        </div>
+                      </div>
+                      <div className="divide-y divide-slate-50">
+                        {line.skusSummary.map((sku, idx) => (
+                          <div key={idx} className="px-6 py-3 flex justify-between items-center hover:bg-slate-50/50 transition-colors">
+                            <div className="flex-1 min-w-0 mr-4">
+                              <p className="text-[11px] font-black text-slate-800 uppercase truncate" title={sku.nome}>
+                                {sku.nome}
+                              </p>
+                            </div>
+                            <div className="flex gap-6 items-center">
+                              <span className="text-[11px] font-black text-slate-900 w-16 text-right">
+                                {sku.unidades.toLocaleString()}
+                              </span>
+                              <span className="text-[11px] font-bold text-slate-500 w-12 text-right">
+                                {sku.pacotes.toLocaleString()}
+                              </span>
+                              <span className="text-[11px] font-bold text-blue-600 w-12 text-right">
+                                {sku.paletes.toFixed(1)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
