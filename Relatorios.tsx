@@ -353,7 +353,7 @@ const Relatorios: React.FC = () => {
                   </div>
                   <div className="text-center">
                     <p className="text-[8px] font-black text-slate-400 uppercase mb-0.5">Carga</p>
-                    <p className="text-sm font-bold text-slate-900 leading-none">{line.cargaHoraria}h</p>
+                    <p className="text-sm font-bold text-slate-900 leading-none">{(line.cargaHoraria || 0).toFixed(2)}h</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[8px] font-black text-slate-400 uppercase mb-0.5">Downtime JSONB</p>

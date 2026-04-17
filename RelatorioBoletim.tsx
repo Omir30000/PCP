@@ -427,7 +427,7 @@ const RelatorioBoletim: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-slate-50 p-6 rounded-3xl">
                       <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Carga / Meta</p>
-                      <p className="text-sm font-black text-slate-900">{line.cargaHoraria}h / {line.capNominal.toLocaleString()}</p>
+                      <p className="text-sm font-black text-slate-900">{(line.cargaHoraria || 0).toFixed(2)}h / {line.capNominal.toLocaleString()}</p>
                     </div>
                     <div className="bg-slate-50 p-6 rounded-3xl">
                       <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Eficiência (Sincro)</p>
@@ -436,6 +436,14 @@ const RelatorioBoletim: React.FC = () => {
                       </p>
                     </div>
                   </div>
+
+                  <div className="bg-slate-900 p-6 rounded-3xl text-white">
+                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Produção Realizada Total</p>
+                    <p className="text-3xl font-black leading-none">
+                      {line.producaoTotal.toLocaleString()} <span className="text-xs text-blue-400 font-bold">UN</span>
+                    </p>
+                  </div>
+
 
                   <div className="space-y-3">
                     <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
