@@ -126,6 +126,16 @@ const Relatorios: React.FC = () => {
       let totalCapNominalLinha = 0;
       let totalCargaHorariaLinha = 0;
       let status: 'active' | 'inactive' = 'inactive';
+      
+      // Detalhamento por SKU
+      const skusMap: Record<string, { 
+        nome: string, 
+        unidades: number, 
+        pacotes: number, 
+        paletes: number,
+        unidadesPorFardo: number,
+        fardosPorPalete: number
+      }> = {};
 
       if (regsDaLinha.length > 0) {
         status = 'active';
@@ -147,16 +157,38 @@ const Relatorios: React.FC = () => {
 
           const cargaHoras = Number(r.carga_horaria) || 8;
           totalCargaHorariaGlobalMin += (cargaHoras * 60);
+
+          // Agrupamento por SKU
+          const prod = r.produtos;
+          if (prod) {
+            const skuId = prod.id;
+            if (!skusMap[skuId]) {
+              skusMap[skuId] = {
+                nome: prod.nome,
+                unidades: 0,
+                pacotes: 0,
+                paletes: 0,
+                unidadesPorFardo: Number(prod.unidades_por_fardo) || 12,
+                fardosPorPalete: Number(prod.fardos_por_palete) || 100
+              };
+            }
+            skusMap[skuId].unidades += (Number(r.quantidade_produzida) || 0);
+          }
+        });
+
+        // Calcular PK e PLT para cada SKU
+        Object.values(skusMap).forEach(sku => {
+          sku.pacotes = Math.floor(sku.unidades / sku.unidadesPorFardo);
+          sku.paletes = sku.pacotes / sku.fardosPorPalete;
         });
       }
 
+      const skusSummary = Object.values(skusMap).sort((a, b) => b.unidades - a.unidades);
+      const totalBundles = skusSummary.reduce((acc, s) => acc + s.pacotes, 0);
+      const totalPallets = skusSummary.reduce((acc, s) => acc + s.paletes, 0);
+
       // SINCRO COM DASHBOARD: Eficiência = Produzido / Capacidade Nominal
       const eficiencia = totalCapNominalLinha > 0 ? (totalQty / totalCapNominalLinha) * 100 : 0;
-
-      const latestProd = regsDaLinha[0]?.produtos;
-      const unitsPerBundle = Number(latestProd?.unidades_por_fardo) || 12;
-      const bundlesPerPallet = Number(latestProd?.fardos_por_palete) || 100;
-      const totalBundles = Math.floor(totalQty / unitsPerBundle);
 
       return {
         id: num,
@@ -164,13 +196,15 @@ const Relatorios: React.FC = () => {
         status,
         producaoTotal: totalQty,
         totalBundles,
-        totalPallets: parseFloat((totalBundles / bundlesPerPallet).toFixed(1)),
+        totalPallets: parseFloat(totalPallets.toFixed(1)),
         eficiencia,
         capNominal: totalCapNominalLinha,
         cargaHoraria: totalCargaHorariaLinha,
-        downtime: totalDowntimeLinha || 0
+        downtime: totalDowntimeLinha || 0,
+        skusSummary
       };
     });
+
 
     const totalProduzidoGeral = linesSummary.reduce((acc, l) => acc + l.producaoTotal, 0);
     const totalCapNominalGeral = linesSummary.reduce((acc, l) => acc + (l.capNominal || 0), 0);
@@ -337,6 +371,32 @@ const Relatorios: React.FC = () => {
                     <span className="text-[10px] font-black text-slate-700">{line.totalPallets.toFixed(1)} <span className="text-slate-400 font-bold">PLT</span></span>
                   </div>
                 </div>
+
+                {line.status === 'active' && line.skusSummary.length > 0 && (
+                  <div className="bg-slate-50/50 rounded-lg overflow-hidden border border-slate-100">
+                    <div className="bg-slate-100/50 px-3 py-1 flex justify-between items-center text-[7px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                      <span>Detalhamento SKU</span>
+                      <div className="flex gap-3 pr-1">
+                        <span className="w-8 text-right">UN</span>
+                        <span className="w-6 text-right">PK</span>
+                        <span className="w-6 text-right">PLT</span>
+                      </div>
+                    </div>
+                    <div className="divide-y divide-slate-100/50 max-h-[120px] overflow-y-auto no-scrollbar">
+                      {line.skusSummary.map((sku, idx) => (
+                        <div key={idx} className="px-3 py-1.5 flex justify-between items-center">
+                          <span className="text-[9px] font-bold text-slate-700 truncate mr-2" title={sku.nome}>{sku.nome}</span>
+                          <div className="flex gap-3 items-center shrink-0">
+                            <span className="text-[9px] font-black text-slate-900 w-8 text-right">{sku.unidades.toLocaleString()}</span>
+                            <span className="text-[9px] font-bold text-slate-500 w-6 text-right">{sku.pacotes.toLocaleString()}</span>
+                            <span className="text-[9px] font-bold text-blue-600 w-6 text-right">{sku.paletes.toFixed(1)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
 
                 <div className="space-y-1">
                   <div className="flex justify-between items-center">
