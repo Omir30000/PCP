@@ -174,7 +174,9 @@ const RelatoriosDowntime: React.FC = () => {
 
         // Histórico técnico para gráficos e tabela (mantém tudo)
         const mObj = maquinas.find(m => m.id === p.maquina_id);
-        const equipName = p.maquina || (mObj ? mObj.nome : (p.equipamento || 'GERAL'));
+        const baseEquipName = p.maquina || (mObj ? mObj.nome : (p.equipamento || 'GERAL'));
+        const linhaNome = reg.linhas?.nome || 'N/A';
+        const equipName = `${baseEquipName} (${linhaNome})`;
 
         // Apenas alimenta os gráficos se NÃO for parada programada
         if (type !== 'PARADA PROGRAMADA') {
