@@ -606,8 +606,17 @@ const RelatorioDowntimeTecnico: React.FC = () => {
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
           @page { margin: 15mm; size: A4 portrait; }
+          
+          /* Force parent containers to expand for printing */
+          html, body, #root, .min-h-screen, main, .max-w-\\[1800px\\] {
+            height: auto !important;
+            overflow: visible !important;
+            position: static !important;
+            display: block !important;
+          }
+
           body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          .print\\:hidden { display: none !important; }
+          .print\\:hidden, nav, aside { display: none !important; }
           
           /* Unify backgrounds for print */
           .bg-\\[\\#0d0d0d\\], .bg-\\[\\#0a0a0a\\], .bg-white\\/5, .bg-white\\/10, .bg-blue-950\\/20, .bg-emerald-950\\/20, .bg-white\\/\\[0\\.02\\], .bg-white\\/\\[0\\.01\\] { 
@@ -637,14 +646,18 @@ const RelatorioDowntimeTecnico: React.FC = () => {
           .sticky { position: static !important; }
 
           /* Layout adjustments for A4 */
-          .grid-cols-6 { grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
+          .grid-cols-6 { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
+          .grid-cols-1 { display: block !important; }
           .gap-6 { gap: 15px !important; }
           
           /* Prevent page breaks inside cards */
-          .bg-\\[\\#0d0d0d\\] { page-break-inside: avoid; break-inside: avoid; }
+          .bg-\\[\\#0d0d0d\\] { page-break-inside: avoid; break-inside: avoid; margin-bottom: 20px !important; }
           
           /* Footer always at bottom of content */
           .pt-10 { margin-top: 20px !important; border-top: 2px solid #e2e8f0 !important; }
+          
+          /* Remove animations that might mess with rendering */
+          .animate-in { animation: none !important; opacity: 1 !important; }
         }
       `}} />
 
