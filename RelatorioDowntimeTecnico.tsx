@@ -147,8 +147,20 @@ const RelatorioDowntimeTecnico: React.FC = () => {
     const top3Types = typeTableData.slice(0, 3).map(t => t.name);
 
     const top3Details = top3Types.map(typeName => {
-      const failures = detailedFailures.filter(f => f.tipo === typeName)
-        .sort((a, b) => b.duracao - a.duracao);
+      const typeFailures = detailedFailures.filter(f => f.tipo === typeName);
+      
+      const aggregated: Record<string, any> = {};
+      typeFailures.forEach(f => {
+        const key = `${f.equipamento}-${f.motivo}`;
+        if (!aggregated[key]) {
+          aggregated[key] = { ...f };
+        } else {
+          aggregated[key].duracao += f.duracao;
+          aggregated[key].volumeLost += f.volumeLost;
+        }
+      });
+
+      const failures = Object.values(aggregated).sort((a, b) => b.duracao - a.duracao);
       return { type: typeName, failures };
     });
 
