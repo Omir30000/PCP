@@ -461,7 +461,9 @@ const RelatorioDowntimeTecnico: React.FC = () => {
               <table className="w-full text-left border-collapse">
                 <thead className="sticky top-0 bg-[#0d0d0d] z-10">
                   <tr className="bg-white/5">
+                    <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Linha</th>
                     <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Máquina / Equipamento</th>
+                    <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Tipo</th>
                     <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Motivo Técnico</th>
                     <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Duração</th>
                   </tr>
@@ -469,11 +471,16 @@ const RelatorioDowntimeTecnico: React.FC = () => {
                 <tbody className="divide-y divide-white/5">
                   {analytics.top3Details[0]?.failures.map((fail, idx) => (
                     <tr key={idx} className="hover:bg-red-500/5 transition-colors group">
+                      <td className="px-6 py-4 text-[10px] font-black text-blue-400 uppercase tracking-tighter">
+                        {fail.linha}
+                      </td>
                       <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="text-[11px] font-black text-white uppercase tracking-tight">{fail.equipamento}</span>
-                          <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{fail.linha}</span>
-                        </div>
+                        <span className="text-[11px] font-black text-white uppercase tracking-tight">{fail.equipamento}</span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="text-[9px] font-bold text-slate-500 uppercase bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                          {fail.tipo}
+                        </span>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
@@ -519,7 +526,9 @@ const RelatorioDowntimeTecnico: React.FC = () => {
                    <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-white/5">
+                          <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Linha</th>
                           <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Máquina / Equipamento</th>
+                          <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Tipo</th>
                           <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Motivo Técnico</th>
                           <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Duração</th>
                         </tr>
@@ -527,11 +536,16 @@ const RelatorioDowntimeTecnico: React.FC = () => {
                       <tbody className="divide-y divide-white/5">
                         {detail.failures.map((fail, fidx) => (
                           <tr key={fidx} className="hover:bg-white/[0.02] transition-colors group">
+                            <td className="px-6 py-4 text-[10px] font-black text-blue-400 uppercase tracking-tighter">
+                              {fail.linha}
+                            </td>
                             <td className="px-6 py-4">
-                              <div className="flex flex-col">
-                                <span className="text-[11px] font-black text-white uppercase tracking-tight">{fail.equipamento}</span>
-                                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{fail.linha}</span>
-                              </div>
+                              <span className="text-[11px] font-black text-white uppercase tracking-tight">{fail.equipamento}</span>
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <span className="text-[9px] font-bold text-slate-500 uppercase bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                                {fail.tipo}
+                              </span>
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-2">
