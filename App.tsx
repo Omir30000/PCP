@@ -14,6 +14,7 @@ import RelatorioAnaliticoPorLinha from './RelatorioAnaliticoPorLinha';
 import CalendarioVendas from './CalendarioVendas';
 import RelatorioBoletim from './RelatorioBoletim';
 import RelatoriosDowntimeHoras from './RelatoriosDowntimeHoras';
+import RelatorioDowntimeTecnico from './RelatorioDowntimeTecnico';
 import Auth from './Auth';
 import Perfil from './Perfil';
 import Usuarios from './Usuarios';
@@ -58,6 +59,7 @@ type Tab =
   | 'relatorios_produtos'
   | 'relatorios_downtime'
   | 'relatorios_downtime_horas'
+  | 'relatorio_downtime_tecnico'
   | 'relatorio_registros'
   | 'analise_gargalos'
   | 'calendario_vendas'
@@ -264,6 +266,7 @@ const App: React.FC = () => {
               <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime (Min)" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" isSubItem={isSidebarExpanded} />
+              <NavItem id="relatorio_downtime_tecnico" icon={Activity} label="Downtime Técnico" isSubItem={isSidebarExpanded} />
               <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" isSubItem={isSidebarExpanded} />
             </div>
           )}
@@ -331,6 +334,7 @@ const App: React.FC = () => {
           {activeTab === 'relatorio_registros' && <RelatorioRegistros />}
           {activeTab === 'relatorios_downtime' && <RelatoriosDowntime />}
           {activeTab === 'relatorios_downtime_horas' && <RelatoriosDowntimeHoras />}
+          {activeTab === 'relatorio_downtime_tecnico' && <RelatorioDowntimeTecnico />}
           {activeTab === 'analise_gargalos' && <RelatorioAnaliticoPorLinha />}
           {activeTab === 'calendario_vendas' && <CalendarioVendas />}
           {activeTab === 'relatorio_boletim' && <RelatorioBoletim />}
@@ -420,6 +424,7 @@ const App: React.FC = () => {
                   <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros Detalhados" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" onClick={() => setIsMobileMenuOpen(false)} />
+                  <NavItem id="relatorio_downtime_tecnico" icon={Activity} label="Downtime Técnico" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" onClick={() => setIsMobileMenuOpen(false)} />
                 </>
               )}
