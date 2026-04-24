@@ -148,8 +148,7 @@ const RelatorioDowntimeTecnico: React.FC = () => {
 
     const top3Details = top3Types.map(typeName => {
       const failures = detailedFailures.filter(f => f.tipo === typeName)
-        .sort((a, b) => b.duracao - a.duracao)
-        .slice(0, 15);
+        .sort((a, b) => b.duracao - a.duracao);
       return { type: typeName, failures };
     });
 
@@ -376,7 +375,7 @@ const RelatorioDowntimeTecnico: React.FC = () => {
           <h3 className="text-[11px] font-black text-white uppercase tracking-[0.3em]">II. Análise Técnica e Impacto por Máquina</h3>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {/* Card 1: Impacto por Tipo de Parada (Planilha) */}
           <div className="bg-[#0d0d0d] border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
             <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
@@ -446,7 +445,7 @@ const RelatorioDowntimeTecnico: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-0 overflow-x-auto max-h-[440px] overflow-y-auto no-scrollbar">
+            <div className="p-0 overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead className="sticky top-0 bg-[#0d0d0d] z-10">
                   <tr className="bg-white/5">
@@ -492,7 +491,7 @@ const RelatorioDowntimeTecnico: React.FC = () => {
         </div>
 
         {/* TOP 2 & 3 SUB-ANALYSIS */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
            {analytics.top3Details.slice(1).map((detail, idx) => (
              <div key={idx} className="bg-[#0d0d0d] border border-white/5 rounded-3xl overflow-hidden shadow-xl opacity-90 hover:opacity-100 transition-opacity">
                 <div className="p-5 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
@@ -505,7 +504,7 @@ const RelatorioDowntimeTecnico: React.FC = () => {
                    <span className="text-[9px] font-black text-slate-600 uppercase">{detail.failures.length} Eventos</span>
                 </div>
                 <div className="p-4 space-y-3">
-                   {detail.failures.slice(0, 5).map((f, fidx) => (
+                   {detail.failures.map((f, fidx) => (
                       <div key={fidx} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all">
                          <div className="flex flex-col">
                             <span className="text-[10px] font-black text-white uppercase">{f.equipamento}</span>
