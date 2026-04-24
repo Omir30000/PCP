@@ -605,17 +605,46 @@ const RelatorioDowntimeTecnico: React.FC = () => {
 
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
-          body { background: white !important; color: black !important; }
+          @page { margin: 15mm; size: A4 portrait; }
+          body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           .print\\:hidden { display: none !important; }
-          .bg-[#0d0d0d], .bg-[#0a0a0a], .bg-white/5, .bg-white/10 { background: white !important; border-color: #e2e8f0 !important; }
-          .text-white, .text-slate-200, .text-slate-300 { color: black !important; }
-          .text-slate-500, .text-slate-600 { color: #64748b !important; }
-          .border-white/5, .border-white/10 { border-color: #cbd5e1 !important; }
-          .shadow-2xl, .shadow-xl, .shadow-lg { shadow: none !important; }
-          .rounded-2xl, .rounded-3xl { border-radius: 8px !important; }
-          table { border: 1px solid #e2e8f0 !important; }
-          th { background: #f8fafc !important; color: black !important; }
-          .no-scrollbar::-webkit-scrollbar { display: none; }
+          
+          /* Unify backgrounds for print */
+          .bg-\\[\\#0d0d0d\\], .bg-\\[\\#0a0a0a\\], .bg-white\\/5, .bg-white\\/10, .bg-blue-950\\/20, .bg-emerald-950\\/20, .bg-white\\/\\[0\\.02\\], .bg-white\\/\\[0\\.01\\] { 
+            background: #ffffff !important; 
+            border: 1px solid #e2e8f0 !important; 
+            color: black !important;
+          }
+
+          /* Force text to black for readability */
+          .text-white, .text-slate-200, .text-slate-300, .text-blue-400, .text-emerald-400, .text-slate-400 { color: black !important; }
+          .text-slate-500, .text-slate-600, .text-blue-600, .text-emerald-600 { color: #334155 !important; }
+          
+          /* Highlights in grayscale or subtle colors */
+          .text-red-500 { color: #b91c1c !important; font-weight: 800 !important; }
+          .text-cyan-500 { color: #0369a1 !important; }
+          .bg-cyan-500, .bg-red-500 { background-color: #334155 !important; }
+          .bg-\\[\\#facc15\\] { background-color: #facc15 !important; -webkit-print-color-adjust: exact; }
+
+          /* Remove shadows and roundings for clean doc look */
+          .shadow-2xl, .shadow-xl, .shadow-lg, .shadow-\\[0_0_30px_rgba\\(250\\,204\\,21\\,0\\.2\\)\\] { box-shadow: none !important; }
+          .rounded-2xl, .rounded-3xl, .rounded-xl { border-radius: 4px !important; }
+
+          /* Tables optimization */
+          table { width: 100% !important; border-collapse: collapse !important; margin-top: 10px !important; }
+          th { background: #f8fafc !important; color: black !important; border: 1px solid #e2e8f0 !important; text-transform: uppercase !important; font-size: 8px !important; }
+          td { border: 1px solid #e2e8f0 !important; color: black !important; padding: 8px !important; }
+          .sticky { position: static !important; }
+
+          /* Layout adjustments for A4 */
+          .grid-cols-6 { grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
+          .gap-6 { gap: 15px !important; }
+          
+          /* Prevent page breaks inside cards */
+          .bg-\\[\\#0d0d0d\\] { page-break-inside: avoid; break-inside: avoid; }
+          
+          /* Footer always at bottom of content */
+          .pt-10 { margin-top: 20px !important; border-top: 2px solid #e2e8f0 !important; }
         }
       `}} />
 
