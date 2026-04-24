@@ -160,7 +160,7 @@ const RelatorioDowntimeTecnico: React.FC = () => {
         }
       });
 
-      const failures = Object.values(aggregated).sort((a, b) => b.duracao - a.duracao);
+      const failures = Object.values(aggregated).sort((a, b) => a.equipamento.localeCompare(b.equipamento));
       return { type: typeName, failures };
     });
 
@@ -505,31 +505,57 @@ const RelatorioDowntimeTecnico: React.FC = () => {
         {/* TOP 2 & 3 SUB-ANALYSIS */}
         <div className="grid grid-cols-1 gap-6">
            {analytics.top3Details.slice(1).map((detail, idx) => (
-             <div key={idx} className="bg-[#0d0d0d] border border-white/5 rounded-3xl overflow-hidden shadow-xl opacity-90 hover:opacity-100 transition-opacity">
-                <div className="p-5 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+             <div key={idx} className="bg-[#0d0d0d] border border-white/5 rounded-3xl overflow-hidden shadow-xl">
+                <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                    <div className="flex items-center gap-3">
-                      <Clock className="w-4 h-4 text-slate-400" />
-                      <h4 className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                      <Clock className="w-5 h-5 text-slate-400" />
+                      <h4 className="text-xs font-black text-white uppercase tracking-widest">
                          {idx + 2}º Principal: {detail.type}
                       </h4>
                    </div>
-                   <span className="text-[9px] font-black text-slate-600 uppercase">{detail.failures.length} Eventos</span>
+                   <span className="text-[9px] font-black text-slate-600 uppercase">{detail.failures.length} Ocorrências</span>
                 </div>
-                <div className="p-4 space-y-3">
-                   {detail.failures.map((f, fidx) => (
-                      <div key={fidx} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all">
-                         <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-white uppercase">{f.equipamento}</span>
-                            <span className="text-[8px] font-bold text-slate-500 uppercase truncate max-w-[150px]">{f.motivo}</span>
-                         </div>
-                         <div className="text-right">
-                            <span className="text-xs font-black text-white">{f.duracao}m</span>
-                         </div>
-                      </div>
-                   ))}
-                   {detail.failures.length === 0 && (
-                      <p className="text-center py-10 text-[9px] font-black text-slate-600 uppercase tracking-widest italic">Sem dados adicionais</p>
-                   )}
+                <div className="p-0 overflow-x-auto">
+                   <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-white/5">
+                          <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Máquina / Equipamento</th>
+                          <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Motivo Técnico</th>
+                          <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Duração</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {detail.failures.map((fail, fidx) => (
+                          <tr key={fidx} className="hover:bg-white/[0.02] transition-colors group">
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col">
+                                <span className="text-[11px] font-black text-white uppercase tracking-tight">{fail.equipamento}</span>
+                                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{fail.linha}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2">
+                                 <ArrowRight className="w-3 h-3 text-slate-500 opacity-50" />
+                                 <span className="text-[10px] font-bold text-slate-300 uppercase">{fail.motivo}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex flex-col items-end">
+                                <span className="text-sm font-black text-white">{fail.duracao}m</span>
+                                <span className="text-[8px] font-bold text-slate-600 uppercase">-{fail.volumeLost} un</span>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                        {detail.failures.length === 0 && (
+                          <tr>
+                            <td colSpan={3} className="px-6 py-20 text-center text-slate-600 uppercase font-black text-[10px] tracking-widest italic">
+                              Sem ocorrências registradas
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                   </table>
                 </div>
              </div>
            ))}
