@@ -160,7 +160,11 @@ const RelatorioDowntimeTecnico: React.FC = () => {
         }
       });
 
-      const failures = Object.values(aggregated).sort((a, b) => a.equipamento.localeCompare(b.equipamento));
+      const failures = Object.values(aggregated).sort((a, b) => {
+        const lineCmp = a.linha.localeCompare(b.linha);
+        if (lineCmp !== 0) return lineCmp;
+        return a.equipamento.localeCompare(b.equipamento);
+      });
       return { type: typeName, failures };
     });
 
