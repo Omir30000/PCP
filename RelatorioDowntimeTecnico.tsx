@@ -192,6 +192,11 @@ const RelatorioDowntimeTecnico: React.FC = () => {
     return `${day}/${month}/${year}`;
   };
 
+  const formatDuration = (min: number) => {
+    if (min < 60) return `${min}m`;
+    return `${(min / 60).toFixed(1)}h`;
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -303,8 +308,7 @@ const RelatorioDowntimeTecnico: React.FC = () => {
           </div>
           <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Inatividade Total</p>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white">{analytics.totalDowntime}</span>
-            <span className="text-[10px] font-bold text-slate-500 uppercase">minutos</span>
+            <span className="text-3xl font-black text-white">{formatDuration(analytics.totalDowntime)}</span>
           </div>
           <p className="text-[8px] font-bold text-slate-600 uppercase tracking-widest mt-2">Duração Bruta Acumulada</p>
         </div>
@@ -421,8 +425,7 @@ const RelatorioDowntimeTecnico: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="text-sm font-black text-white">{row.minutos}</span>
-                        <span className="text-[9px] font-bold text-slate-500 uppercase ml-1">min</span>
+                        <span className="text-sm font-black text-white">{formatDuration(row.minutos)}</span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex flex-col items-end gap-1">
@@ -494,7 +497,7 @@ const RelatorioDowntimeTecnico: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex flex-col items-end">
-                          <span className="text-sm font-black text-red-500">{fail.duracao}m</span>
+                          <span className="text-sm font-black text-red-500">{formatDuration(fail.duracao)}</span>
                           <span className="text-[8px] font-bold text-slate-600 uppercase">-{fail.volumeLost} un</span>
                         </div>
                       </td>
@@ -559,7 +562,7 @@ const RelatorioDowntimeTecnico: React.FC = () => {
                             </td>
                             <td className="px-6 py-4 text-right">
                               <div className="flex flex-col items-end">
-                                <span className="text-sm font-black text-white">{fail.duracao}m</span>
+                                <span className="text-sm font-black text-white">{formatDuration(fail.duracao)}</span>
                                 <span className="text-[8px] font-bold text-slate-600 uppercase">-{fail.volumeLost} un</span>
                               </div>
                             </td>
