@@ -7,21 +7,11 @@ import {
   Calendar,
   Search,
   Loader2,
-  Activity,
-  Timer,
-  Settings,
-  AlertCircle,
-  TrendingDown,
-  TrendingUp,
-  ChevronRight,
-  ShieldCheck,
-  Factory,
-  BarChart2,
-  AlertTriangle,
-  History,
-  Box,
   Package,
-  X
+  X,
+  Sparkles,
+  BrainCircuit,
+  Zap
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
 
@@ -44,6 +34,10 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [maquinas, setMaquinas] = useState<Maquina[]>([]);
   const reportRef = useRef<HTMLDivElement>(null);
+
+  // Estados para IA
+  const [insights, setInsights] = useState<string>('');
+  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
 
   // Helper robusto para extração de minutos de campos variados (JSONB)
   const parseMinutos = (val: any): number => {
@@ -84,6 +78,7 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
       if (machRes.data) setMaquinas(machRes.data);
       if (regsRes.data) setRegistros(regsRes.data);
 
+      setInsights(''); // Limpa insights ao buscar novos dados
     } catch (err: any) {
       console.error("Nexus Downtime Sync Error:", err);
       alert("Erro ao sincronizar dados: " + (err.message || "Erro de conexão"));
@@ -116,6 +111,9 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
               @page { size: A4 portrait; margin: 1cm; }
               body { zoom: 0.95; -webkit-print-color-adjust: exact; }
               .bg-red-500 { background-color: #ef4444 !important; color: white !important; }
+              .bg-indigo-600 { background-color: #4f46e5 !important; color: white !important; }
+              .bg-indigo-50 { background-color: #eef2ff !important; -webkit-print-color-adjust: exact; }
+              .text-indigo-900 { color: #312e81 !important; }
               .print-force-page-1 { height: auto; min-height: 270mm; position: relative; }
               .print-break-before { page-break-before: always; break-before: page; }
             }
@@ -130,6 +128,93 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
       </html>
     `);
     printWindow.document.close();
+  };
+
+  const generateAIInsights = async () => {
+    if (registros.length === 0) {
+      alert("Não há dados de produção para analisar no período selecionado.");
+      return;
+    }
+
+    setIsGeneratingInsights(true);
+    setInsights('');
+
+    const MISTRAL_API_KEY = "VUM0jYdoE3DFV4txchjU70t0QiCir6sx";
+
+    // Preparar dados específicos de downtime e turnos para a IA
+    const performanceTurnos = ['1º Turno', '2º Turno'].map(t => {
+      const regsT = registros.filter(r => r.turno === t);
+      const prodT = regsT.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
+      const nominalT = regsT.reduce((acc, r) => acc + (Number(r.produtos?.capacidade_nominal) || Number(r.capacidade_producao) || 0), 0);
+      
+      let downtimeT = 0;
+      regsT.forEach(r => {
+        const pRaw = r.paradas;
+        const pArr = Array.isArray(pRaw) ? pRaw : [];
+        pArr.forEach((p: any) => {
+          const type = (p.tipo || '').toUpperCase();
+          if (type !== 'PARADA PROGRAMADA') {
+            downtimeT += parseMinutos(p.duracao || p.tempo || p.total_min || 0);
+          }
+        });
+      });
+
+      return {
+        turno: t,
+        unidadesProduzidas: prodT,
+        eficiencia: nominalT > 0 ? ((prodT / nominalT) * 100).toFixed(1) + '%' : '0%',
+        minutosDowntime: downtimeT
+      };
+    });
+
+    const resumoIA = {
+      periodo: `${formatarDataBR(dataInicio)} até ${formatarDataBR(dataFim)}`,
+      tempoTotalInatividade: `${analytics.totalDowntime} minutos`,
+      totalOcorrencias: analytics.totalStopsCount,
+      mttr: `${analytics.mttr.toFixed(1)} minutos (tempo médio de reparo)`,
+      perdaEstimada: `${Math.abs(analytics.volumeLost)} unidades`,
+      comparativoTurnos: performanceTurnos,
+      topEquipamentos: analytics.topEquipments
+    };
+
+    const prompt = `Você é um consultor de manutenção industrial "pé no chão", especialista em confiabilidade e TPM (Manutenção Produtiva Total).
+Analise os seguintes dados de produção e paradas (Downtime) e forneça 4 insights curtos, diretos e com um toque de humor em português.
+
+REGRAS DE LINGUAGEM:
+1. Use linguagem de "chão de fábrica" (direta, sem frescura).
+2. Se usar termos técnicos em inglês (ex: MTTR, MTBF, Downtime, Bottleneck), coloque a tradução ou explicação simples entre parênteses.
+3. Pode usar gírias leves de produção (ex: "dar um trato", "máquina abrindo o bico", "fogo no parquinho").
+4. Foque em: comparação de eficiência entre turnos, causas raiz das paradas e sugestões para a manutenção preventiva.
+5. Se um turno estiver produzindo bem mais que o outro ou parando mais, "puxe a orelha" ou elogie no tom de brincadeira.
+
+DADOS DO PERÍODO:
+${JSON.stringify(resumoIA, null, 2)}
+
+Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito em pontos chave. Seja motivador e focado em manter as máquinas rodando!`;
+
+    try {
+      const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${MISTRAL_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "open-mistral-7b",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) throw new Error("Erro na API da Mistral");
+      const data = await response.json();
+      setInsights(data.choices[0].message.content);
+    } catch (err: any) {
+      console.error("Erro ao gerar insights:", err);
+      setInsights(`Ops! O motor de IA deu uma engasgada. Verifique a conexão e tente de novo!`);
+    } finally {
+      setIsGeneratingInsights(false);
+    }
   };
 
   const analytics = useMemo(() => {
@@ -348,6 +433,16 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
           </button>
 
           <button
+            onClick={generateAIInsights}
+            disabled={isGeneratingInsights || registros.length === 0}
+            className="px-4 py-3 bg-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/20 disabled:opacity-50"
+            title="Gerar Insights com IA"
+          >
+            {isGeneratingInsights ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            IA
+          </button>
+
+          <button
             onClick={handlePrint}
             className="px-6 py-3 bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-all flex items-center gap-2 border border-white/10 shadow-xl"
           >
@@ -377,6 +472,50 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
             </p>
           </div>
         </header>
+
+        {/* Insights da IA */}
+        {(insights || isGeneratingInsights) && (
+          <div className="bg-indigo-50/50 border-2 border-indigo-100 rounded-[32px] p-8 shadow-sm print:bg-indigo-50/20 break-inside-avoid mb-10">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg">
+                <BrainCircuit className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-indigo-900 uppercase tracking-tighter">Análise Preditiva de Falhas</h3>
+                <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest leading-none mt-1">Consultoria de Manutenção Nexus AI</p>
+              </div>
+            </div>
+            
+            {isGeneratingInsights ? (
+              <div className="flex flex-col items-center justify-center py-12 space-y-4 print:hidden">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce"></div>
+                </div>
+                <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.2em]">Sincronizando com o motor Mistral...</p>
+              </div>
+            ) : (
+              <div className="prose prose-indigo max-w-none">
+                 {insights.split('\n').map((line, i) => {
+                   if (!line.trim()) return null;
+                   return (
+                     <p key={i} className="text-slate-700 font-medium leading-relaxed text-sm mb-2 flex items-start gap-3">
+                       {(line.startsWith('-') || /^\d\./.test(line)) ? (
+                         <>
+                           <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
+                           <span>{line.replace(/^\d\.\s*|^- \s*/, '')}</span>
+                         </>
+                       ) : (
+                         line
+                       )}
+                     </p>
+                   );
+                 })}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* KPIs Consolidados */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 break-inside-avoid">
