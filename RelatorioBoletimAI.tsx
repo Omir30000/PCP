@@ -383,7 +383,8 @@ Formate sua resposta em tópicos claros, usando um tom profissional e motivador.
         </div>
       </div>
 
-
+      {/* Container do Relatório para Impressão */}
+      <div ref={reportRef} className="bg-white p-0 space-y-8 print:p-0">
         {/* Cabeçalho Institucional */}
         <header className="flex justify-between items-start border-b-2 border-slate-900 pb-6 break-inside-avoid">
           <div className="flex items-center gap-4">
