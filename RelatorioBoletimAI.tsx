@@ -383,57 +383,6 @@ Formate sua resposta em tópicos claros, usando um tom profissional e motivador.
         </div>
       </div>
 
-      {/* Seção de Insights da IA (Exibida apenas se houver insights ou estiver gerando) */}
-      {(insights || isGeneratingInsights) && (
-        <div className="bg-indigo-50 border-2 border-indigo-100 rounded-[40px] p-8 shadow-sm animate-in slide-in-from-top duration-700 print:break-inside-avoid">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="text-lg font-black text-indigo-900 uppercase tracking-tighter">Nexus AI - Análise Estratégica</h3>
-              <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest leading-none mt-1">Processado pelo modelo Mistral AI</p>
-            </div>
-          </div>
-          
-          {isGeneratingInsights ? (
-            <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <div className="flex gap-2">
-                <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce"></div>
-              </div>
-              <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.2em] animate-pulse">A IA está analisando seus dados de produção...</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-              <div className="bg-white/50 backdrop-blur-sm p-8 rounded-3xl border border-indigo-100/50">
-                <div className="prose prose-indigo max-w-none">
-                   {insights.split('\n').map((line, i) => (
-                     <p key={i} className="text-slate-700 font-medium leading-relaxed mb-3">
-                       {line.startsWith('-') || line.match(/^\d\./) ? (
-                         <span className="flex items-start gap-3">
-                           <ChevronRight className="w-4 h-4 text-indigo-600 mt-1 shrink-0" />
-                           <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>').replace(/^- /, '') }} />
-                         </span>
-                       ) : (
-                         <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>') }} />
-                       )}
-                     </p>
-                   ))}
-                </div>
-              </div>
-              <div className="flex justify-end gap-4 mt-2">
-                 <p className="text-[9px] font-bold text-indigo-300 uppercase tracking-widest italic flex items-center gap-2">
-                   <ShieldCheck className="w-3 h-3" /> Análise baseada em dados reais sincronizados
-                 </p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div ref={reportRef} className="bg-white p-0 space-y-8 print:p-0">
 
         {/* Cabeçalho Institucional */}
         <header className="flex justify-between items-start border-b-2 border-slate-900 pb-6 break-inside-avoid">
@@ -460,18 +409,51 @@ Formate sua resposta em tópicos claros, usando um tom profissional e motivador.
           </div>
         </header>
 
-        {/* Insights na Impressão (Versão resumida se disponível) */}
-        {insights && (
-          <div className="hidden print:block bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100 break-inside-avoid">
-            <div className="flex items-center gap-2 mb-4 border-b border-indigo-200 pb-2">
-              <Sparkles className="w-4 h-4 text-indigo-600" />
-              <h3 className="text-xs font-black text-indigo-900 uppercase">Resumo Analítico da IA</h3>
+        {/* Seção de Insights da IA (Exibida na tela e na impressão se disponível) */}
+        {(insights || isGeneratingInsights) && (
+          <div className="bg-indigo-50/50 border-2 border-indigo-100 rounded-[30px] p-8 shadow-sm print:shadow-none print:border-indigo-200 print:bg-indigo-50/20 break-inside-avoid mt-8">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg print:shadow-none">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-indigo-900 uppercase tracking-tighter">Nexus AI - Análise Estratégica</h3>
+                <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest leading-none mt-1">Análise de Performance e Sugestões Operacionais</p>
+              </div>
             </div>
-            <div className="text-[10px] text-slate-700 leading-relaxed space-y-2">
-              {insights.split('\n').filter(l => l.trim().length > 0).slice(0, 5).map((line, i) => (
-                <p key={i}>{line.replace(/\*\*/g, '')}</p>
-              ))}
-            </div>
+            
+            {isGeneratingInsights ? (
+              <div className="flex flex-col items-center justify-center py-12 space-y-4 print:hidden">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce"></div>
+                </div>
+                <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.2em] animate-pulse">A IA está analisando seus dados de produção...</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="prose prose-indigo max-w-none">
+                   {insights.split('\n').filter(l => l.trim().length > 0).map((line, i) => (
+                     <p key={i} className="text-slate-700 font-medium leading-relaxed text-sm print:text-xs mb-2">
+                       {line.startsWith('-') || line.match(/^\d\./) ? (
+                         <span className="flex items-start gap-3">
+                           <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
+                           <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>').replace(/^- /, '') }} />
+                         </span>
+                       ) : (
+                         <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>') }} />
+                       )}
+                     </p>
+                   ))}
+                </div>
+                <div className="flex justify-end pt-4 border-t border-indigo-100 print:hidden">
+                   <p className="text-[9px] font-bold text-indigo-300 uppercase tracking-widest italic flex items-center gap-2">
+                     <ShieldCheck className="w-3 h-3" /> Análise baseada em dados reais sincronizados
+                   </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
