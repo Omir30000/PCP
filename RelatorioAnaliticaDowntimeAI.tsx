@@ -112,7 +112,7 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
       const capPerMin = nominalCap / 480;
 
       paradas.forEach((p: any) => {
-        const dur = parseMinutos(p.duracao || p.tempo || p.total_min || 0);
+        const dur = parseMinutos(p.duracao || p.tempo || p.total_min || p.minutos || 0);
         const type = (p.tipo || 'NÃO PLANEJADA').toUpperCase();
 
         if (dur <= 0) return;
@@ -182,7 +182,7 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
       mttr: totalStopsCount > 0 ? totalDowntime / totalStopsCount : 0,
       totalProduced,
       totalNominal,
-      volumeLost: Math.round(totalProduced - totalNominal),
+      volumeLost: Math.max(0, Math.round(totalNominal - totalProduced)),
       typeTableData,
       top3Details,
       topEquipments
@@ -362,7 +362,7 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
 
           <button 
             onClick={generateAIInsights}
-            disabled={isGeneratingInsights || analytics.totalStopsCount === 0}
+            disabled={isGeneratingInsights || registros.length === 0}
             className="w-[52px] h-[52px] bg-indigo-600 text-white rounded-2xl flex items-center justify-center hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50"
             title="Gerar Insights com IA"
           >
