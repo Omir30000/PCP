@@ -278,7 +278,7 @@ Formate sua resposta em tópicos claros, usando um tom profissional e motivador.
           "Authorization": `Bearer ${MISTRAL_API_KEY}`
         },
         body: JSON.stringify({
-          model: "mistral-small-latest",
+          model: "open-mistral-7b",
           messages: [
             { role: "user", content: prompt }
           ],
@@ -286,15 +286,20 @@ Formate sua resposta em tópicos claros, usando um tom profissional e motivador.
         })
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Erro ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
       if (data.choices && data.choices[0]) {
         setInsights(data.choices[0].message.content);
       } else {
         throw new Error("Resposta inválida da API");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erro ao gerar insights:", err);
-      setInsights("Ops! Ocorreu um erro ao conectar com o cérebro da IA. Verifique sua conexão ou tente novamente em instantes.");
+      setInsights(`Ops! Ocorreu um erro: ${err.message || "Conexão falhou"}. Verifique sua chave API ou se o modelo está disponível.`);
     } finally {
       setIsGeneratingInsights(false);
     }
