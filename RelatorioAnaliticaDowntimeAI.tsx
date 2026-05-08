@@ -394,7 +394,7 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
           <div className="text-right">
             <h3 className="text-xs font-black uppercase tracking-widest mb-1">Relatório Técnico de Downtime</h3>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-              Período: {dataInicio === dataFim ? formatarDataBR(dataInicio) : `${formatarDataBR(dataInicio)} - ${formatarDataBR(dataFim)}`}
+              Período: {dataInicio === dataFim ? formatarDataBR(dataInicio) : formatarDataBR(dataInicio) + ' - ' + formatarDataBR(dataFim)}
             </p>
           </div>
         </div>
@@ -423,18 +423,21 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
               </div>
             ) : (
               <div className="prose prose-indigo max-w-none">
-                 {insights.split('\n').filter(l => l.trim().length > 0).map((line, i) => (
-                   <p key={i} className="text-slate-700 font-medium leading-relaxed text-sm mb-2">
-                     {line.startsWith('-') || line.match(/^\d\./) ? (
-                       <span className="flex items-start gap-3">
-                         <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
-                         <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>').replace(/^- /, '') }} />
-                       </span>
-                     ) : (
-                       <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>') }} />
-                     )}
-                   </p>
-                 ))}
+                 {insights.split('\n').map((line, i) => {
+                   if (!line.trim()) return null;
+                   return (
+                     <p key={i} className="text-slate-700 font-medium leading-relaxed text-sm mb-2">
+                       {line.startsWith('-') || /^\d\./.test(line) ? (
+                         <span className="flex items-start gap-3">
+                           <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
+                           <span>{line.replace(/^\d\.\s*|^- \s*/, '')}</span>
+                         </span>
+                       ) : (
+                         line
+                       )}
+                     </p>
+                   );
+                 })}
               </div>
             )}
           </div>
