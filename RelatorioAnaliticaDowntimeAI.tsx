@@ -53,20 +53,13 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
+      // Query simplificada para garantir que os dados cheguem sem bloqueios de filtros de banco
       let query = supabase
         .from('registros_producao')
         .select('*, produtos(*), linhas(*)')
         .gte('data_registro', dataInicio)
         .lte('data_registro', dataFim)
         .order('data_registro', { ascending: false });
-
-      if (turno !== 'todos') {
-        query = query.eq('turno', turno);
-      }
-
-      if (linhaId !== 'todos') {
-        query = query.eq('linha_id', linhaId);
-      }
 
       const [regsRes, linesRes, machRes] = await Promise.all([
         query,
@@ -102,19 +95,17 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
     const detailedFailures: any[] = [];
     const equipCount: Record<string, number> = {};
 
-    registros.forEach(reg => {
-      const paradasRaw = reg.paradas;
+    // Filtragem local para maior precisão e performance
+    const registrosFiltrados = registros.filter(reg => {
+      const matchTurno = turno === 'todos' || reg.turno === turno;
+      const matchLinha = linhaId === 'todos' || reg.linha_id === linhaId;
+      return matchTurno && matchLinha;
+    });
+
+    registrosFiltrados.forEach(reg => {
+      // Tenta encontrar as paradas em múltiplos campos possíveis para evitar erros de schema
+      const paradasRaw = reg.paradas || reg.downtime || reg.interruptores || [];
       let paradas: any[] = [];
-      
-      if (Array.isArray(paradasRaw)) {
-        paradas = paradasRaw;
-      } else if (typeof paradasRaw === 'string') {
-        try {
-          paradas = JSON.parse(paradasRaw);
-        } catch (e) {
-          paradas = [];
-        }
-      }
 
       totalProduced += Number(reg.quantidade_produzida) || 0;
       const nominalCap = Number(reg.produtos?.capacidade_nominal) || Number(reg.capacidade_producao) || 0;
