@@ -14,6 +14,7 @@ import RelatorioAnaliticoPorLinha from './RelatorioAnaliticoPorLinha';
 import CalendarioVendas from './CalendarioVendas';
 import RelatorioBoletim from './RelatorioBoletim';
 import RelatorioBoletimAI from './RelatorioBoletimAI';
+import RelatorioAnaliticaDowntimeAI from './RelatorioAnaliticaDowntimeAI';
 import RelatoriosDowntimeHoras from './RelatoriosDowntimeHoras';
 import RelatorioDowntimeTecnico from './RelatorioDowntimeTecnico';
 import Auth from './Auth';
@@ -47,7 +48,9 @@ import {
   Menu,
   X,
   Wrench,
-  BrainCircuit
+  BrainCircuit,
+  Timer,
+  Zap
 } from 'lucide-react';
 
 type Tab =
@@ -67,6 +70,7 @@ type Tab =
   | 'calendario_vendas'
   | 'relatorio_boletim'
   | 'relatorio_boletim_ai'
+  | 'analitica_downtime_ai'
   | 'perfil'
   | 'usuarios';
 
@@ -267,6 +271,7 @@ const App: React.FC = () => {
               <NavItem id="relatorios" icon={FileText} label="Boletim" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorio_boletim" icon={Calculator} label="Boletim Turno" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" isSubItem={isSidebarExpanded} />
+              <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime (Min)" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" isSubItem={isSidebarExpanded} />
@@ -343,6 +348,7 @@ const App: React.FC = () => {
           {activeTab === 'calendario_vendas' && <CalendarioVendas />}
           {activeTab === 'relatorio_boletim' && <RelatorioBoletim />}
           {activeTab === 'relatorio_boletim_ai' && <RelatorioBoletimAI />}
+          {activeTab === 'analitica_downtime_ai' && <RelatorioAnaliticaDowntimeAI />}
           {activeTab === 'perfil' && <Perfil userProfile={userProfile} onProfileUpdate={handleProfileUpdate} />}
           {activeTab === 'usuarios' && userProfile?.nivel_acesso === 'admin' && <Usuarios />}
         </div>
@@ -427,6 +433,7 @@ const App: React.FC = () => {
                   <NavItem id="analise_disponibilidade" icon={Scale} label="Balanço" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="relatorio_boletim" icon={Calculator} label="Boletim Turno" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" onClick={() => setIsMobileMenuOpen(false)} />
+                  <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros Detalhados" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" onClick={() => setIsMobileMenuOpen(false)} />
