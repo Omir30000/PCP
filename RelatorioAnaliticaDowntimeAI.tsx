@@ -7,6 +7,19 @@ import {
   Calendar,
   Search,
   Loader2,
+  Activity,
+  Timer,
+  Settings,
+  AlertCircle,
+  TrendingDown,
+  TrendingUp,
+  ChevronRight,
+  ShieldCheck,
+  Factory,
+  BarChart2,
+  AlertTriangle,
+  History,
+  Box,
   Package,
   X,
   Sparkles,
@@ -734,7 +747,7 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
                     <th className="px-2 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Linha</th>
                     <th className="px-2 py-3 text-[8px] font-black text-slate-900 uppercase tracking-widest">Produto</th>
                     <th className="px-2 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest text-center">Nominal</th>
-                    <th className="px-2 py-4 text-[8px) font-black text-slate-900 uppercase tracking-widest">Máquina</th>
+                    <th className="px-2 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Máquina</th>
                     <th className="px-2 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest">Motivo</th>
                     <th className="px-2 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest text-right">Dur.</th>
                     <th className="px-2 py-4 text-[8px] font-black text-slate-900 uppercase tracking-widest text-right">Perda Est.</th>
