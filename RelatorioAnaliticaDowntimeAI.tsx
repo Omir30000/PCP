@@ -45,7 +45,7 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
   const parseMinutos = (val: any): number => {
     if (val === null || val === undefined) return 0;
     if (typeof val === 'number') return val;
-    const match = String(val).match(/\d+/);
+    const match = String(val).match(/d+/);
     return match ? parseInt(match[0]) : 0;
   };
 
@@ -423,14 +423,14 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
               </div>
             ) : (
               <div className="prose prose-indigo max-w-none">
-                 {insights.split('\n').map((line, i) => {
+                 {insights.split('n').map((line, i) => {
                    if (!line.trim()) return null;
                    return (
                      <p key={i} className="text-slate-700 font-medium leading-relaxed text-sm mb-2">
-                       {line.startsWith('-') || /^\d\./.test(line) ? (
+                       {line.startsWith('-') || /^d./.test(line) ? (
                          <span className="flex items-start gap-3">
                            <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
-                           <span>{line.replace(/^\d\.\s*|^- \s*/, '')}</span>
+                           <span>{line.replace(/^d.s*|^- s*/, '')}</span>
                          </span>
                        ) : (
                          line
@@ -461,7 +461,7 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
               {analytics.topEquipments.map((equip, idx) => (
                 <div key={idx} className="flex items-center justify-between group/item">
                   <div className="flex items-center gap-2">
-                    <span className={\`w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black \${idx === 0 ? 'bg-red-500 text-white' : 'bg-slate-100 text-slate-500'}\`}>
+                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black ${idx === 0 ? 'bg-red-500 text-white' : 'bg-slate-100 text-slate-500'}`}>
                       {idx + 1}
                     </span>
                     <span className="text-[10px] font-bold text-slate-700 truncate max-w-[120px] uppercase">{equip.name}</span>
@@ -541,7 +541,7 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
                   <tr key={idx} className="hover:bg-slate-50 transition-colors group">
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-4">
-                        <div className={\`w-2 h-10 rounded-full \${idx === 0 ? 'bg-red-600' : 'bg-slate-200'}\`} />
+                        <div className={`w-2 h-10 rounded-full ${idx === 0 ? 'bg-red-600' : 'bg-slate-200'}`} />
                         <span className="text-[13px] font-black text-slate-900 uppercase tracking-tighter">{row.name}</span>
                       </div>
                     </td>
@@ -552,7 +552,7 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
                       <div className="flex flex-col items-end gap-1">
                         <span className="text-sm font-black text-red-600">{row.percent.toFixed(1)}%</span>
                         <div className="w-32 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-red-600 rounded-full" style={{ width: \`\${row.percent}%\` }} />
+                          <div className="h-full bg-red-600 rounded-full" style={{ width: `${row.percent}%` }} />
                         </div>
                       </div>
                     </td>
