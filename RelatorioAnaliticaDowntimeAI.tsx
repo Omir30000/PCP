@@ -104,13 +104,23 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
 
     registros.forEach(reg => {
       const paradasRaw = reg.paradas;
-      const paradas = Array.isArray(paradasRaw) ? paradasRaw : [];
-      totalProduced += Number(reg.quantidade_produzida) || 0;
+      let paradas: any[] = [];
+      
+      if (Array.isArray(paradasRaw)) {
+        paradas = paradasRaw;
+      } else if (typeof paradasRaw === 'string') {
+        try {
+          paradas = JSON.parse(paradasRaw);
+        } catch (e) {
+          paradas = [];
+        }
+      }
 
-      const nominalCap = Number(reg.produtos?.capacidade_nominal) || Number(reg.capacidade_producao) || 7200;
+      totalProduced += Number(reg.quantidade_produzida) || 0;
+      const nominalCap = Number(reg.produtos?.capacidade_nominal) || Number(reg.capacidade_producao) || 0;
       totalNominal += nominalCap;
 
-      const capPerMin = nominalCap / 480;
+      const capPerMin = nominalCap > 0 ? (nominalCap / 480) : 0;
 
       paradas.forEach((p: any) => {
         const dur = parseMinutos(p.duracao || p.tempo || p.total_min || p.minutos || 0);
@@ -118,19 +128,15 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
 
         if (dur <= 0) return;
 
-        if (type !== 'PARADA PROGRAMADA') {
-          totalDowntime += dur;
-          totalStopsCount += 1;
-          byType[type] = (byType[type] || 0) + dur;
-          
-          const mObj = maquinas.find(m => m.id === p.maquina_id);
-          const equipName = p.maquina || (mObj ? mObj.nome : (p.equipamento || 'GERAL'));
-          const fullEquipName = `${equipName} (${reg.linhas?.nome || 'N/A'})`;
-          equipCount[fullEquipName] = (equipCount[fullEquipName] || 0) + 1;
-        }
-
+        // Contabiliza para o total de inatividade técnica
+        totalDowntime += dur;
+        totalStopsCount += 1;
+        byType[type] = (byType[type] || 0) + dur;
+        
         const mObj = maquinas.find(m => m.id === p.maquina_id);
         const equipName = p.maquina || (mObj ? mObj.nome : (p.equipamento || 'GERAL'));
+        const fullEquipName = `${equipName} (${reg.linhas?.nome || 'N/A'})`;
+        equipCount[fullEquipName] = (equipCount[fullEquipName] || 0) + 1;
 
         detailedFailures.push({
           data: reg.data_registro,
