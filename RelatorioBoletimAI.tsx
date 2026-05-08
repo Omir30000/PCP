@@ -274,14 +274,19 @@ const RelatorioBoletimAI: React.FC = () => {
       }))
     };
 
-    const prompt = `Você é um consultor especialista em PCP (Planejamento e Controle de Produção) e Lean Manufacturing.
-Analise os seguintes dados de produção industrial e forneça 3 a 4 insights estratégicos, curtos e acionáveis em português.
-Foque em: eficiência de planta, gargalos potenciais, desempenho por linha, COMPARAÇÃO ENTRE TURNOS (se disponível) e sugestões de melhoria.
+    const prompt = `Você é um consultor de produção "pé no chão", com anos de experiência em fábrica e um toque de bom humor.
+Analise os seguintes dados de produção e forneça 3 a 4 insights curtos e diretos em português.
+
+REGRAS DE LINGUAGEM:
+1. Use uma linguagem simples, de quem está no "chão de fábrica" (direta e sem frescura).
+2. Se usar termos técnicos em inglês (ex: OEE, Bottleneck, Lead Time, SKUs), coloque a tradução ou explicação simples entre parênteses.
+3. Pode usar um toque de humor ou gírias leves de produção (ex: "foguete não tem ré", "dar um gás", "máquina parada é prejuízo").
+4. Foque em: eficiência, comparação entre turnos e onde a equipe precisa focar para bater as metas.
 
 DADOS DA PRODUÇÃO:
 ${JSON.stringify(resumoProducao, null, 2)}
 
-Formate sua resposta em tópicos claros, usando um tom profissional e motivador. Use Markdown para negrito em pontos chave.`;
+Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito em pontos chave. Seja motivador e profissional ao mesmo tempo!`;
 
     try {
       const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
