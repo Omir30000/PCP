@@ -246,13 +246,26 @@ const RelatorioBoletimAI: React.FC = () => {
 
     const MISTRAL_API_KEY = "VUM0jYdoE3DFV4txchjU70t0QiCir6sx";
     
+    // Cálculo específico por turno para comparação
+    const performanceTurnos = ['1º Turno', '2º Turno'].map(t => {
+      const regsTurno = registros.filter(r => r.turno === t);
+      const prodTurno = regsTurno.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
+      const capTurno = regsTurno.reduce((acc, r) => acc + (Number(r.capacidade_producao) || 0), 0);
+      return {
+        turno: t,
+        producao: prodTurno,
+        eficiencia: capTurno > 0 ? ((prodTurno / capTurno) * 100).toFixed(1) + "%" : "0%"
+      };
+    });
+
     // Preparar dados para o prompt
     const resumoProducao = {
       periodo: `${formatarDataBR(dataInicio)} até ${formatarDataBR(dataFim)}`,
-      turno: filtroTurno,
+      turnoVisualizado: filtroTurno,
       totalUnidades: analytics.factoryTotals.totalUnits,
       eficienciaMediaPlanta: analytics.factoryTotals.avgEfficiency.toFixed(1) + "%",
       paletesTotais: analytics.factoryTotals.pallets,
+      comparativoTurnos: filtroTurno === 'GLOBAL' ? performanceTurnos : undefined,
       linhas: analytics.linesSummary.filter(l => l.status === 'active').map(l => ({
         nome: l.nome,
         producao: l.producaoTotal,
@@ -263,7 +276,7 @@ const RelatorioBoletimAI: React.FC = () => {
 
     const prompt = `Você é um consultor especialista em PCP (Planejamento e Controle de Produção) e Lean Manufacturing.
 Analise os seguintes dados de produção industrial e forneça 3 a 4 insights estratégicos, curtos e acionáveis em português.
-Foque em: eficiência de planta, gargalos potenciais, desempenho por linha e sugestões de melhoria.
+Foque em: eficiência de planta, gargalos potenciais, desempenho por linha, COMPARAÇÃO ENTRE TURNOS (se disponível) e sugestões de melhoria.
 
 DADOS DA PRODUÇÃO:
 ${JSON.stringify(resumoProducao, null, 2)}
