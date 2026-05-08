@@ -267,7 +267,7 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
     if (!printWindow) return;
 
     const content = reportRef.current.innerHTML;
-    printWindow.document.write(\`
+    printWindow.document.write(`
       <!DOCTYPE html>
       <html lang="pt-BR">
       <head>
@@ -280,7 +280,7 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
             @media print {
               @page { size: A4 portrait; margin: 0.5cm; }
               body { zoom: 0.8; }
-              .print\\\\:hidden { display: none !important; }
+              .print:hidden { display: none !important; }
               .break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
               .bg-slate-900 { background-color: #0f172a !important; color: white !important; -webkit-print-color-adjust: exact; }
               .bg-red-600 { background-color: #dc2626 !important; color: white !important; -webkit-print-color-adjust: exact; }
@@ -293,11 +293,11 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
           </style>
       </head>
       <body>
-          <div class="p-4">\${content}</div>
+          <div class="p-4">${content}</div>
           <script>window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 800); };</script>
       </body>
       </html>
-    \`);
+    `);
     printWindow.document.close();
   };
 
@@ -394,7 +394,7 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
           <div className="text-right">
             <h3 className="text-xs font-black uppercase tracking-widest mb-1">Relatório Técnico de Downtime</h3>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-              Período: {dataInicio === dataFim ? formatarDataBR(dataInicio) : \`\${formatarDataBR(dataInicio)} - \${formatarDataBR(dataFim)}\`}
+              Período: {dataInicio === dataFim ? formatarDataBR(dataInicio) : `${formatarDataBR(dataInicio)} - ${formatarDataBR(dataFim)}`}
             </p>
           </div>
         </div>
@@ -423,15 +423,15 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
               </div>
             ) : (
               <div className="prose prose-indigo max-w-none">
-                 {insights.split('\\n').filter(l => l.trim().length > 0).map((line, i) => (
+                 {insights.split('\n').filter(l => l.trim().length > 0).map((line, i) => (
                    <p key={i} className="text-slate-700 font-medium leading-relaxed text-sm mb-2">
-                     {line.startsWith('-') || line.match(/^\\d\\./) ? (
+                     {line.startsWith('-') || line.match(/^\d\./) ? (
                        <span className="flex items-start gap-3">
                          <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
-                         <span dangerouslySetInnerHTML={{ __html: line.replace(/\\*\\*(.*?)\\*\\*/g, '<strong class="text-indigo-900 font-black">$1</strong>').replace(/^- /, '') }} />
+                         <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>').replace(/^- /, '') }} />
                        </span>
                      ) : (
-                       <span dangerouslySetInnerHTML={{ __html: line.replace(/\\*\\*(.*?)\\*\\*/g, '<strong class="text-indigo-900 font-black">$1</strong>') }} />
+                       <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>') }} />
                      )}
                    </p>
                  ))}
