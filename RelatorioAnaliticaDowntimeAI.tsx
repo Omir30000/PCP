@@ -488,45 +488,80 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
 
         {/* Insights da IA */}
         {(insights || isGeneratingInsights) && (
-          <div className="bg-indigo-50/50 border-2 border-indigo-100 rounded-[32px] p-8 shadow-sm print:bg-indigo-50/20 break-inside-avoid mb-10">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg">
-                <BrainCircuit className="w-6 h-6" />
+          <div className="bg-slate-50 border border-slate-200 rounded-[32px] p-8 shadow-sm print:bg-white break-inside-avoid mb-10">
+            <div className="flex items-center justify-between mb-8 border-b border-slate-200 pb-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-slate-900 rounded-2xl text-white shadow-lg">
+                  <BrainCircuit className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Diagnóstico de Performance Nexus</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1 italic">Processamento de Confiabilidade via Mistral AI</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-black text-indigo-900 uppercase tracking-tighter">Análise Preditiva de Falhas</h3>
-                <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest leading-none mt-1">Consultoria de Manutenção Nexus AI</p>
+              <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-slate-200 shadow-sm">
+                 <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                 <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Análise de Causa Raiz em Tempo Real</span>
               </div>
             </div>
             
             {isGeneratingInsights ? (
               <div className="flex flex-col items-center justify-center py-12 space-y-4 print:hidden">
                 <div className="flex gap-2">
-                  <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                  <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                  <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce"></div>
+                  <div className="w-3 h-3 bg-slate-900 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="w-3 h-3 bg-slate-900 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="w-3 h-3 bg-slate-900 rounded-full animate-bounce"></div>
                 </div>
-                <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.2em]">Sincronizando com o motor Mistral...</p>
+                <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Consultando o motor de Inteligência Industrial...</p>
               </div>
             ) : (
-              <div className="prose prose-indigo max-w-none">
-                 {insights.split('\n').map((line, i) => {
-                   if (!line.trim()) return null;
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 {insights.split(/(?=###|\d\.)/).filter(block => block.trim()).map((block, idx) => {
+                   // Limpeza básica de Markdown para exibição limpa
+                   const cleanBlock = block
+                     .replace(/###\s*|\d\.\s*|\*\*/g, '') // Remove cabeçalhos e negritos
+                     .replace(/- /g, '• ') // Padroniza bullets
+                     .trim();
+                   
+                   const lines = cleanBlock.split('\n');
+                   const title = lines[0];
+                   const content = lines.slice(1).join('\n');
+
                    return (
-                     <p key={i} className="text-slate-700 font-medium leading-relaxed text-sm mb-2 flex items-start gap-3">
-                       {(line.startsWith('-') || /^\d\./.test(line)) ? (
-                         <>
-                           <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
-                           <span>{line.replace(/^\d\.\s*|^- \s*/, '')}</span>
-                         </>
-                       ) : (
-                         line
-                       )}
-                     </p>
+                     <div key={idx} className="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm hover:border-slate-300 transition-all group">
+                        <div className="flex items-start gap-4">
+                           <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 group-hover:bg-slate-900 group-hover:text-white transition-colors">
+                              {idx === 0 ? <TrendingUp className="w-5 h-5" /> : 
+                               idx === 1 ? <AlertTriangle className="w-5 h-5" /> :
+                               idx === 2 ? <Zap className="w-5 h-5" /> : <Activity className="w-5 h-5" />}
+                           </div>
+                           <div className="space-y-3">
+                              <h4 className="text-[13px] font-black text-slate-900 uppercase tracking-tight leading-tight">
+                                {title}
+                              </h4>
+                              <div className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                                 {content.split('\n').map((line, li) => (
+                                   <p key={li} className={line.startsWith('•') ? "ml-1 mt-1 flex items-start gap-2" : "mb-2"}>
+                                      {line.startsWith('•') && <span className="text-slate-400 mt-1 shrink-0">•</span>}
+                                      <span>{line.replace('• ', '')}</span>
+                                   </p>
+                                 ))}
+                              </div>
+                           </div>
+                        </div>
+                     </div>
                    );
                  })}
               </div>
             )}
+
+            <div className="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center opacity-60">
+               <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Baseado no modelo open-mistral-7b • Análise probabilística</p>
+               <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                  <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Nexus Verified Insights</span>
+               </div>
+            </div>
           </div>
         )}
 
