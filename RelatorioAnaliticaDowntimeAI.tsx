@@ -190,20 +190,19 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
       topEquipamentos: analytics.topEquipments
     };
 
-    const prompt = `Você é um consultor de manutenção industrial de alto nível.
-Analise os seguintes dados de produção e paradas (Downtime) e forneça um RESUMO EXECUTIVO direto.
+    const prompt = `Você é um consultor de produção "pé no chão", com anos de experiência em fábrica e um toque de bom humor.
+Analise os seguintes dados de produção e paradas (Downtime) e forneça 3 a 4 insights curtos e diretos em português.
 
-REGRAS CRÍTICAS:
-1. NÃO use introduções como "Aqui vai o diagnóstico", "Olá", ou qualquer frase de abertura. Comece DIRETO nos dados.
-2. Use linguagem de "chão de fábrica" profissional (direta, mas técnica).
-3. Traduza termos técnicos (ex: MTTR - Tempo Médio de Reparo).
-4. Forneça 4 tópicos principais de análise.
-5. Use um tom de consultoria séria com foco em resultados, sem piadas excessivas ou clichês de IA.
+REGRAS DE LINGUAGEM:
+1. Use uma linguagem simples, de quem está no "chão de fábrica" (direta e sem frescura).
+2. Se usar termos técnicos em inglês (ex: MTTR, Downtime, Bottleneck), coloque a tradução ou explicação simples entre parênteses.
+3. Pode usar um toque de humor ou gírias leves de produção (ex: "foguete não tem ré", "dar um gás", "máquina parada é prejuízo").
+4. Foque em: eficiência, comparação entre turnos e onde a equipe precisa focar para bater as metas.
 
-DADOS DO PERÍODO:
+DADOS DA PRODUÇÃO:
 ${JSON.stringify(resumoIA, null, 2)}
 
-Formate sua resposta em tópicos claros, usando negrito apenas no que for essencial.`;
+Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito em pontos chave. Seja motivador e profissional ao mesmo tempo!`;
 
     try {
       const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
@@ -515,26 +514,32 @@ Formate sua resposta em tópicos claros, usando negrito apenas no que for essenc
                 <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Consultando o motor de Inteligência Industrial...</p>
               </div>
             ) : (
-              <div className="space-y-6">
-                 {insights.split('\n').filter(line => line.trim()).map((line, idx) => {
-                   // Limpeza de Markdown para exibição limpa
-                   const cleanLine = line
-                     .replace(/###\s*|\d\.\s*|\*\*/g, '') // Remove cabeçalhos e negritos
-                     .replace(/- /g, '') // Remove traços
-                     .trim();
-
-                   if (!cleanLine) return null;
-
-                   const isHeader = line.includes('###') || /^\d\./.test(line);
-
-                   return (
-                     <div key={idx} className={`${isHeader ? "border-l-4 border-slate-900 pl-4 py-1" : "ml-5"}`}>
-                        <p className={`${isHeader ? "text-[14px] font-black text-slate-900 uppercase tracking-tight" : "text-[12px] text-slate-600 font-medium leading-relaxed"}`}>
-                           {cleanLine}
-                        </p>
-                     </div>
-                   );
-                 })}
+              <div className="space-y-4">
+                <div className="prose prose-indigo max-w-none">
+                   {insights.split('\n').filter(l => l.trim().length > 0).map((line, i) => (
+                     <p key={i} className="text-slate-700 font-medium leading-relaxed text-sm print:text-xs mb-2">
+                       {line.startsWith('-') || line.match(/^\d\./) || line.startsWith('###') ? (
+                         <span className="flex items-start gap-3">
+                           <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
+                           <span dangerouslySetInnerHTML={{ 
+                             __html: line
+                               .replace(/###\s*|\d\.\s*|^- \s*/, '')
+                               .replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>') 
+                           }} />
+                         </span>
+                       ) : (
+                         <span dangerouslySetInnerHTML={{ 
+                           __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>') 
+                         }} />
+                       )}
+                     </p>
+                   ))}
+                </div>
+                <div className="flex justify-end pt-4 border-t border-indigo-100 print:hidden">
+                   <p className="text-[9px] font-bold text-indigo-300 uppercase tracking-widest italic flex items-center gap-2">
+                     <ShieldCheck className="w-3 h-3" /> Análise baseada em dados reais sincronizados
+                   </p>
+                </div>
               </div>
             )}
 
