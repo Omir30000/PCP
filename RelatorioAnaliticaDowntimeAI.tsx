@@ -190,20 +190,20 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
       topEquipamentos: analytics.topEquipments
     };
 
-    const prompt = `Você é um consultor de manutenção industrial "pé no chão", especialista em confiabilidade e TPM (Manutenção Produtiva Total).
-Analise os seguintes dados de produção e paradas (Downtime) e forneça 4 insights curtos, diretos e com um toque de humor em português.
+    const prompt = `Você é um consultor de manutenção industrial de alto nível.
+Analise os seguintes dados de produção e paradas (Downtime) e forneça um RESUMO EXECUTIVO direto.
 
-REGRAS DE LINGUAGEM:
-1. Use linguagem de "chão de fábrica" (direta, sem frescura).
-2. Se usar termos técnicos em inglês (ex: MTTR, MTBF, Downtime, Bottleneck), coloque a tradução ou explicação simples entre parênteses.
-3. Pode usar gírias leves de produção (ex: "dar um trato", "máquina abrindo o bico", "fogo no parquinho").
-4. Foque em: comparação de eficiência entre turnos, causas raiz das paradas e sugestões para a manutenção preventiva.
-5. Se um turno estiver produzindo bem mais que o outro ou parando mais, "puxe a orelha" ou elogie no tom de brincadeira.
+REGRAS CRÍTICAS:
+1. NÃO use introduções como "Aqui vai o diagnóstico", "Olá", ou qualquer frase de abertura. Comece DIRETO nos dados.
+2. Use linguagem de "chão de fábrica" profissional (direta, mas técnica).
+3. Traduza termos técnicos (ex: MTTR - Tempo Médio de Reparo).
+4. Forneça 4 tópicos principais de análise.
+5. Use um tom de consultoria séria com foco em resultados, sem piadas excessivas ou clichês de IA.
 
 DADOS DO PERÍODO:
 ${JSON.stringify(resumoIA, null, 2)}
 
-Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito em pontos chave. Seja motivador e focado em manter as máquinas rodando!`;
+Formate sua resposta em tópicos claros, usando negrito apenas no que for essencial.`;
 
     try {
       const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
@@ -515,40 +515,23 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
                 <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Consultando o motor de Inteligência Industrial...</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 {insights.split(/(?=###|\d\.)/).filter(block => block.trim()).map((block, idx) => {
-                   // Limpeza básica de Markdown para exibição limpa
-                   const cleanBlock = block
+              <div className="space-y-6">
+                 {insights.split('\n').filter(line => line.trim()).map((line, idx) => {
+                   // Limpeza de Markdown para exibição limpa
+                   const cleanLine = line
                      .replace(/###\s*|\d\.\s*|\*\*/g, '') // Remove cabeçalhos e negritos
-                     .replace(/- /g, '• ') // Padroniza bullets
+                     .replace(/- /g, '') // Remove traços
                      .trim();
-                   
-                   const lines = cleanBlock.split('\n');
-                   const title = lines[0];
-                   const content = lines.slice(1).join('\n');
+
+                   if (!cleanLine) return null;
+
+                   const isHeader = line.includes('###') || /^\d\./.test(line);
 
                    return (
-                     <div key={idx} className="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm hover:border-slate-300 transition-all group">
-                        <div className="flex items-start gap-4">
-                           <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 group-hover:bg-slate-900 group-hover:text-white transition-colors">
-                              {idx === 0 ? <TrendingUp className="w-5 h-5" /> : 
-                               idx === 1 ? <AlertTriangle className="w-5 h-5" /> :
-                               idx === 2 ? <Zap className="w-5 h-5" /> : <Activity className="w-5 h-5" />}
-                           </div>
-                           <div className="space-y-3">
-                              <h4 className="text-[13px] font-black text-slate-900 uppercase tracking-tight leading-tight">
-                                {title}
-                              </h4>
-                              <div className="text-[11px] text-slate-600 leading-relaxed font-medium">
-                                 {content.split('\n').map((line, li) => (
-                                   <p key={li} className={line.startsWith('•') ? "ml-1 mt-1 flex items-start gap-2" : "mb-2"}>
-                                      {line.startsWith('•') && <span className="text-slate-400 mt-1 shrink-0">•</span>}
-                                      <span>{line.replace('• ', '')}</span>
-                                   </p>
-                                 ))}
-                              </div>
-                           </div>
-                        </div>
+                     <div key={idx} className={`${isHeader ? "border-l-4 border-slate-900 pl-4 py-1" : "ml-5"}`}>
+                        <p className={`${isHeader ? "text-[14px] font-black text-slate-900 uppercase tracking-tight" : "text-[12px] text-slate-600 font-medium leading-relaxed"}`}>
+                           {cleanLine}
+                        </p>
                      </div>
                    );
                  })}
