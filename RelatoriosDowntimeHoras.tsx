@@ -186,9 +186,10 @@ const RelatoriosDowntimeHoras: React.FC = () => {
 
                 return {
                     data: dia.split('-').reverse().join('/'),
-                    horasParada: Number((hrsParadaDia / 60).toFixed(2))
+                    horasParada: Number((hrsParadaDia / 60).toFixed(2)),
+                    hasRecords: regsDoDia.length > 0
                 };
-            });
+            }).filter(d => d.hasRecords);
 
             regsDaLinha.forEach(reg => {
                 const paradas = Array.isArray(reg.paradas) ? reg.paradas : [];

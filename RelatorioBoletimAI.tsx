@@ -164,7 +164,7 @@ const RelatorioBoletimAI: React.FC = () => {
           data: dia.split('-').reverse().join('/'),
           quantidade: qtdDia
         };
-      });
+      }).filter(d => d.quantidade > 0);
 
       if (regsDaLinha.length > 0) {
         status = 'active';
