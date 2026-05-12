@@ -175,13 +175,15 @@ const RelatorioBoletimPro: React.FC = () => {
 
     setIsSending(true);
 
-    // Formatação da Mensagem Consolidada
-    let mensagem = `*📋 DIAGNÓSTICO OPERACIONAL - NEXUS PCP*\n`;
+    // Formatação da Mensagem Consolidada (Sem Emojis para evitar erro 400)
+    let mensagem = `*DIAGNÓSTICO OPERACIONAL - NEXUS PCP*\n`;
     mensagem += `_Data: ${new Date().toLocaleDateString('pt-BR')}_\n\n`;
 
     Object.entries(lineAnalyses).forEach(([lineId, analysis]) => {
       const lineName = analytics.linesSummary.find(l => l.id === lineId)?.nome || `Linha ${lineId}`;
-      mensagem += `*📍 ${lineName.toUpperCase()}*\n${analysis}\n\n`;
+      // Limpa negritos duplos da IA que podem confundir a API
+      const cleanAnalysis = analysis.replace(/\*\*/g, '*');
+      mensagem += `*📍 ${lineName.toUpperCase()}*\n${cleanAnalysis}\n\n`;
     });
 
     mensagem += `\n_Enviado via Nexus Intelligence_`;
@@ -205,18 +207,16 @@ const RelatorioBoletimPro: React.FC = () => {
 
       const payload = {
         number: number,
-        textMessage: {
-          text: mensagem
-        }
+        text: mensagem
       };
 
-      console.log("Enviando Payload:", JSON.stringify(payload));
+      console.log("Tentativa Final Payload:", JSON.stringify(payload));
 
       const response = await fetch(`${API_URL}/message/sendText/${INSTANCE_NAME}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': API_KEY
+          'apikey': API_KEY.trim() // Garante que não tenha espaços no Token
         },
         body: JSON.stringify(payload)
       });
