@@ -20,6 +20,7 @@ import RelatorioDowntimeTecnico from './RelatorioDowntimeTecnico';
 import Auth from './Auth';
 import Perfil from './Perfil';
 import Usuarios from './Usuarios';
+import AgendaContatos from './AgendaContatos';
 import { supabase } from './lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
@@ -71,6 +72,7 @@ type Tab =
   | 'relatorio_boletim'
   | 'relatorio_boletim_ai'
   | 'analitica_downtime_ai'
+  | 'agenda'
   | 'perfil'
   | 'usuarios';
 
@@ -249,6 +251,8 @@ const App: React.FC = () => {
 
           <NavItem id="registro" icon={ClipboardPenLine} label="Apontamento" />
           
+          <NavItem id="agenda" icon={Users} label="Agenda" />
+
           {role === 'admin' && (
             <NavItem id="produtos" icon={Package} label="Catálogo" />
           )}
@@ -351,6 +355,7 @@ const App: React.FC = () => {
           {activeTab === 'analitica_downtime_ai' && <RelatorioAnaliticaDowntimeAI />}
           {activeTab === 'perfil' && <Perfil userProfile={userProfile} onProfileUpdate={handleProfileUpdate} />}
           {activeTab === 'usuarios' && userProfile?.nivel_acesso === 'admin' && <Usuarios />}
+          {activeTab === 'agenda' && <AgendaContatos />}
         </div>
       </main>
 
