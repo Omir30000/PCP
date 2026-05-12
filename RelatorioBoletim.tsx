@@ -144,6 +144,7 @@ const RelatorioBoletim: React.FC = () => {
         unidades: number, 
         pacotes: number, 
         paletes: number,
+        horas: number,
         unidadesPorFardo: number,
         fardosPorPalete: number
       }> = {};
@@ -178,13 +179,16 @@ const RelatorioBoletim: React.FC = () => {
               unidades: 0,
               pacotes: 0,
               paletes: 0,
+              horas: 0,
               unidadesPorFardo: Number(prod.unidades_por_fardo) || 12,
               fardosPorPalete: Number(prod.fardos_por_palete) || 100
             };
           }
           
           const qtd = Number(r.quantidade_produzida) || 0;
+          const carga = Number(r.carga_horaria) || 0;
           skusMap[skuId].unidades += qtd;
+          skusMap[skuId].horas += carga;
         });
 
         // Calcular PK e PLT para cada SKU
@@ -508,6 +512,7 @@ const RelatorioBoletim: React.FC = () => {
                           <span className="w-16 text-right">UN</span>
                           <span className="w-12 text-right">PK</span>
                           <span className="w-12 text-right">PLT</span>
+                          <span className="w-20 text-right">UN/H</span>
                         </div>
                       </div>
                       <div className="divide-y divide-slate-50">
@@ -527,6 +532,9 @@ const RelatorioBoletim: React.FC = () => {
                               </span>
                               <span className="text-[11px] font-bold text-blue-600 w-12 text-right">
                                 {sku.paletes.toFixed(1)}
+                              </span>
+                              <span className="text-[11px] font-black text-emerald-600 w-20 text-right">
+                                {sku.horas > 0 ? Math.round(sku.unidades / sku.horas).toLocaleString() : '0'}
                               </span>
                             </div>
                           </div>

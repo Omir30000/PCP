@@ -133,6 +133,7 @@ const Relatorios: React.FC = () => {
         unidades: number, 
         pacotes: number, 
         paletes: number,
+        horas: number,
         unidadesPorFardo: number,
         fardosPorPalete: number
       }> = {};
@@ -168,11 +169,13 @@ const Relatorios: React.FC = () => {
                 unidades: 0,
                 pacotes: 0,
                 paletes: 0,
+                horas: 0,
                 unidadesPorFardo: Number(prod.unidades_por_fardo) || 12,
                 fardosPorPalete: Number(prod.fardos_por_palete) || 100
               };
             }
             skusMap[skuId].unidades += (Number(r.quantidade_produzida) || 0);
+            skusMap[skuId].horas += (Number(r.carga_horaria) || 0);
           }
         });
 
@@ -380,6 +383,7 @@ const Relatorios: React.FC = () => {
                         <span className="w-8 text-right">UN</span>
                         <span className="w-6 text-right">PK</span>
                         <span className="w-6 text-right">PLT</span>
+                        <span className="w-10 text-right">UN/H</span>
                       </div>
                     </div>
                     <div className="divide-y divide-slate-100/50 max-h-[120px] overflow-y-auto no-scrollbar">
@@ -390,6 +394,9 @@ const Relatorios: React.FC = () => {
                             <span className="text-[9px] font-black text-slate-900 w-8 text-right">{sku.unidades.toLocaleString()}</span>
                             <span className="text-[9px] font-bold text-slate-500 w-6 text-right">{sku.pacotes.toLocaleString()}</span>
                             <span className="text-[9px] font-bold text-blue-600 w-6 text-right">{sku.paletes.toFixed(1)}</span>
+                            <span className="text-[9px] font-black text-emerald-600 w-10 text-right">
+                              {sku.horas > 0 ? Math.round(sku.unidades / sku.horas).toLocaleString() : '0'}
+                            </span>
                           </div>
                         </div>
                       ))}
