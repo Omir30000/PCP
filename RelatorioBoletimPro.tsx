@@ -122,9 +122,9 @@ const RelatorioBoletimPro: React.FC = () => {
       - Horas Trabalhadas: ${line.cargaHoraria.toFixed(1)}h.
       - SKUs em Processo: ${skusText}.
 
-      Forneça um parecer técnico ultra-direto (máximo 3 frases).
-      Use terminologia técnica industrial em PORTUGUÊS (ex: gargalo, capacidade nominal, cadência, disponibilidade, rendimento).
-      ESTRITAMENTE PROIBIDO o uso de termos em inglês (nada de OEE, downtime, setup, etc).
+      Forneça um parecer técnico ultra-direto e, em seguida, defina 3 METAS TÉCNICAS DE MELHORIA para o próximo período (ex: reduzir tempo de parada em X%, elevar cadência para Y unidades/h).
+      Use terminologia técnica industrial em PORTUGUÊS.
+      ESTRITAMENTE PROIBIDO o uso de termos em inglês.
     `;
 
     try {
