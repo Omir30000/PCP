@@ -115,16 +115,16 @@ const RelatorioBoletimPro: React.FC = () => {
     const skusText = line.skusSummary.map((s: any) => `${s.nome} (${s.unidades} un)`).join(', ');
 
     const prompt = `
-      Você é um Encarregado Geral de Fábrica muito experiente. 
-      Fale com o Líder da ${line.nome.toUpperCase()} sobre estes números:
-      - Produção: ${line.producaoTotal} unidades.
-      - Eficiência: ${line.eficiencia.toFixed(1)}%.
-      - Horas: ${line.cargaHoraria.toFixed(1)}h.
-      - No pé da máquina: ${skusText}.
+      Você é um Especialista em Engenharia de Produção.
+      Analise tecnicamente a ${line.nome.toUpperCase()}:
+      - Produção Realizada: ${line.producaoTotal} unidades.
+      - Eficiência Produtiva: ${line.eficiencia.toFixed(1)}%.
+      - Horas Trabalhadas: ${line.cargaHoraria.toFixed(1)}h.
+      - SKUs em Processo: ${skusText}.
 
-      Dê um papo reto e curto (máximo 3 frases) de como ele pode melhorar o rendimento agora. 
-      Use gírias de fábrica (ex: bater meta, gargalo, linha voando, troca rápida). 
-      PROIBIDO usar inglês ou termos difíceis. Seja o mais curto possível.
+      Forneça um parecer técnico ultra-direto (máximo 3 frases).
+      Use terminologia técnica industrial em PORTUGUÊS (ex: gargalo, capacidade nominal, cadência, disponibilidade, rendimento).
+      ESTRITAMENTE PROIBIDO o uso de termos em inglês (nada de OEE, downtime, setup, etc).
     `;
 
     try {
@@ -523,7 +523,7 @@ const RelatorioBoletimPro: React.FC = () => {
                     <div className="mt-4 p-5 bg-indigo-50 border-l-4 border-indigo-600 rounded-2xl animate-in slide-in-from-top duration-500 shadow-sm">
                       <div className="flex items-center gap-2 mb-2">
                         <BrainCircuit className="w-3.5 h-3.5 text-indigo-600" />
-                        <span className="text-[9px] font-black text-indigo-900 uppercase tracking-widest">Papo Reto do Encarregado</span>
+                        <span className="text-[9px] font-black text-indigo-900 uppercase tracking-widest">Parecer Técnico Industrial</span>
                         <button 
                           onClick={() => setLineAnalyses(prev => {
                             const newObj = { ...prev };
