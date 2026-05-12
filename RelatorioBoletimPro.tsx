@@ -192,9 +192,16 @@ const RelatorioBoletimPro: React.FC = () => {
       const API_KEY = "B2B08F854A50-40DD-B222-C91ECAA63FF7";
       const INSTANCE_NAME = "nexusalmox";
 
-      // Garante que o número tenha o prefixo 55 se não tiver
+      // Limpeza agressiva do número
       let number = contato.telefone.replace(/\D/g, '');
-      if (number.length <= 11) number = '55' + number;
+      // Se começar com 0, remove
+      if (number.startsWith('0')) number = number.substring(1);
+      // Se não tiver 55 no começo e tiver 10 ou 11 dígitos, adiciona 55
+      if (!number.startsWith('55') && (number.length === 10 || number.length === 11)) {
+        number = '55' + number;
+      }
+
+      console.log("Tentando enviar para:", number);
 
       const response = await fetch(`${API_URL}/message/sendText/${INSTANCE_NAME}`, {
         method: 'POST',
@@ -213,13 +220,13 @@ const RelatorioBoletimPro: React.FC = () => {
         alert("Mensagem enviada com sucesso!");
         setIsShareModalOpen(false);
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({ message: "Erro desconhecido na API" }));
         console.error("Erro da API:", errorData);
-        throw new Error(errorData.message || "Erro no envio");
+        alert(`A API recusou: ${errorData.message || "Erro de validação"}`);
       }
     } catch (err: any) {
-      console.error("Erro Evolution API:", err);
-      alert(`Erro: ${err.message || "Verifique a conexão ou configurações da API"}`);
+      console.error("Erro de Rede/CORS:", err);
+      alert(`Erro de Conexão: O navegador bloqueou a requisição ou o servidor está fora. (CORS?)`);
     } finally {
       setIsSending(false);
     }
