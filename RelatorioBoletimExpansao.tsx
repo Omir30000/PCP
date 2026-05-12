@@ -125,24 +125,29 @@ const RelatorioBoletimExpansao: React.FC = () => {
       const prod = regs.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
       const cap = regs.reduce((acc, r) => acc + (Number(r.produtos?.capacidade_nominal) || 0), 0);
       const horas = regs.reduce((acc, r) => acc + (Number(r.carga_horaria) || 0), 0);
-      return { turno, prod, cap, horas, ef: cap > 0 ? (prod / cap * 100).toFixed(1) : '0' };
+      
+      // Lista de SKUs únicos produzidos no turno
+      const skus = Array.from(new Set(regs.map(r => r.produtos?.nome).filter(Boolean)));
+      
+      return { turno, prod, cap, horas, ef: cap > 0 ? (prod / cap * 100).toFixed(1) : '0', skus };
     };
 
     const dataT1 = getTurnoData('1º Turno');
     const dataT2 = getTurnoData('2º Turno');
 
     const basePrompt = (data: any) => `
-      Você é um Consultor Master de Produção Industrial e Especialista em RH Industrial.
+      Você é um Gerente de Produção "Pé no Chão", com 30 anos de experiência em fábrica.
       Analise os dados do ${data.turno}:
-      - Produção: ${data.prod} unidades
-      - Eficiência (OEE): ${data.ef}%
-      - Carga Horária: ${data.horas}h
-      
-      Forneça um diagnóstico curto (3-4 bullets) focado em:
-      1. Melhoria de Processo (Produção).
-      2. Fator Humano (RH/Motivação/Fadiga).
-      3. Uma ideia disruptiva para esse turno.
-      Seja direto, profissional e inspirador.
+      - Produção Total: ${data.prod} unidades.
+      - Aproveitamento da Meta: ${data.ef}%.
+      - Horas de Máquina: ${data.horas}h.
+      - Produtos na Linha: ${data.skus.join(', ')}.
+
+      REGRAS OBRIGATÓRIAS:
+      1. NÃO USE TERMOS EM INGLÊS (ex: nada de OEE, Downtime, Setup, Performance, Insights). Use termos como Eficiência, Parada, Preparação, Rendimento.
+      2. Seja direto e prático sobre como aumentar a produção desses produtos específicos.
+      3. Use linguagem simples de quem está no chão de fábrica.
+      4. Dê 3 dicas curtas por turno para melhorar o rendimento.
     `;
 
     try {
@@ -483,14 +488,14 @@ const RelatorioBoletimExpansao: React.FC = () => {
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-black">1º</div>
                   <div>
-                    <h4 className="text-lg font-black text-slate-900 uppercase tracking-tighter leading-none">Análise Matinal</h4>
-                    <p className="text-[9px] font-bold text-indigo-500 uppercase tracking-widest mt-1">Foco em Processos e Energia</p>
+                    <h4 className="text-lg font-black text-slate-900 uppercase tracking-tighter leading-none">Rendimento Matinal</h4>
+                    <p className="text-[9px] font-bold text-indigo-500 uppercase tracking-widest mt-1">Foco em Produção e Metas</p>
                   </div>
                 </div>
                 {isGenerating && !insightsTurno1 ? (
                   <div className="py-10 flex flex-col items-center gap-4">
                     <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
-                    <p className="text-[10px] font-black text-slate-400 uppercase animate-pulse">Consultando Especialista...</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase animate-pulse">Analisando Produção...</p>
                   </div>
                 ) : (
                   <div className="prose prose-slate max-w-none">
@@ -507,8 +512,8 @@ const RelatorioBoletimExpansao: React.FC = () => {
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-10 h-10 bg-indigo-400 rounded-2xl flex items-center justify-center text-slate-900 font-black">2º</div>
                   <div>
-                    <h4 className="text-lg font-black text-white uppercase tracking-tighter leading-none">Análise Vespertina</h4>
-                    <p className="text-[9px] font-bold text-indigo-300 uppercase tracking-widest mt-1">Foco em RH e Sustentabilidade</p>
+                    <h4 className="text-lg font-black text-white uppercase tracking-tighter leading-none">Rendimento Vespertino</h4>
+                    <p className="text-[9px] font-bold text-indigo-300 uppercase tracking-widest mt-1">Foco em Agilidade e Entrega</p>
                   </div>
                 </div>
                 {isGenerating && !insightsTurno2 ? (
