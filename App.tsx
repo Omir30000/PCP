@@ -17,7 +17,6 @@ import RelatorioBoletimAI from './RelatorioBoletimAI';
 import RelatorioAnaliticaDowntimeAI from './RelatorioAnaliticaDowntimeAI';
 import RelatoriosDowntimeHoras from './RelatoriosDowntimeHoras';
 import RelatorioDowntimeTecnico from './RelatorioDowntimeTecnico';
-import RelatorioBoletimExpansao from './RelatorioBoletimExpansao';
 import Auth from './Auth';
 import Perfil from './Perfil';
 import Usuarios from './Usuarios';
@@ -53,8 +52,7 @@ import {
   BrainCircuit,
   Timer,
   Zap,
-  Users,
-  FlaskConical
+  Users
 } from 'lucide-react';
 
 type Tab =
@@ -74,7 +72,6 @@ type Tab =
   | 'calendario_vendas'
   | 'relatorio_boletim'
   | 'relatorio_boletim_ai'
-  | 'relatorio_boletim_expansao'
   | 'analitica_downtime_ai'
   | 'agenda'
   | 'perfil'
@@ -278,7 +275,6 @@ const App: React.FC = () => {
               <NavItem id="analise_disponibilidade" icon={Scale} label="Balanço" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorios" icon={FileText} label="Boletim" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorio_boletim" icon={Calculator} label="Boletim Turno" isSubItem={isSidebarExpanded} />
-              <NavItem id="relatorio_boletim_expansao" icon={FlaskConical} label="Boletim Expansão" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" isSubItem={isSidebarExpanded} />
               <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" isSubItem={isSidebarExpanded} />
@@ -356,7 +352,6 @@ const App: React.FC = () => {
           {activeTab === 'analise_gargalos' && <RelatorioAnaliticoPorLinha />}
           {activeTab === 'calendario_vendas' && <CalendarioVendas />}
           {activeTab === 'relatorio_boletim' && <RelatorioBoletim />}
-          {activeTab === 'relatorio_boletim_expansao' && <RelatorioBoletimExpansao />}
           {activeTab === 'relatorio_boletim_ai' && <RelatorioBoletimAI />}
           {activeTab === 'analitica_downtime_ai' && <RelatorioAnaliticaDowntimeAI />}
           {activeTab === 'perfil' && <Perfil userProfile={userProfile} onProfileUpdate={handleProfileUpdate} />}
