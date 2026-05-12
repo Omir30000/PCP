@@ -51,7 +51,8 @@ import {
   Wrench,
   BrainCircuit,
   Timer,
-  Zap
+  Zap,
+  Users
 } from 'lucide-react';
 
 type Tab =
