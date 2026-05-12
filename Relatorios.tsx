@@ -380,10 +380,11 @@ const Relatorios: React.FC = () => {
                     <div className="bg-slate-100/50 px-3 py-1 flex justify-between items-center text-[7px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
                       <span>Detalhamento SKU</span>
                       <div className="flex gap-3 pr-1">
-                        <span className="w-8 text-right">UN</span>
-                        <span className="w-6 text-right">PK</span>
-                        <span className="w-6 text-right">PLT</span>
-                        <span className="w-10 text-right">UN/H</span>
+                        <span className="w-10 text-right">UN</span>
+                        <span className="w-8 text-right">H</span>
+                        <span className="w-12 text-right">UN/H</span>
+                        <span className="w-8 text-right">PK</span>
+                        <span className="w-8 text-right">PLT</span>
                       </div>
                     </div>
                     <div className="divide-y divide-slate-100/50 max-h-[120px] overflow-y-auto no-scrollbar">
@@ -391,12 +392,13 @@ const Relatorios: React.FC = () => {
                         <div key={idx} className="px-3 py-1.5 flex justify-between items-center">
                           <span className="text-[9px] font-bold text-slate-700 truncate mr-2" title={sku.nome}>{sku.nome}</span>
                           <div className="flex gap-3 items-center shrink-0">
-                            <span className="text-[9px] font-black text-slate-900 w-8 text-right">{sku.unidades.toLocaleString()}</span>
-                            <span className="text-[9px] font-bold text-slate-500 w-6 text-right">{sku.pacotes.toLocaleString()}</span>
-                            <span className="text-[9px] font-bold text-blue-600 w-6 text-right">{sku.paletes.toFixed(1)}</span>
-                            <span className="text-[9px] font-black text-emerald-600 w-10 text-right">
+                            <span className="text-[9px] font-black text-slate-900 w-10 text-right">{sku.unidades.toLocaleString()}</span>
+                            <span className="text-[9px] font-bold text-slate-500 w-8 text-right">{sku.horas.toFixed(1)}h</span>
+                            <span className="text-[9px] font-black text-emerald-600 w-12 text-right">
                               {sku.horas > 0 ? Math.round(sku.unidades / sku.horas).toLocaleString() : '0'}
                             </span>
+                            <span className="text-[9px] font-bold text-slate-500 w-8 text-right">{sku.pacotes.toLocaleString()}</span>
+                            <span className="text-[9px] font-bold text-blue-600 w-8 text-right">{sku.paletes.toFixed(1)}</span>
                           </div>
                         </div>
                       ))}

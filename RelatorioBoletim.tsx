@@ -508,11 +508,12 @@ const RelatorioBoletim: React.FC = () => {
                         <div className="flex items-center gap-2 text-slate-900">
                           <Package className="w-3.5 h-3.5 text-blue-600" /> Detalhamento por SKU
                         </div>
-                        <div className="flex gap-6 pr-4">
-                          <span className="w-16 text-right">UN</span>
-                          <span className="w-12 text-right">PK</span>
-                          <span className="w-12 text-right">PLT</span>
-                          <span className="w-20 text-right">UN/H</span>
+                        <div className="flex gap-4 pr-2">
+                          <span className="w-14 text-right">UN</span>
+                          <span className="w-10 text-right">H</span>
+                          <span className="w-16 text-right">UN/H</span>
+                          <span className="w-10 text-right">PK</span>
+                          <span className="w-10 text-right">PLT</span>
                         </div>
                       </div>
                       <div className="divide-y divide-slate-50">
@@ -523,18 +524,21 @@ const RelatorioBoletim: React.FC = () => {
                                 {sku.nome}
                               </p>
                             </div>
-                            <div className="flex gap-6 items-center">
-                              <span className="text-[11px] font-black text-slate-900 w-16 text-right">
+                            <div className="flex gap-4 items-center">
+                              <span className="text-[11px] font-black text-slate-900 w-14 text-right">
                                 {sku.unidades.toLocaleString()}
                               </span>
-                              <span className="text-[11px] font-bold text-slate-500 w-12 text-right">
+                              <span className="text-[11px] font-bold text-slate-500 w-10 text-right">
+                                {sku.horas.toFixed(1)}h
+                              </span>
+                              <span className="text-[11px] font-black text-emerald-600 w-16 text-right">
+                                {sku.horas > 0 ? Math.round(sku.unidades / sku.horas).toLocaleString() : '0'}
+                              </span>
+                              <span className="text-[11px] font-bold text-slate-500 w-10 text-right">
                                 {sku.pacotes.toLocaleString()}
                               </span>
-                              <span className="text-[11px] font-bold text-blue-600 w-12 text-right">
+                              <span className="text-[11px] font-bold text-blue-600 w-10 text-right">
                                 {sku.paletes.toFixed(1)}
-                              </span>
-                              <span className="text-[11px] font-black text-emerald-600 w-20 text-right">
-                                {sku.horas > 0 ? Math.round(sku.unidades / sku.horas).toLocaleString() : '0'}
                               </span>
                             </div>
                           </div>
