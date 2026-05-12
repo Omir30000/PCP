@@ -192,6 +192,10 @@ const RelatorioBoletimPro: React.FC = () => {
       const API_KEY = "B2B08F854A50-40DD-B222-C91ECAA63FF7";
       const INSTANCE_NAME = "nexusalmox";
 
+      // Garante que o número tenha o prefixo 55 se não tiver
+      let number = contato.telefone.replace(/\D/g, '');
+      if (number.length <= 11) number = '55' + number;
+
       const response = await fetch(`${API_URL}/message/sendText/${INSTANCE_NAME}`, {
         method: 'POST',
         headers: {
@@ -199,8 +203,8 @@ const RelatorioBoletimPro: React.FC = () => {
           'apikey': API_KEY
         },
         body: JSON.stringify({
-          number: contato.telefone.replace(/\D/g, ''),
-          options: { delay: 1200, presence: "composing" },
+          number: number,
+          options: { delay: 1200, presence: "composing", linkPreview: false },
           textMessage: { text: mensagem }
         })
       });
@@ -209,11 +213,13 @@ const RelatorioBoletimPro: React.FC = () => {
         alert("Mensagem enviada com sucesso!");
         setIsShareModalOpen(false);
       } else {
-        throw new Error("Erro no envio");
+        const errorData = await response.json();
+        console.error("Erro da API:", errorData);
+        throw new Error(errorData.message || "Erro no envio");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erro Evolution API:", err);
-      alert("Erro ao enviar via API. Verifique as configurações.");
+      alert(`Erro: ${err.message || "Verifique a conexão ou configurações da API"}`);
     } finally {
       setIsSending(false);
     }
