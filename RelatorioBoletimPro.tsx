@@ -203,16 +203,22 @@ const RelatorioBoletimPro: React.FC = () => {
 
       console.log("Tentando enviar para:", number);
 
+      const payload = {
+        number: number,
+        textMessage: {
+          text: mensagem
+        }
+      };
+
+      console.log("Enviando Payload:", JSON.stringify(payload));
+
       const response = await fetch(`${API_URL}/message/sendText/${INSTANCE_NAME}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'apikey': API_KEY
         },
-        body: JSON.stringify({
-          number: number,
-          text: mensagem
-        })
+        body: JSON.stringify(payload)
       });
 
       if (response.ok) {
