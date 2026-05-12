@@ -27,7 +27,9 @@ import {
   Target,
   BarChart3,
   BrainCircuit,
-  X
+  X,
+  MessageSquare,
+  Users
 } from 'lucide-react';
 
 const RelatorioBoletimPro: React.FC = () => {
@@ -42,6 +44,12 @@ const RelatorioBoletimPro: React.FC = () => {
   // Estados para IA por Linha
   const [loadingAI, setLoadingAI] = useState<Record<string, boolean>>({});
   const [lineAnalyses, setLineAnalyses] = useState<Record<string, string>>({});
+
+  // Estados para Compartilhamento
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [contatos, setContatos] = useState<any[]>([]);
+  const [selectedContact, setSelectedContact] = useState<string>('');
+  const [isSending, setIsSending] = useState(false);
 
   const reportRef = useRef<HTMLDivElement>(null);
 
@@ -144,6 +152,70 @@ const RelatorioBoletimPro: React.FC = () => {
       console.error("Erro na análise da linha:", err);
     } finally {
       setLoadingAI(prev => ({ ...prev, [line.id]: false }));
+    }
+  };
+
+  const fetchContatos = async () => {
+    const { data } = await supabase.from('contatos').select('*').order('nome');
+    if (data) setContatos(data);
+  };
+
+  useEffect(() => {
+    if (isShareModalOpen) fetchContatos();
+  }, [isShareModalOpen]);
+
+  const sendEvolutionAPI = async () => {
+    if (!selectedContact) {
+      alert("Selecione um contato!");
+      return;
+    }
+
+    const contato = contatos.find(c => c.id === selectedContact);
+    if (!contato) return;
+
+    setIsSending(true);
+
+    // Formatação da Mensagem Consolidada
+    let mensagem = `*📋 DIAGNÓSTICO OPERACIONAL - NEXUS PCP*\n`;
+    mensagem += `_Data: ${new Date().toLocaleDateString('pt-BR')}_\n\n`;
+
+    Object.entries(lineAnalyses).forEach(([lineId, analysis]) => {
+      const lineName = analytics.linesSummary.find(l => l.id === lineId)?.nome || `Linha ${lineId}`;
+      mensagem += `*📍 ${lineName.toUpperCase()}*\n${analysis}\n\n`;
+    });
+
+    mensagem += `\n_Enviado via Nexus Intelligence_`;
+
+    try {
+      // CONFIGURAÇÃO DA EVOLUTION API (Credenciais Reais)
+      const API_URL = "https://evolution-evolution-api.lwv8jw.easypanel.host"; 
+      const API_KEY = "B2B08F854A50-40DD-B222-C91ECAA63FF7";
+      const INSTANCE_NAME = "nexusalmox";
+
+      const response = await fetch(`${API_URL}/message/sendText/${INSTANCE_NAME}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': API_KEY
+        },
+        body: JSON.stringify({
+          number: contato.telefone.replace(/\D/g, ''),
+          options: { delay: 1200, presence: "composing" },
+          textMessage: { text: mensagem }
+        })
+      });
+
+      if (response.ok) {
+        alert("Mensagem enviada com sucesso!");
+        setIsShareModalOpen(false);
+      } else {
+        throw new Error("Erro no envio");
+      }
+    } catch (err) {
+      console.error("Erro Evolution API:", err);
+      alert("Erro ao enviar via API. Verifique as configurações.");
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -349,6 +421,16 @@ const RelatorioBoletimPro: React.FC = () => {
             <Printer className="w-4 h-4" />
             Imprimir A4
           </button>
+
+          {Object.keys(lineAnalyses).length > 0 && (
+            <button
+              onClick={() => setIsShareModalOpen(true)}
+              className="px-6 py-3 bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+            >
+              <MessageSquare className="w-4 h-4" />
+              Enviar p/ Líderes
+            </button>
+          )}
         </div>
       </div>
 
@@ -660,6 +742,82 @@ const RelatorioBoletimPro: React.FC = () => {
         </footer>
       </div>
 
+      {/* Modal de Compartilhamento Evolution API */}
+      {isShareModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/95 backdrop-blur-md" onClick={() => setIsShareModalOpen(false)} />
+          <div className="bg-[#1a1a1a] border border-white/10 w-full max-w-2xl rounded-[40px] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-300">
+            <header className="p-8 border-b border-white/5 flex items-center justify-between bg-emerald-600/10">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-emerald-600 rounded-xl text-white">
+                  <MessageSquare className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-white uppercase tracking-tighter">Enviar Diagnósticos</h3>
+                  <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mt-1">Consolidação e Disparo via WhatsApp</p>
+                </div>
+              </div>
+              <button onClick={() => setIsShareModalOpen(false)} className="p-2 text-slate-500 hover:text-white transition-colors">
+                <X className="w-8 h-8" />
+              </button>
+            </header>
+
+            <div className="p-8 space-y-8 overflow-y-auto max-h-[70vh]">
+              {/* Preview da Mensagem */}
+              <div className="space-y-3">
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Preview do Texto Consolidado</label>
+                <div className="bg-black/40 border border-white/5 p-6 rounded-3xl max-h-48 overflow-y-auto no-scrollbar">
+                  <p className="text-[10px] font-bold text-slate-300 leading-relaxed whitespace-pre-line">
+                    *📋 DIAGNÓSTICO OPERACIONAL*\n
+                    {Object.entries(lineAnalyses).map(([lineId, analysis]) => {
+                      const lineName = analytics.linesSummary.find(l => l.id === lineId)?.nome || `Linha ${lineId}`;
+                      return `\n*📍 ${lineName.toUpperCase()}*\n${analysis}\n`;
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Seleção de Contato */}
+              <div className="space-y-3">
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Selecionar Destinatário da Agenda</label>
+                <div className="relative">
+                  <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 pointer-events-none" />
+                  <select 
+                    value={selectedContact}
+                    onChange={e => setSelectedContact(e.target.value)}
+                    className="w-full bg-black/60 border-2 border-white/10 rounded-2xl py-4 pl-12 pr-4 text-[11px] font-black text-white outline-none focus:border-emerald-500 appearance-none cursor-pointer"
+                  >
+                    <option value="">SELECIONE UM CONTATO...</option>
+                    {contatos.map(c => (
+                      <option key={c.id} value={c.id} className="bg-slate-900">
+                        {c.nome.toUpperCase()} {c.apelido ? `(${c.apelido})` : ''} - {c.categoria}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-4 grid grid-cols-2 gap-4">
+                <button 
+                  type="button"
+                  onClick={() => setIsShareModalOpen(false)}
+                  className="py-4 bg-white/5 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={sendEvolutionAPI}
+                  disabled={isSending || !selectedContact}
+                  className="py-4 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 shadow-xl shadow-emerald-600/20 disabled:opacity-50"
+                >
+                  {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare className="w-4 h-4" />}
+                  {isSending ? 'Enviando...' : 'Disparar WhatsApp'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
