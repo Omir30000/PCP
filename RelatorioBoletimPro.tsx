@@ -211,8 +211,7 @@ const RelatorioBoletimPro: React.FC = () => {
         },
         body: JSON.stringify({
           number: number,
-          options: { delay: 1200, presence: "composing", linkPreview: false },
-          textMessage: { text: mensagem }
+          text: mensagem
         })
       });
 
