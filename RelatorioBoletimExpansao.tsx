@@ -26,7 +26,10 @@ import {
   Zap,
   Target,
   BarChart3,
-  FlaskConical
+  FlaskConical,
+  BrainCircuit,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 const RelatorioBoletimExpansao: React.FC = () => {
@@ -37,6 +40,11 @@ const RelatorioBoletimExpansao: React.FC = () => {
   const [registros, setRegistros] = useState<any[]>([]);
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [filtroTurno, setFiltroTurno] = useState<'GLOBAL' | '1º Turno' | '2º Turno'>('GLOBAL');
+
+  // Estados para IA
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [insightsTurno1, setInsightsTurno1] = useState<string>('');
+  const [insightsTurno2, setInsightsTurno2] = useState<string>('');
 
   const reportRef = useRef<HTMLDivElement>(null);
 
@@ -101,6 +109,69 @@ const RelatorioBoletimExpansao: React.FC = () => {
       </html>
     `);
     printWindow.document.close();
+  };
+
+  const generateAIAnalysis = async () => {
+    if (registros.length === 0) {
+      alert("Sincronize os dados primeiro!");
+      return;
+    }
+
+    setIsGenerating(true);
+    const MISTRAL_API_KEY = "VUM0jYdoE3DFV4txchjU70t0QiCir6sx";
+
+    const getTurnoData = (turno: string) => {
+      const regs = registros.filter(r => r.turno === turno);
+      const prod = regs.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
+      const cap = regs.reduce((acc, r) => acc + (Number(r.produtos?.capacidade_nominal) || 0), 0);
+      const horas = regs.reduce((acc, r) => acc + (Number(r.carga_horaria) || 0), 0);
+      return { turno, prod, cap, horas, ef: cap > 0 ? (prod / cap * 100).toFixed(1) : '0' };
+    };
+
+    const dataT1 = getTurnoData('1º Turno');
+    const dataT2 = getTurnoData('2º Turno');
+
+    const basePrompt = (data: any) => `
+      Você é um Consultor Master de Produção Industrial e Especialista em RH Industrial.
+      Analise os dados do ${data.turno}:
+      - Produção: ${data.prod} unidades
+      - Eficiência (OEE): ${data.ef}%
+      - Carga Horária: ${data.horas}h
+      
+      Forneça um diagnóstico curto (3-4 bullets) focado em:
+      1. Melhoria de Processo (Produção).
+      2. Fator Humano (RH/Motivação/Fadiga).
+      3. Uma ideia disruptiva para esse turno.
+      Seja direto, profissional e inspirador.
+    `;
+
+    try {
+      const callMistral = async (prompt: string) => {
+        const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${MISTRAL_API_KEY}` },
+          body: JSON.stringify({
+            model: "open-mistral-7b",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.7
+          })
+        });
+        const d = await res.json();
+        return d.choices[0].message.content;
+      };
+
+      const [ins1, ins2] = await Promise.all([
+        callMistral(basePrompt(dataT1)),
+        callMistral(basePrompt(dataT2))
+      ]);
+
+      setInsightsTurno1(ins1);
+      setInsightsTurno2(ins2);
+    } catch (err) {
+      console.error("Erro IA:", err);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const formatarDataBR = (dateStr: string) => {
@@ -290,6 +361,15 @@ const RelatorioBoletimExpansao: React.FC = () => {
           </button>
 
           <button
+            onClick={generateAIAnalysis}
+            disabled={isGenerating || registros.length === 0}
+            className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/20 disabled:opacity-50"
+          >
+            {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <BrainCircuit className="w-4 h-4" />}
+            Análise Master (IA)
+          </button>
+
+          <button
             onClick={handlePrint}
             className="px-6 py-3 bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-all flex items-center gap-2 border border-white/10 shadow-xl"
           >
@@ -385,6 +465,68 @@ const RelatorioBoletimExpansao: React.FC = () => {
             </div>
           </div>
         </section>
+
+        {/* ANÁLISE DE IA POR TURNO - EXPANSÃO */}
+        {(insightsTurno1 || insightsTurno2 || isGenerating) && (
+          <section className="space-y-6 pt-10 break-inside-avoid">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="h-8 w-1.5 bg-indigo-600 rounded-full" />
+              <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.3em]">
+                IV. DIAGNÓSTICO MASTER: PRODUÇÃO & RECURSOS HUMANOS
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Card Turno 1 */}
+              <div className="bg-indigo-50/50 border-2 border-indigo-100 p-8 rounded-[40px] relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform"><Sun className="w-12 h-12 text-indigo-600" /></div>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-black">1º</div>
+                  <div>
+                    <h4 className="text-lg font-black text-slate-900 uppercase tracking-tighter leading-none">Análise Matinal</h4>
+                    <p className="text-[9px] font-bold text-indigo-500 uppercase tracking-widest mt-1">Foco em Processos e Energia</p>
+                  </div>
+                </div>
+                {isGenerating && !insightsTurno1 ? (
+                  <div className="py-10 flex flex-col items-center gap-4">
+                    <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+                    <p className="text-[10px] font-black text-slate-400 uppercase animate-pulse">Consultando Especialista...</p>
+                  </div>
+                ) : (
+                  <div className="prose prose-slate max-w-none">
+                    <div className="text-[11px] font-bold text-slate-700 leading-relaxed whitespace-pre-line space-y-4">
+                      {insightsTurno1}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Card Turno 2 */}
+              <div className="bg-slate-900 border-2 border-slate-800 p-8 rounded-[40px] relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform"><Moon className="w-12 h-12 text-indigo-400" /></div>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-10 h-10 bg-indigo-400 rounded-2xl flex items-center justify-center text-slate-900 font-black">2º</div>
+                  <div>
+                    <h4 className="text-lg font-black text-white uppercase tracking-tighter leading-none">Análise Vespertina</h4>
+                    <p className="text-[9px] font-bold text-indigo-300 uppercase tracking-widest mt-1">Foco em RH e Sustentabilidade</p>
+                  </div>
+                </div>
+                {isGenerating && !insightsTurno2 ? (
+                  <div className="py-10 flex flex-col items-center gap-4">
+                    <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+                    <p className="text-[10px] font-black text-slate-600 uppercase animate-pulse">Consultando Especialista...</p>
+                  </div>
+                ) : (
+                  <div className="prose prose-invert max-w-none">
+                    <div className="text-[11px] font-bold text-slate-300 leading-relaxed whitespace-pre-line space-y-4">
+                      {insightsTurno2}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* PERFORMANCE POR CT */}
         <section className="space-y-8">
