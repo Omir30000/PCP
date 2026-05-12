@@ -25,7 +25,9 @@ import {
   ChevronRight,
   Zap,
   Target,
-  BarChart3
+  BarChart3,
+  BrainCircuit,
+  X
 } from 'lucide-react';
 
 const RelatorioBoletimPro: React.FC = () => {
@@ -36,6 +38,10 @@ const RelatorioBoletimPro: React.FC = () => {
   const [registros, setRegistros] = useState<any[]>([]);
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [filtroTurno, setFiltroTurno] = useState<'GLOBAL' | '1º Turno' | '2º Turno'>('GLOBAL');
+
+  // Estados para IA por Linha
+  const [loadingAI, setLoadingAI] = useState<Record<string, boolean>>({});
+  const [lineAnalyses, setLineAnalyses] = useState<Record<string, string>>({});
 
   const reportRef = useRef<HTMLDivElement>(null);
 
@@ -100,6 +106,43 @@ const RelatorioBoletimPro: React.FC = () => {
       </html>
     `);
     printWindow.document.close();
+  };
+
+  const analyzeLineProduction = async (line: any) => {
+    setLoadingAI(prev => ({ ...prev, [line.id]: true }));
+    const MISTRAL_API_KEY = "VUM0jYdoE3DFV4txchjU70t0QiCir6sx";
+
+    const skusText = line.skusSummary.map((s: any) => `${s.nome} (${s.unidades} un)`).join(', ');
+
+    const prompt = `
+      Você é um Gerente de Produção Sênior focado em eficiência de máquina.
+      Analise o desempenho da ${line.nome.toUpperCase()}:
+      - Produção Total: ${line.producaoTotal} unidades.
+      - Eficiência Atual: ${line.eficiencia.toFixed(1)}%.
+      - Carga Horária: ${line.cargaHoraria.toFixed(1)}h.
+      - Produtos na Linha: ${skusText}.
+
+      Dê um diagnóstico rápido e 3 sugestões práticas "pé no chão" para esse gerente de produção melhorar o rendimento especificamente nesta linha e com estes produtos.
+      Use linguagem simples de fábrica, sem termos em inglês. Seja direto.
+    `;
+
+    try {
+      const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${MISTRAL_API_KEY}` },
+        body: JSON.stringify({
+          model: "open-mistral-7b",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.7
+        })
+      });
+      const data = await res.json();
+      setLineAnalyses(prev => ({ ...prev, [line.id]: data.choices[0].message.content }));
+    } catch (err) {
+      console.error("Erro na análise da linha:", err);
+    } finally {
+      setLoadingAI(prev => ({ ...prev, [line.id]: false }));
+    }
   };
 
   const formatarDataBR = (dateStr: string) => {
@@ -428,6 +471,18 @@ const RelatorioBoletimPro: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Botão de IA da Linha */}
+                  {line.status === 'active' && (
+                    <button
+                      onClick={() => analyzeLineProduction(line)}
+                      disabled={loadingAI[line.id]}
+                      className="w-full py-3 bg-indigo-600/10 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 border border-indigo-600/20"
+                    >
+                      {loadingAI[line.id] ? <Loader2 className="w-4 h-4 animate-spin" /> : <BrainCircuit className="w-4 h-4" />}
+                      {loadingAI[line.id] ? 'Analisando...' : 'Pedir Ajuda ao Gerente IA'}
+                    </button>
+                  )}
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-slate-50 p-6 rounded-3xl">
                       <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Carga / Meta</p>
@@ -461,6 +516,29 @@ const RelatorioBoletimPro: React.FC = () => {
                       />
                     </div>
                   </div>
+
+                  {/* Área de Resultado da IA */}
+                  {lineAnalyses[line.id] && (
+                    <div className="mt-6 p-6 bg-indigo-50 border-2 border-indigo-100 rounded-3xl animate-in slide-in-from-top duration-500">
+                      <div className="flex items-center gap-2 mb-4">
+                        <BrainCircuit className="w-4 h-4 text-indigo-600" />
+                        <span className="text-[10px] font-black text-indigo-900 uppercase tracking-widest">Diagnóstico do Gerente Virtual</span>
+                        <button 
+                          onClick={() => setLineAnalyses(prev => {
+                            const newObj = { ...prev };
+                            delete newObj[line.id];
+                            return newObj;
+                          })}
+                          className="ml-auto text-indigo-300 hover:text-indigo-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <p className="text-[11px] font-bold text-slate-700 leading-relaxed whitespace-pre-line">
+                        {lineAnalyses[line.id]}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="lg:w-2/3 space-y-6">
