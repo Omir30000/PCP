@@ -115,15 +115,16 @@ const RelatorioBoletimPro: React.FC = () => {
     const skusText = line.skusSummary.map((s: any) => `${s.nome} (${s.unidades} un)`).join(', ');
 
     const prompt = `
-      Você é um Gerente de Produção Sênior focado em eficiência de máquina.
-      Analise o desempenho da ${line.nome.toUpperCase()}:
-      - Produção Total: ${line.producaoTotal} unidades.
-      - Eficiência Atual: ${line.eficiencia.toFixed(1)}%.
-      - Carga Horária: ${line.cargaHoraria.toFixed(1)}h.
-      - Produtos na Linha: ${skusText}.
+      Você é um Encarregado Geral de Fábrica muito experiente. 
+      Fale com o Líder da ${line.nome.toUpperCase()} sobre estes números:
+      - Produção: ${line.producaoTotal} unidades.
+      - Eficiência: ${line.eficiencia.toFixed(1)}%.
+      - Horas: ${line.cargaHoraria.toFixed(1)}h.
+      - No pé da máquina: ${skusText}.
 
-      Dê um diagnóstico rápido e 3 sugestões práticas "pé no chão" para esse gerente de produção melhorar o rendimento especificamente nesta linha e com estes produtos.
-      Use linguagem simples de fábrica, sem termos em inglês. Seja direto.
+      Dê um papo reto e curto (máximo 3 frases) de como ele pode melhorar o rendimento agora. 
+      Use gírias de fábrica (ex: bater meta, gargalo, linha voando, troca rápida). 
+      PROIBIDO usar inglês ou termos difíceis. Seja o mais curto possível.
     `;
 
     try {
@@ -517,12 +518,12 @@ const RelatorioBoletimPro: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Área de Resultado da IA */}
+                  {/* Área de Resultado da IA - Papo Reto */}
                   {lineAnalyses[line.id] && (
-                    <div className="mt-6 p-6 bg-indigo-50 border-2 border-indigo-100 rounded-3xl animate-in slide-in-from-top duration-500">
-                      <div className="flex items-center gap-2 mb-4">
-                        <BrainCircuit className="w-4 h-4 text-indigo-600" />
-                        <span className="text-[10px] font-black text-indigo-900 uppercase tracking-widest">Diagnóstico do Gerente Virtual</span>
+                    <div className="mt-4 p-5 bg-indigo-50 border-l-4 border-indigo-600 rounded-2xl animate-in slide-in-from-top duration-500 shadow-sm">
+                      <div className="flex items-center gap-2 mb-2">
+                        <BrainCircuit className="w-3.5 h-3.5 text-indigo-600" />
+                        <span className="text-[9px] font-black text-indigo-900 uppercase tracking-widest">Papo Reto do Encarregado</span>
                         <button 
                           onClick={() => setLineAnalyses(prev => {
                             const newObj = { ...prev };
