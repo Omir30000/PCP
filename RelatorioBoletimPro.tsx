@@ -12,7 +12,6 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import {
-  Printer,
   Calendar,
   Search,
   Loader2,
@@ -79,42 +78,7 @@ const RelatorioBoletimPro: React.FC = () => {
     fetchRelatorioData();
   }, []);
 
-  const handlePrint = () => {
-    if (!reportRef.current) return;
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
 
-    const content = reportRef.current.innerHTML;
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html lang="pt-BR">
-      <head>
-          <meta charset="UTF-8">
-          <title>BOLETIM DIÁRIO - NEXUS PCP</title>
-          <script src="https://cdn.tailwindcss.com"></script>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-            body { font-family: 'Inter', sans-serif; background: white !important; color: #1e293b; padding: 0; margin: 0; }
-            @media print {
-              @page { size: A4 portrait; margin: 0.5cm; }
-              body { zoom: 0.90; }
-              .print\\:hidden { display: none !important; }
-              .break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
-              .bg-slate-900 { background-color: #0f172a !important; color: white !important; -webkit-print-color-adjust: exact; }
-              .bg-blue-600 { background-color: #2563eb !important; color: white !important; -webkit-print-color-adjust: exact; }
-              .text-white { color: white !important; }
-              .recharts-area { -webkit-print-color-adjust: exact; }
-            }
-          </style>
-      </head>
-      <body>
-          <div class="p-4">${content}</div>
-          <script>window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 800); };</script>
-      </body>
-      </html>
-    `);
-    printWindow.document.close();
-  };
 
   const analyzeLineProduction = async (line: any) => {
     setLoadingAI(prev => ({ ...prev, [line.id]: true }));
@@ -426,27 +390,25 @@ const RelatorioBoletimPro: React.FC = () => {
           <button
             onClick={fetchRelatorioData}
             disabled={loading}
-            className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group relative px-8 py-3 bg-blue-600 overflow-hidden rounded-2xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/20 disabled:opacity-50"
           >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-            {loading ? 'Sincronizando...' : 'Sincronizar'}
-          </button>
-
-          <button
-            onClick={handlePrint}
-            className="px-6 py-3 bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-all flex items-center gap-2 border border-white/10 shadow-xl"
-          >
-            <Printer className="w-4 h-4" />
-            Imprimir A4
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative flex items-center gap-3">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Search className="w-4 h-4 text-white" />}
+              <span className="text-[11px] font-black text-white uppercase tracking-widest">{loading ? 'Sincronizando...' : 'Sincronizar'}</span>
+            </div>
           </button>
 
           {Object.keys(lineAnalyses).length > 0 && (
             <button
               onClick={() => setIsShareModalOpen(true)}
-              className="px-6 py-3 bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+              className="group relative px-8 py-3 bg-emerald-600 overflow-hidden rounded-2xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20"
             >
-              <MessageSquare className="w-4 h-4" />
-              Enviar p/ Líderes
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative flex items-center gap-3">
+                <MessageSquare className="w-4 h-4 text-white" />
+                <span className="text-[11px] font-black text-white uppercase tracking-widest">Enviar p/ Líderes</span>
+              </div>
             </button>
           )}
         </div>
