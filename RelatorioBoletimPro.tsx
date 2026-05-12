@@ -122,9 +122,10 @@ const RelatorioBoletimPro: React.FC = () => {
       - Horas Trabalhadas: ${line.cargaHoraria.toFixed(1)}h.
       - SKUs em Processo: ${skusText}.
 
-      Forneça um parecer técnico ultra-direto e, em seguida, defina 3 METAS TÉCNICAS DE MELHORIA para o próximo período (ex: reduzir tempo de parada em X%, elevar cadência para Y unidades/h).
-      Use terminologia técnica industrial em PORTUGUÊS.
-      ESTRITAMENTE PROIBIDO o uso de termos em inglês.
+      Seja extremamente breve (máximo 200 caracteres).
+      Use linguagem séria e profissional de chão de fábrica.
+      Dê o diagnóstico e as 3 metas de forma direta.
+      PROIBIDO termos em inglês ou qualquer tipo de humor.
     `;
 
     try {
@@ -523,7 +524,7 @@ const RelatorioBoletimPro: React.FC = () => {
                     <div className="mt-4 p-5 bg-indigo-50 border-l-4 border-indigo-600 rounded-2xl animate-in slide-in-from-top duration-500 shadow-sm">
                       <div className="flex items-center gap-2 mb-2">
                         <BrainCircuit className="w-3.5 h-3.5 text-indigo-600" />
-                        <span className="text-[9px] font-black text-indigo-900 uppercase tracking-widest">Parecer Técnico Industrial</span>
+                        <span className="text-[9px] font-black text-indigo-900 uppercase tracking-widest">Diagnóstico Operacional</span>
                         <button 
                           onClick={() => setLineAnalyses(prev => {
                             const newObj = { ...prev };
