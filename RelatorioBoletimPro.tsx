@@ -84,22 +84,39 @@ const RelatorioBoletimPro: React.FC = () => {
     setLoadingAI(prev => ({ ...prev, [line.id]: true }));
     const MISTRAL_API_KEY = "VUM0jYdoE3DFV4txchjU70t0QiCir6sx";
 
-    const prompt = `
-      Você é um Coordenador de Produção focado em Ritmo e Estabilidade. 
-      Analise a ${line.nome.toUpperCase()} (Linguagem séria e técnica):
-      - Eficiência Atual: ${line.eficiencia.toFixed(1)}%.
-      - Produção Total: ${line.producaoTotal} UN.
-      - Cadência por SKU (UN/H): ${line.skusSummary.map((s: any) => `${s.nome}: ${Math.round(s.unidades/s.horas)}`).join(', ')}.
+    // Extrair motivos de paradas reais do campo JSONB 'paradas'
+    const paradasMap: Record<string, number> = {};
+    const registrosDaLinha = registros.filter(r => r.linha_id === line.id);
+    
+    registrosDaLinha.forEach(r => {
+      const pRaw = r.paradas;
+      const pArr = Array.isArray(pRaw) ? pRaw : [];
+      pArr.forEach((p: any) => {
+        const motivo = (p.motivo || p.descricao || 'Outros').toUpperCase();
+        const duracao = Number(p.duracao || p.tempo || p.total_min || 0);
+        paradasMap[motivo] = (paradasMap[motivo] || 0) + duracao;
+      });
+    });
 
-      DIRETRIZES PARA O PARECER:
-      1. NÃO descreva os produtos ou as quantidades (o líder já vê isso na tabela).
-      2. Foque na VARIABILIDADE: O gráfico de tendência mostra oscilações. Identifique que a falta de constância no ritmo é o que derruba a eficiência.
-      3. METAS: Defina 3 metas baseadas em: 
-         a) Elevar a cadência (UN/H) do produto mais lento.
-         b) Reduzir o tempo de máquina parada entre trocas.
-         c) Estabilizar a curva de produção diária.
-      
-      Seja ultra-curto, sem inglês e sem repetir dados da tela.
+    const paradasTexto = Object.entries(paradasMap)
+      .sort((a, b) => b[1] - a[1])
+      .map(([m, d]) => `${m} (${d} min)`)
+      .join(', ');
+
+    const prompt = `
+      Você é um Supervisor de Manutenção e Produção Industrial experiente.
+      Analise o desempenho técnico da ${line.nome.toUpperCase()}:
+      - Eficiência: ${line.eficiencia.toFixed(1)}%.
+      - Produção Realizada: ${line.producaoTotal} UN.
+      - HISTÓRICO DE PARADAS (Downtime): ${paradasTexto || 'Sem paradas críticas registradas'}.
+
+      DIRETRIZES DE ANÁLISE:
+      1. NÃO fale sobre demanda de vendas ou variedade de produtos. O usuário já controla isso.
+      2. FOCO TOTAL NAS MÁQUINAS: Identifique quais paradas foram mais frequentes (ex: se houve muita limpeza de cola, ajuste de sensor, quebra).
+      3. DIAGNÓSTICO: Diga claramente o que está quebrando ou parando a linha (ex: "A rotuladora está parando muito por limpeza, ajuste a dosagem").
+      4. METAS TÉCNICAS: Crie 3 metas baseadas em REDUZIR ESSAS PARADAS ESPECÍFICAS (ex: "Zerar paradas por limpeza de cola nos próximos 7 dias").
+
+      Seja extremamente direto, profissional e focado em resolver problemas mecânicos/operacionais. Máximo 200 caracteres.
     `;
 
     try {
