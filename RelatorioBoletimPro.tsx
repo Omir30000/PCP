@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from './lib/supabase';
 import { Produto, Linha, RegistroProducao } from './types/database';
@@ -12,6 +11,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import {
+  Printer,
   Calendar,
   Search,
   Loader2,
@@ -24,11 +24,7 @@ import {
   ChevronRight,
   Zap,
   Target,
-  BarChart3,
-  BrainCircuit,
-  X,
-  MessageSquare,
-  Users
+  BarChart3
 } from 'lucide-react';
 
 const RelatorioBoletimPro: React.FC = () => {
@@ -39,17 +35,6 @@ const RelatorioBoletimPro: React.FC = () => {
   const [registros, setRegistros] = useState<any[]>([]);
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [filtroTurno, setFiltroTurno] = useState<'GLOBAL' | '1º Turno' | '2º Turno'>('GLOBAL');
-
-  // Estados para IA por Linha
-  const [loadingAI, setLoadingAI] = useState<Record<string, boolean>>({});
-  const [lineAnalyses, setLineAnalyses] = useState<Record<string, string>>({});
-
-  // Estados para Compartilhamento
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [messageToEdit, setMessageToEdit] = useState('');
-  const [contatos, setContatos] = useState<any[]>([]);
-  const [selectedContact, setSelectedContact] = useState<string>('');
-  const [isSending, setIsSending] = useState(false);
 
   const reportRef = useRef<HTMLDivElement>(null);
 
@@ -79,142 +64,41 @@ const RelatorioBoletimPro: React.FC = () => {
     fetchRelatorioData();
   }, []);
 
+  const handlePrint = () => {
+    if (!reportRef.current) return;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
 
-
-  const analyzeLineProduction = async (line: any) => {
-    setLoadingAI(prev => ({ ...prev, [line.id]: true }));
-    const MISTRAL_API_KEY = "VUM0jYdoE3DFV4txchjU70t0QiCir6sx";
-
-    // Extrair motivos de paradas reais do campo JSONB 'paradas'
-    const paradasMap: Record<string, number> = {};
-    const registrosDaLinha = registros.filter(r => r.linha_id === line.id);
-    
-    registrosDaLinha.forEach(r => {
-      const pRaw = r.paradas;
-      const pArr = Array.isArray(pRaw) ? pRaw : [];
-      pArr.forEach((p: any) => {
-        const motivo = (p.motivo || p.descricao || 'Outros').toUpperCase();
-        const duracao = Number(p.duracao || p.tempo || p.total_min || 0);
-        paradasMap[motivo] = (paradasMap[motivo] || 0) + duracao;
-      });
-    });
-
-    const paradasTexto = Object.entries(paradasMap)
-      .sort((a, b) => b[1] - a[1])
-      .map(([m, d]) => `${m} (${d} min)`)
-      .join(', ');
-
-    const periodoTexto = dataInicio === dataFim ? formatarDataBR(dataInicio) : `${formatarDataBR(dataInicio)} a ${formatarDataBR(dataFim)}`;
-
-    const prompt = `
-      Você é um Supervisor de Manutenção e Produção Industrial experiente.
-      Analise o desempenho técnico da ${line.nome.toUpperCase()} no período de ${periodoTexto}:
-      - Eficiência: ${line.eficiencia.toFixed(1)}%.
-      - Produção Realizada: ${line.producaoTotal} UN.
-      - HISTÓRICO DE PARADAS (Downtime): ${paradasTexto || 'Sem paradas críticas registradas'}.
-
-      DIRETRIZES DE ANÁLISE:
-      1. Comece mencionando o período analisado: ${periodoTexto}.
-      2. NÃO fale sobre demanda de vendas ou variedade de produtos. O usuário já controla isso.
-      3. FOCO TOTAL NAS MÁQUINAS: Identifique quais paradas foram mais frequentes (ex: se houve muita limpeza de cola, ajuste de sensor, quebra).
-      4. DIAGNÓSTICO: Diga claramente o que está quebrando ou parando a linha (ex: "A rotuladora está parando muito por limpeza, ajuste a dosagem").
-      5. METAS TÉCNICAS: Crie 3 metas baseadas em REDUZIR ESSAS PARADAS ESPECÍFICAS (ex: "Zerar paradas por limpeza de cola nos próximos 7 dias").
-
-      Seja extremamente direto, profissional e focado em resolver problemas mecânicos/operacionais. Máximo 250 caracteres.
-    `;
-
-    try {
-      const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${MISTRAL_API_KEY}` },
-        body: JSON.stringify({
-          model: "open-mistral-7b",
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.7
-        })
-      });
-      const data = await res.json();
-      setLineAnalyses(prev => ({ ...prev, [line.id]: data.choices[0].message.content }));
-    } catch (err) {
-      console.error("Erro na análise da linha:", err);
-    } finally {
-      setLoadingAI(prev => ({ ...prev, [line.id]: false }));
-    }
-  };
-
-  const fetchContatos = async () => {
-    const { data } = await supabase.from('contatos').select('*').order('nome');
-    if (data) setContatos(data);
-  };
-
-  useEffect(() => {
-    if (isShareModalOpen) fetchContatos();
-  }, [isShareModalOpen]);
-
-  const handleOpenShareModal = () => {
-    const periodoTexto = dataInicio === dataFim ? formatarDataBR(dataInicio) : `${formatarDataBR(dataInicio)} a ${formatarDataBR(dataFim)}`;
-    let msg = `*DIAGNÓSTICO OPERACIONAL - NEXUS PCP*\n_Período: ${periodoTexto}_\n`;
-    
-    Object.entries(lineAnalyses).forEach(([lineId, analysis]) => {
-      const lineName = analytics.linesSummary.find(l => l.id === lineId)?.nome || `Linha ${lineId}`;
-      const cleanAnalysis = analysis.replace(/\*\*/g, '*');
-      msg += `\n*📍 ${lineName.toUpperCase()}*\n${cleanAnalysis}\n`;
-    });
-
-    msg += `\n_Enviado via Nexus Intelligence_`;
-    setMessageToEdit(msg);
-    setIsShareModalOpen(true);
-  };
-
-  const sendEvolutionAPI = async () => {
-    if (!selectedContact) {
-      alert("Selecione um contato!");
-      return;
-    }
-
-    const contato = contatos.find(c => c.id === selectedContact);
-    if (!contato || !messageToEdit) {
-      alert("Selecione um contato e certifique-se de que há diagnósticos gerados.");
-      return;
-    }
-
-    setIsSending(true);
-
-    try {
-      const API_URL = "https://evolution-evolution-api.lwv8jw.easypanel.host"; 
-      const API_KEY = "B2B08F854A50-40DD-B222-C91ECAA63FF7";
-      const INSTANCE_NAME = "nexusalmox";
-
-      let number = contato.telefone.replace(/\D/g, '');
-      if (number.startsWith('0')) number = number.substring(1);
-      if (!number.startsWith('55') && (number.length === 10 || number.length === 11)) {
-        number = '55' + number;
-      }
-
-      const response = await fetch(`${API_URL}/message/sendText/${INSTANCE_NAME}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': API_KEY.trim()
-        },
-        body: JSON.stringify({
-          number: number,
-          text: messageToEdit
-        })
-      });
-
-      if (response.ok) {
-        alert("Mensagem enviada com sucesso!");
-        setIsShareModalOpen(false);
-      } else {
-        const errorData = await response.json().catch(() => ({ message: "Erro desconhecido na API" }));
-        alert(`A API recusou: ${errorData.message || "Erro de validação"}`);
-      }
-    } catch (err: any) {
-      alert(`Erro de Conexão: O navegador bloqueou a requisição ou o servidor está fora.`);
-    } finally {
-      setIsSending(false);
-    }
+    const content = reportRef.current.innerHTML;
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="pt-BR">
+      <head>
+          <meta charset="UTF-8">
+          <title>BOLETIM DIÁRIO - NEXUS PCP</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+            body { font-family: 'Inter', sans-serif; background: white !important; color: #1e293b; padding: 0; margin: 0; }
+            @media print {
+              @page { size: A4 portrait; margin: 0.5cm; }
+              body { zoom: 0.90; }
+              .print\\:hidden { display: none !important; }
+              .break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
+              .bg-slate-900 { background-color: #0f172a !important; color: white !important; -webkit-print-color-adjust: exact; }
+              .bg-blue-600 { background-color: #2563eb !important; color: white !important; -webkit-print-color-adjust: exact; }
+              .text-white { color: white !important; }
+              .recharts-area { -webkit-print-color-adjust: exact; }
+            }
+          </style>
+      </head>
+      <body>
+          <div class="p-4">${content}</div>
+          <script>window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 800); };</script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   const formatarDataBR = (dateStr: string) => {
@@ -273,22 +157,14 @@ const RelatorioBoletimPro: React.FC = () => {
         };
       }).filter(d => d.quantidade > 0);
 
-      let totalDowntimeLinha = 0;
-
       if (regsDaLinha.length > 0) {
         status = 'active';
         totalQty = regsDaLinha.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
-        totalCapNominalLinha = regsDaLinha.reduce((acc, r) => acc + (Number(r.capacidade_producao) || 0), 0);
+        totalCapNominalLinha = regsDaLinha.reduce((acc, r) => {
+          const cap = Number(r.capacidade_producao) || 0;
+          return acc + cap;
+        }, 0);
         totalCargaHorariaLinha = regsDaLinha.reduce((acc, r) => acc + (Number(r.carga_horaria) || 0), 0);
-        
-        // Somar downtime real
-        regsDaLinha.forEach(r => {
-          const pRaw = r.paradas;
-          const pArr = Array.isArray(pRaw) ? pRaw : [];
-          pArr.forEach((p: any) => {
-            totalDowntimeLinha += Number(p.duracao || p.tempo || p.total_min || 0);
-          });
-        });
 
         // Processar cada registro para o detalhamento por SKU
         regsDaLinha.forEach(r => {
@@ -328,25 +204,6 @@ const RelatorioBoletimPro: React.FC = () => {
       // SINCRO COM DASHBOARD: Eficiência = Produzido / Capacidade Nominal
       const eficiencia = totalCapNominalLinha > 0 ? (totalQty / totalCapNominalLinha) * 100 : 0;
 
-      // CÁLCULO DE OEE PRO
-      // 1. Disponibilidade: (Tempo Total - Paradas) / Tempo Total
-      // Se não houver carga horária definida, usamos a soma das horas de produção dos SKUs como base
-      const horasPlanejadas = totalCargaHorariaLinha > 0 ? totalCargaHorariaLinha : Object.values(skusMap).reduce((acc, s) => acc + s.horas, 0);
-      const tempoTotalMin = (horasPlanejadas || 1) * 60; 
-      
-      let disponibilidade = 100;
-      if (totalDowntimeLinha > 0) {
-        disponibilidade = ((tempoTotalMin - totalDowntimeLinha) / tempoTotalMin) * 100;
-      }
-      if (disponibilidade < 0) disponibilidade = 0;
-      if (disponibilidade > 100) disponibilidade = 100;
-      
-      // 2. Performance: Produzido / Capacidade Nominal
-      const performance = totalCapNominalLinha > 0 ? (totalQty / totalCapNominalLinha) * 100 : 0;
-      
-      // 3. OEE Final (D x P)
-      const oee = (disponibilidade / 100) * (performance / 100) * 100;
-
       return {
         id: num,
         nome: `Linha ${num}`,
@@ -354,13 +211,9 @@ const RelatorioBoletimPro: React.FC = () => {
         producaoTotal: totalQty,
         totalBundles,
         totalPallets: parseFloat(totalPallets.toFixed(1)),
-        eficiencia: performance,
-        disponibilidade,
-        performance,
-        oee,
+        eficiencia,
         capNominal: totalCapNominalLinha,
         cargaHoraria: totalCargaHorariaLinha,
-        totalDowntime: totalDowntimeLinha,
         serieHistorica,
         skusSummary
       };
@@ -437,27 +290,19 @@ const RelatorioBoletimPro: React.FC = () => {
           <button
             onClick={fetchRelatorioData}
             disabled={loading}
-            className="group relative px-8 py-3 bg-blue-600 overflow-hidden rounded-2xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/20 disabled:opacity-50"
+            className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative flex items-center gap-3">
-              {loading ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Search className="w-4 h-4 text-white" />}
-              <span className="text-[11px] font-black text-white uppercase tracking-widest">{loading ? 'Sincronizando...' : 'Sincronizar'}</span>
-            </div>
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+            {loading ? 'Sincronizando...' : 'Sincronizar'}
           </button>
 
-          {Object.keys(lineAnalyses).length > 0 && (
-            <button
-              onClick={handleOpenShareModal}
-              className="group relative px-8 py-3 bg-emerald-600 overflow-hidden rounded-2xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative flex items-center gap-3">
-                <MessageSquare className="w-4 h-4 text-white" />
-                <span className="text-[11px] font-black text-white uppercase tracking-widest">Enviar p/ Líderes</span>
-              </div>
-            </button>
-          )}
+          <button
+            onClick={handlePrint}
+            className="px-6 py-3 bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-all flex items-center gap-2 border border-white/10 shadow-xl"
+          >
+            <Printer className="w-4 h-4" />
+            Imprimir A4
+          </button>
         </div>
       </div>
 
@@ -582,29 +427,10 @@ const RelatorioBoletimPro: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Botão de IA da Linha */}
-                  {line.status === 'active' && (
-                    <button
-                      onClick={() => analyzeLineProduction(line)}
-                      disabled={loadingAI[line.id]}
-                      className="w-full py-3 bg-indigo-600/10 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 border border-indigo-600/20"
-                    >
-                      {loadingAI[line.id] ? <Loader2 className="w-4 h-4 animate-spin" /> : <BrainCircuit className="w-4 h-4" />}
-                      {loadingAI[line.id] ? 'Analisando...' : 'Pedir Ajuda ao Gerente IA'}
-                    </button>
-                  )}
-
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-slate-50 p-6 rounded-3xl relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-2 opacity-5"><Activity className="w-8 h-8 text-blue-600" /></div>
-                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">OEE GLOBAL</p>
-                      <p className={`text-3xl font-black ${(line.oee || 0) >= 80 ? 'text-emerald-500' : 'text-blue-600'}`}>
-                        {(line.oee || 0).toFixed(1)}%
-                      </p>
-                      <div className="flex gap-2 mt-2">
-                        <div className="px-2 py-0.5 bg-slate-200 rounded-md text-[7px] font-bold text-slate-600 uppercase">D: {(line.disponibilidade || 0).toFixed(0)}%</div>
-                        <div className="px-2 py-0.5 bg-slate-200 rounded-md text-[7px] font-bold text-slate-600 uppercase">P: {(line.performance || 0).toFixed(0)}%</div>
-                      </div>
+                    <div className="bg-slate-50 p-6 rounded-3xl">
+                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Carga / Meta</p>
+                      <p className="text-sm font-black text-slate-900">{(line.cargaHoraria || 0).toFixed(2)}h / {line.capNominal.toLocaleString()}</p>
                     </div>
                     <div className="bg-slate-50 p-6 rounded-3xl">
                       <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Eficiência (Sincro)</p>
@@ -634,29 +460,6 @@ const RelatorioBoletimPro: React.FC = () => {
                       />
                     </div>
                   </div>
-
-                  {/* Área de Resultado da IA - Papo Reto */}
-                  {lineAnalyses[line.id] && (
-                    <div className="mt-4 p-5 bg-indigo-50 border-l-4 border-indigo-600 rounded-2xl animate-in slide-in-from-top duration-500 shadow-sm">
-                      <div className="flex items-center gap-2 mb-2">
-                        <BrainCircuit className="w-3.5 h-3.5 text-indigo-600" />
-                        <span className="text-[9px] font-black text-indigo-900 uppercase tracking-widest">Diagnóstico Operacional</span>
-                        <button 
-                          onClick={() => setLineAnalyses(prev => {
-                            const newObj = { ...prev };
-                            delete newObj[line.id];
-                            return newObj;
-                          })}
-                          className="ml-auto text-indigo-300 hover:text-indigo-600"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <p className="text-[11px] font-bold text-slate-700 leading-relaxed whitespace-pre-line">
-                        {lineAnalyses[line.id]}
-                      </p>
-                    </div>
-                  )}
                 </div>
 
                 <div className="lg:w-2/3 space-y-6">
@@ -776,80 +579,6 @@ const RelatorioBoletimPro: React.FC = () => {
         </footer>
       </div>
 
-      {/* Modal de Compartilhamento Evolution API */}
-      {isShareModalOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/95 backdrop-blur-md" onClick={() => setIsShareModalOpen(false)} />
-          <div className="bg-[#1a1a1a] border border-white/10 w-full max-w-2xl rounded-[40px] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-300">
-            <header className="p-8 border-b border-white/5 flex items-center justify-between bg-emerald-600/10">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-emerald-600 rounded-xl text-white">
-                  <MessageSquare className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-white uppercase tracking-tighter">Enviar Diagnósticos</h3>
-                  <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mt-1">Consolidação e Disparo via WhatsApp</p>
-                </div>
-              </div>
-              <button onClick={() => setIsShareModalOpen(false)} className="p-2 text-slate-500 hover:text-white transition-colors">
-                <X className="w-8 h-8" />
-              </button>
-            </header>
-
-            <div className="p-8 space-y-8 overflow-y-auto max-h-[70vh]">
-              {/* Preview da Mensagem */}
-              <div className="space-y-3">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Editar Mensagem Consolidada</label>
-                <div className="bg-black/40 border border-white/5 p-4 rounded-3xl">
-                  <textarea
-                    value={messageToEdit}
-                    onChange={e => setMessageToEdit(e.target.value)}
-                    className="w-full h-64 bg-transparent text-[11px] font-bold text-slate-300 leading-relaxed outline-none resize-none no-scrollbar"
-                  />
-                </div>
-              </div>
-
-              {/* Seleção de Contato */}
-              <div className="space-y-3">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Selecionar Destinatário da Agenda</label>
-                <div className="relative">
-                  <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 pointer-events-none" />
-                  <select 
-                    value={selectedContact}
-                    onChange={e => setSelectedContact(e.target.value)}
-                    className="w-full bg-black/60 border-2 border-white/10 rounded-2xl py-4 pl-12 pr-4 text-[11px] font-black text-white outline-none focus:border-emerald-500 appearance-none cursor-pointer"
-                  >
-                    <option value="">SELECIONE UM CONTATO...</option>
-                    {contatos.map(c => (
-                      <option key={c.id} value={c.id} className="bg-slate-900">
-                        {c.nome.toUpperCase()} {c.apelido ? `(${c.apelido})` : ''} - {c.categoria}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="pt-4 grid grid-cols-2 gap-4">
-                <button 
-                  type="button"
-                  onClick={() => setIsShareModalOpen(false)}
-                  className="py-4 bg-white/5 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
-                >
-                  Cancelar
-                </button>
-                <button 
-                  onClick={sendEvolutionAPI}
-                  disabled={isSending || !selectedContact}
-                  className="py-4 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 shadow-xl shadow-emerald-600/20 disabled:opacity-50"
-                >
-                  {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare className="w-4 h-4" />}
-                  {isSending ? 'Enviando...' : 'Disparar WhatsApp'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
