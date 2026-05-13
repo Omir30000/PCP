@@ -24,7 +24,11 @@ import {
   ChevronRight,
   Zap,
   Target,
-  BarChart3
+  BarChart3,
+  BrainCircuit,
+  X,
+  MessageSquare,
+  Users
 } from 'lucide-react';
 
 const RelatorioBoletimPro: React.FC = () => {
@@ -35,6 +39,15 @@ const RelatorioBoletimPro: React.FC = () => {
   const [registros, setRegistros] = useState<any[]>([]);
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [filtroTurno, setFiltroTurno] = useState<'GLOBAL' | '1º Turno' | '2º Turno'>('GLOBAL');
+
+  // Estados para IA e Compartilhamento
+  const [loadingAI, setLoadingAI] = useState<Record<string, boolean>>({});
+  const [lineAnalyses, setLineAnalyses] = useState<Record<string, string>>({});
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [messageToEdit, setMessageToEdit] = useState('');
+  const [contatos, setContatos] = useState<any[]>([]);
+  const [selectedContact, setSelectedContact] = useState<string>('');
+  const [isSending, setIsSending] = useState(false);
 
   const reportRef = useRef<HTMLDivElement>(null);
 
@@ -63,6 +76,116 @@ const RelatorioBoletimPro: React.FC = () => {
   useEffect(() => {
     fetchRelatorioData();
   }, []);
+
+  const analyzeProductionMotivational = async (line: any) => {
+    setLoadingAI(prev => ({ ...prev, [line.id]: true }));
+    const MISTRAL_API_KEY = "VUM0jYdoE3DFV4txchjU70t0QiCir6sx";
+
+    const periodoTexto = dataInicio === dataFim ? formatarDataBR(dataInicio) : `${formatarDataBR(dataInicio)} a ${formatarDataBR(dataFim)}`;
+    
+    // Preparar dados dos SKUs para a IA
+    const skusTexto = line.skusSummary.map((s: any) => `- ${s.nome}: ${s.unidades.toLocaleString()} un (${s.horas.toFixed(1)}h)`).join('\n');
+
+    const prompt = `
+      Você é um Gerente de Produção Industrial mentor e motivador.
+      Analise o desempenho da ${line.nome.toUpperCase()} no período de ${periodoTexto}:
+      - Eficiência Atual: ${line.eficiencia.toFixed(1)}%.
+      - Produção Total: ${line.producaoTotal.toLocaleString()} UN.
+      - SKUs Produzidos:\n${skusTexto}
+
+      DIRETRIZES DA MENSAGEM:
+      1. Comece com uma saudação positiva ao Líder de Turno.
+      2. TOM MOTIVACIONAL: 
+         - Se Eficiência > 85%: Parabenize pelo excelente desempenho e peça para manter o ritmo.
+         - Se Eficiência entre 70% e 85%: Diga que o objetivo está muito próximo e incentive a buscar os últimos detalhes para bater a meta.
+         - Se Eficiência < 70%: Seja encorajador, identifique que o desafio foi grande, mas que você confia na equipe para recuperar no próximo período.
+      3. INSIGHT TÉCNICO: Dê uma dica rápida baseada nos SKUs (ex: foco na troca de setup ou velocidade constante).
+      4. META PRÓXIMO PERÍODO: Sugira uma meta clara (ex: "Vamos buscar elevar essa eficiência em mais 5% amanha").
+      
+      IMPORTANTE: Seja direto, humano e inspirador. Máximo 300 caracteres. Use emojis moderadamente.
+    `;
+
+    try {
+      const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${MISTRAL_API_KEY}` },
+        body: JSON.stringify({
+          model: "open-mistral-7b",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.7
+        })
+      });
+      const data = await res.json();
+      setLineAnalyses(prev => ({ ...prev, [line.id]: data.choices[0].message.content }));
+    } catch (err) {
+      console.error("Erro na análise motivacional:", err);
+    } finally {
+      setLoadingAI(prev => ({ ...prev, [line.id]: false }));
+    }
+  };
+
+  const fetchContatos = async () => {
+    const { data } = await supabase.from('contatos').select('*').order('nome');
+    if (data) setContatos(data);
+  };
+
+  useEffect(() => {
+    if (isShareModalOpen) fetchContatos();
+  }, [isShareModalOpen]);
+
+  const handleOpenShareModal = () => {
+    const periodoTexto = dataInicio === dataFim ? formatarDataBR(dataInicio) : `${formatarDataBR(dataInicio)} a ${formatarDataBR(dataFim)}`;
+    let msg = `*🚀 FEEDBACK DE PRODUÇÃO - NEXUS PCP*\n_Período: ${periodoTexto}_\n`;
+    
+    Object.entries(lineAnalyses).forEach(([lineId, analysis]) => {
+      const lineName = analytics.linesSummary.find(l => l.id === lineId)?.nome || `Linha ${lineId}`;
+      msg += `\n*📍 ${lineName.toUpperCase()}*\n${analysis}\n`;
+    });
+
+    msg += `\n_Gerado por Nexus Intelligence_`;
+    setMessageToEdit(msg);
+    setIsShareModalOpen(true);
+  };
+
+  const sendWhatsApp = async () => {
+    if (!selectedContact) {
+      alert("Selecione um contato!");
+      return;
+    }
+
+    const contato = contatos.find(c => c.id === selectedContact);
+    if (!contato) return;
+
+    setIsSending(true);
+    try {
+      const API_URL = "https://evolution-evolution-api.lwv8jw.easypanel.host"; 
+      const API_KEY = "B2B08F854A50-40DD-B222-C91ECAA63FF7";
+      const INSTANCE_NAME = "nexusalmox";
+
+      let number = contato.telefone.replace(/\D/g, '');
+      if (number.startsWith('0')) number = number.substring(1);
+      if (!number.startsWith('55') && (number.length === 10 || number.length === 11)) {
+        number = '55' + number;
+      }
+
+      const response = await fetch(`${API_URL}/message/sendText/${INSTANCE_NAME}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': API_KEY.trim() },
+        body: JSON.stringify({ number: number, text: messageToEdit })
+      });
+
+      if (response.ok) {
+        alert("Mensagem enviada com sucesso!");
+        setIsShareModalOpen(false);
+      } else {
+        alert("Erro ao enviar mensagem via API.");
+      }
+    } catch (err) {
+      alert("Erro de conexão com a API de WhatsApp.");
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   const handlePrint = () => {
     if (!reportRef.current) return;
@@ -137,7 +260,6 @@ const RelatorioBoletimPro: React.FC = () => {
       let totalCargaHorariaLinha = 0;
       let status: 'active' | 'inactive' = 'inactive';
       
-      // Detalhamento por SKU
       const skusMap: Record<string, { 
         nome: string, 
         unidades: number, 
@@ -166,7 +288,6 @@ const RelatorioBoletimPro: React.FC = () => {
         }, 0);
         totalCargaHorariaLinha = regsDaLinha.reduce((acc, r) => acc + (Number(r.carga_horaria) || 0), 0);
 
-        // Processar cada registro para o detalhamento por SKU
         regsDaLinha.forEach(r => {
           const prod = r.produtos;
           if (!prod) return;
@@ -190,7 +311,6 @@ const RelatorioBoletimPro: React.FC = () => {
           skusMap[skuId].horas += carga;
         });
 
-        // Calcular PK e PLT para cada SKU
         Object.values(skusMap).forEach(sku => {
           sku.pacotes = Math.floor(sku.unidades / sku.unidadesPorFardo);
           sku.paletes = sku.pacotes / sku.fardosPorPalete;
@@ -201,7 +321,6 @@ const RelatorioBoletimPro: React.FC = () => {
       const totalBundles = skusSummary.reduce((acc, s) => acc + s.pacotes, 0);
       const totalPallets = skusSummary.reduce((acc, s) => acc + s.paletes, 0);
 
-      // SINCRO COM DASHBOARD: Eficiência = Produzido / Capacidade Nominal
       const eficiencia = totalCapNominalLinha > 0 ? (totalQty / totalCapNominalLinha) * 100 : 0;
 
       return {
@@ -219,8 +338,6 @@ const RelatorioBoletimPro: React.FC = () => {
       };
     });
 
-
-    // SINCRO COM DASHBOARD: OEE Médio Planta = Soma(Produzido) / Soma(Capacidade Nominal)
     const totalProduzidoGeral = linesSummary.reduce((acc, l) => acc + l.producaoTotal, 0);
     const totalCapNominalGeral = linesSummary.reduce((acc, l) => acc + l.capNominal, 0);
     const avgEfficiency = totalCapNominalGeral > 0 ? (totalProduzidoGeral / totalCapNominalGeral) * 100 : 0;
@@ -245,8 +362,8 @@ const RelatorioBoletimPro: React.FC = () => {
             <Calculator className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-xl font-bold uppercase tracking-tight text-white leading-tight">Gerador de Boletim</h2>
-            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest leading-none mt-1">Consolidação Industrial em A4</p>
+            <h2 className="text-xl font-bold uppercase tracking-tight text-white leading-tight">Boletim Pro IA</h2>
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest leading-none mt-1">Análise Motivacional & Performance</p>
           </div>
         </div>
 
@@ -266,14 +383,13 @@ const RelatorioBoletimPro: React.FC = () => {
           <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border-2 border-white/5 focus-within:border-blue-500 transition-all shadow-sm">
             <Calendar className="w-5 h-5 text-blue-400" />
             <div className="flex flex-col">
-              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Início / Fim</span>
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Período Selecionado</span>
               <div className="flex items-center gap-2">
                 <input
                   type="date"
                   value={dataInicio}
                   onChange={e => setDataInicio(e.target.value)}
                   className="bg-transparent text-[11px] font-black outline-none uppercase text-white cursor-pointer hover:text-blue-400 transition-colors"
-                  title="Data Inicial"
                 />
                 <span className="text-slate-500 font-bold">-</span>
                 <input
@@ -281,7 +397,6 @@ const RelatorioBoletimPro: React.FC = () => {
                   value={dataFim}
                   onChange={e => setDataFim(e.target.value)}
                   className="bg-transparent text-[11px] font-black outline-none uppercase text-white cursor-pointer hover:text-blue-400 transition-colors"
-                  title="Data Final"
                 />
               </div>
             </div>
@@ -290,18 +405,28 @@ const RelatorioBoletimPro: React.FC = () => {
           <button
             onClick={fetchRelatorioData}
             disabled={loading}
-            className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20 disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             {loading ? 'Sincronizando...' : 'Sincronizar'}
           </button>
 
+          {Object.keys(lineAnalyses).length > 0 && (
+            <button
+              onClick={handleOpenShareModal}
+              className="px-6 py-3 bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+            >
+              <MessageSquare className="w-4 h-4" />
+              Enviar p/ Líderes
+            </button>
+          )}
+
           <button
             onClick={handlePrint}
-            className="px-6 py-3 bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-all flex items-center gap-2 border border-white/10 shadow-xl"
+            className="px-6 py-3 bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-all flex items-center gap-2 border border-white/10"
           >
             <Printer className="w-4 h-4" />
-            Imprimir A4
+            PDF A4
           </button>
         </div>
       </div>
@@ -333,8 +458,6 @@ const RelatorioBoletimPro: React.FC = () => {
           </div>
         </header>
 
-
-
         {/* DESEMPENHO E EVOLUÇÃO POR CT */}
         <section className="space-y-8">
           <div className="flex items-center gap-4 mb-2">
@@ -364,26 +487,61 @@ const RelatorioBoletimPro: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Ação de IA Motivacional */}
+                  {line.status === 'active' && (
+                    <button
+                      onClick={() => analyzeProductionMotivational(line)}
+                      disabled={loadingAI[line.id]}
+                      className="w-full py-3 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20 disabled:opacity-50"
+                    >
+                      {loadingAI[line.id] ? <Loader2 className="w-4 h-4 animate-spin" /> : <BrainCircuit className="w-4 h-4" />}
+                      {loadingAI[line.id] ? 'Analisando Produção...' : 'Gerar Feedback Motivacional IA'}
+                    </button>
+                  )}
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-slate-50 p-6 rounded-3xl">
-                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Carga / Meta</p>
-                      <p className="text-sm font-black text-slate-900">{(line.cargaHoraria || 0).toFixed(2)}h / {line.capNominal.toLocaleString()}</p>
+                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Capacidade / Meta</p>
+                      <p className="text-sm font-black text-slate-900">{line.capNominal.toLocaleString()} UN</p>
                     </div>
                     <div className="bg-slate-50 p-6 rounded-3xl">
-                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Eficiência (Sincro)</p>
+                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Eficiência Real</p>
                       <p className={`text-2xl font-black ${line.eficiencia >= 80 ? 'text-emerald-500' : 'text-blue-600'}`}>
                         {line.eficiencia.toFixed(1)}%
                       </p>
                     </div>
                   </div>
 
-                  <div className="bg-slate-900 p-6 rounded-3xl text-white">
+                  <div className="bg-slate-900 p-6 rounded-3xl text-white relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10"><Package className="w-12 h-12" /></div>
                     <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Produção Realizada Total</p>
                     <p className="text-3xl font-black leading-none">
                       {line.producaoTotal.toLocaleString()} <span className="text-xs text-blue-400 font-bold">UN</span>
                     </p>
                   </div>
 
+                  {/* Card de Análise da IA */}
+                  {lineAnalyses[line.id] && (
+                    <div className="mt-4 p-5 bg-indigo-50 border-l-4 border-indigo-600 rounded-2xl animate-in slide-in-from-top duration-500 shadow-sm group relative">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Zap className="w-4 h-4 text-indigo-600" />
+                        <span className="text-[9px] font-black text-indigo-900 uppercase tracking-widest">Insight Motivacional IA</span>
+                        <button 
+                          onClick={() => setLineAnalyses(prev => {
+                            const n = { ...prev };
+                            delete n[line.id];
+                            return n;
+                          })}
+                          className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity p-1 text-indigo-400 hover:text-indigo-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <p className="text-[11px] font-bold text-slate-700 leading-relaxed italic">
+                        "{lineAnalyses[line.id]}"
+                      </p>
+                    </div>
+                  )}
 
                   <div className="space-y-3">
                     <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
@@ -402,7 +560,7 @@ const RelatorioBoletimPro: React.FC = () => {
                 <div className="lg:w-2/3 space-y-6">
                   <div className="h-[220px] bg-slate-50/50 rounded-3xl p-4 border border-slate-100">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] mb-6 text-center">
-                      <TrendingUp className="w-3 h-3 inline mr-2 text-blue-500" /> Tendência de Evolução Produtiva (Dia a Dia)
+                      <TrendingUp className="w-3 h-3 inline mr-2 text-blue-500" /> Curva de Produção no Período
                     </p>
                     <ResponsiveContainer width="100%" height="80%">
                       <AreaChart data={line.serieHistorica} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
@@ -423,7 +581,6 @@ const RelatorioBoletimPro: React.FC = () => {
                         <YAxis hide={true} />
                         <RechartsTooltip
                           contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '9px', fontWeight: 900, color: '#fff' }}
-                          itemStyle={{ color: '#3b82f6' }}
                         />
                         <Area
                           type="monotone"
@@ -432,7 +589,6 @@ const RelatorioBoletimPro: React.FC = () => {
                           strokeWidth={3}
                           fillOpacity={1}
                           fill={`url(#colorQty-${line.id})`}
-                          animationDuration={1500}
                         />
                       </AreaChart>
                     </ResponsiveContainer>
@@ -442,7 +598,7 @@ const RelatorioBoletimPro: React.FC = () => {
                     <div className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden">
                       <div className="bg-slate-50 px-6 py-3 border-b border-slate-100 flex justify-between items-center text-[8px] font-black text-slate-400 uppercase tracking-widest">
                         <div className="flex items-center gap-2 text-slate-900">
-                          <Package className="w-3.5 h-3.5 text-blue-600" /> Detalhamento por SKU
+                          <Package className="w-3.5 h-3.5 text-blue-600" /> Detalhamento de SKUs por CT
                         </div>
                         <div className="flex gap-4 pr-2">
                           <span className="w-14 text-right">UN</span>
@@ -493,28 +649,86 @@ const RelatorioBoletimPro: React.FC = () => {
             <div className="flex items-center gap-5">
               <ShieldCheck className="w-10 h-10 text-slate-400" />
               <div>
-                <p className="text-[11px] font-black text-slate-800 uppercase tracking-widest leading-none mb-1">Consolidação Industrial Nexus PCP</p>
-                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em]">Autenticação Sincronizada Dashboard v2.6</p>
+                <p className="text-[11px] font-black text-slate-800 uppercase tracking-widest leading-none mb-1">Nexus Intelligent Hub</p>
+                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em]">Autenticação via PCP Terminal v3.0</p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest italic">Nexus Intelligence Terminal</p>
+              <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest italic">Smart Production Terminal</p>
               <p className="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">{new Date().toLocaleString('pt-BR')}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-32">
-            <div className="text-center">
-              <div className="border-t border-slate-900 pt-3"></div>
-              <p className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Gestão de PCP</p>
-            </div>
-            <div className="text-center">
-              <div className="border-t border-slate-900 pt-3"></div>
-              <p className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Gerência Industrial</p>
             </div>
           </div>
         </footer>
       </div>
+
+      {/* Modal de Compartilhamento via Evolution API */}
+      {isShareModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm" onClick={() => setIsShareModalOpen(false)} />
+          <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl relative z-10 overflow-hidden border border-slate-200">
+            <header className="p-8 border-b border-slate-100 flex items-center justify-between bg-indigo-50">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg">
+                  <MessageSquare className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter leading-none">Enviar p/ Líderes</h3>
+                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-1">Compartilhamento de Metas & Motivação</p>
+                </div>
+              </div>
+              <button onClick={() => setIsShareModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors">
+                <X className="w-8 h-8" />
+              </button>
+            </header>
+
+            <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
+              <div className="space-y-4">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Users className="w-4 h-4" /> Selecionar Destinatário (Líder)
+                </label>
+                <select 
+                  value={selectedContact}
+                  onChange={(e) => setSelectedContact(e.target.value)}
+                  className="w-full bg-slate-50 border-2 border-slate-100 p-5 rounded-3xl text-sm font-black text-slate-900 outline-none focus:border-indigo-600 transition-all appearance-none cursor-pointer"
+                >
+                  <option value="">Escolha um contato...</option>
+                  {contatos.map(c => (
+                    <option key={c.id} value={c.id}>{c.nome} - {c.telefone}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Zap className="w-4 h-4" /> Mensagem Consolidada
+                </label>
+                <textarea 
+                  value={messageToEdit}
+                  onChange={(e) => setMessageToEdit(e.target.value)}
+                  className="w-full h-64 bg-slate-50 border-2 border-slate-100 p-6 rounded-3xl text-sm font-bold text-slate-700 outline-none focus:border-indigo-600 transition-all resize-none font-mono"
+                />
+              </div>
+            </div>
+
+            <footer className="p-8 bg-slate-50 border-t border-slate-100 flex justify-end gap-4">
+              <button 
+                onClick={() => setIsShareModalOpen(false)}
+                className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={sendWhatsApp}
+                disabled={isSending || !selectedContact}
+                className="px-10 py-4 bg-emerald-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-emerald-700 active:scale-95 transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare className="w-4 h-4" />}
+                {isSending ? 'Enviando...' : 'Disparar via WhatsApp'}
+              </button>
+            </footer>
+          </div>
+        </div>
+      )}
 
     </div>
   );
