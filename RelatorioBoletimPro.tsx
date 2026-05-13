@@ -84,20 +84,22 @@ const RelatorioBoletimPro: React.FC = () => {
     setLoadingAI(prev => ({ ...prev, [line.id]: true }));
     const MISTRAL_API_KEY = "VUM0jYdoE3DFV4txchjU70t0QiCir6sx";
 
-    const skusText = line.skusSummary.map((s: any) => `${s.nome} (${s.unidades} un)`).join(', ');
-
     const prompt = `
-      Você é um Especialista em Engenharia de Produção.
-      Analise tecnicamente a ${line.nome.toUpperCase()}:
-      - Produção Realizada: ${line.producaoTotal} unidades.
-      - Eficiência Produtiva: ${line.eficiencia.toFixed(1)}%.
-      - Horas Trabalhadas: ${line.cargaHoraria.toFixed(1)}h.
-      - SKUs em Processo: ${skusText}.
+      Você é um Coordenador de Produção focado em Ritmo e Estabilidade. 
+      Analise a ${line.nome.toUpperCase()} (Linguagem séria e técnica):
+      - Eficiência Atual: ${line.eficiencia.toFixed(1)}%.
+      - Produção Total: ${line.producaoTotal} UN.
+      - Cadência por SKU (UN/H): ${line.skusSummary.map((s: any) => `${s.nome}: ${Math.round(s.unidades/s.horas)}`).join(', ')}.
 
-      Seja extremamente breve (máximo 200 caracteres).
-      Use linguagem séria e profissional de chão de fábrica.
-      Dê o diagnóstico e as 3 metas de forma direta.
-      PROIBIDO termos em inglês ou qualquer tipo de humor.
+      DIRETRIZES PARA O PARECER:
+      1. NÃO descreva os produtos ou as quantidades (o líder já vê isso na tabela).
+      2. Foque na VARIABILIDADE: O gráfico de tendência mostra oscilações. Identifique que a falta de constância no ritmo é o que derruba a eficiência.
+      3. METAS: Defina 3 metas baseadas em: 
+         a) Elevar a cadência (UN/H) do produto mais lento.
+         b) Reduzir o tempo de máquina parada entre trocas.
+         c) Estabilizar a curva de produção diária.
+      
+      Seja ultra-curto, sem inglês e sem repetir dados da tela.
     `;
 
     try {
