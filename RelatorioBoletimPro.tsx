@@ -72,22 +72,22 @@ const RelatorioBoletimPro: React.FC = () => {
     const skusTexto = line.skusSummary.map((s: any) => `- ${s.nome}: ${s.unidades.toLocaleString()} un (${s.horas.toFixed(1)}h)`).join('\n');
 
     const prompt = `
-      Você é um Gerente de Produção Industrial mentor e motivador.
+      Você é um Gerente de Produção Industrial mentor e motivador. 
       Analise o desempenho da ${line.nome.toUpperCase()} no período de ${periodoTexto}:
       - Eficiência Atual: ${line.eficiencia.toFixed(1)}%.
       - Produção Total: ${line.producaoTotal.toLocaleString()} UN.
       - SKUs Produzidos:\n${skusTexto}
 
       DIRETRIZES DA MENSAGEM:
-      1. Comece com uma saudação positiva ao Líder de Turno.
-      2. TOM MOTIVACIONAL: 
-         - Se Eficiência > 85%: Parabenize pelo excelente desempenho e peça para manter o ritmo.
-         - Se Eficiência entre 70% e 85%: Diga que o objetivo está muito próximo e incentive a buscar os últimos detalhes para bater a meta.
-         - Se Eficiência < 70%: Seja encorajador, identifique que o desafio foi grande, mas que você confia na equipe para recuperar no próximo período.
-      3. INSIGHT TÉCNICO: Dê uma dica rápida baseada nos SKUs (ex: foco na troca de setup ou velocidade constante).
-      4. META PRÓXIMO PERÍODO: Sugira uma meta clara (ex: "Vamos buscar elevar essa eficiência em mais 5% amanha").
+      1. NÃO use cumprimentos como "Olá, Líder" ou "Bom dia". Vá direto ao ponto.
+      2. ANÁLISE MOTIVACIONAL: 
+         - Se Eficiência > 85%: Destaque o alto nível de entrega e o compromisso da equipe.
+         - Se Eficiência 70%-85%: Mostre que o resultado é sólido, mas incentive a busca pelo próximo degrau.
+         - Se Eficiência < 70%: Seja encorajador, foque na resiliência e na capacidade de superação do time.
+      3. DICA DE PRODUTIVIDADE: Em vez de falar de mecânica, dê uma dica de gestão de tempo, sincronia da equipe ou fluxo de trabalho que ajude a melhorar os números.
+      4. META PARA O PRÓXIMO PERÍODO: Sugira uma meta clara e desafiadora, usando exatamente o título "Meta para o próximo período".
       
-      IMPORTANTE: Seja direto, humano e inspirador. Máximo 300 caracteres. Use emojis moderadamente.
+      ESTILO: Use negrito para destacar números e pontos chave. Use emojis moderadamente para manter o tom inspirador. Máximo 450 caracteres.
     `;
 
     try {
