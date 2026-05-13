@@ -46,6 +46,7 @@ const RelatorioBoletimPro: React.FC = () => {
 
   // Estados para Compartilhamento
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [messageToEdit, setMessageToEdit] = useState('');
   const [contatos, setContatos] = useState<any[]>([]);
   const [selectedContact, setSelectedContact] = useState<string>('');
   const [isSending, setIsSending] = useState(false);
@@ -103,20 +104,23 @@ const RelatorioBoletimPro: React.FC = () => {
       .map(([m, d]) => `${m} (${d} min)`)
       .join(', ');
 
+    const periodoTexto = dataInicio === dataFim ? formatarDataBR(dataInicio) : `${formatarDataBR(dataInicio)} a ${formatarDataBR(dataFim)}`;
+
     const prompt = `
       Você é um Supervisor de Manutenção e Produção Industrial experiente.
-      Analise o desempenho técnico da ${line.nome.toUpperCase()}:
+      Analise o desempenho técnico da ${line.nome.toUpperCase()} no período de ${periodoTexto}:
       - Eficiência: ${line.eficiencia.toFixed(1)}%.
       - Produção Realizada: ${line.producaoTotal} UN.
       - HISTÓRICO DE PARADAS (Downtime): ${paradasTexto || 'Sem paradas críticas registradas'}.
 
       DIRETRIZES DE ANÁLISE:
-      1. NÃO fale sobre demanda de vendas ou variedade de produtos. O usuário já controla isso.
-      2. FOCO TOTAL NAS MÁQUINAS: Identifique quais paradas foram mais frequentes (ex: se houve muita limpeza de cola, ajuste de sensor, quebra).
-      3. DIAGNÓSTICO: Diga claramente o que está quebrando ou parando a linha (ex: "A rotuladora está parando muito por limpeza, ajuste a dosagem").
-      4. METAS TÉCNICAS: Crie 3 metas baseadas em REDUZIR ESSAS PARADAS ESPECÍFICAS (ex: "Zerar paradas por limpeza de cola nos próximos 7 dias").
+      1. Comece mencionando o período analisado: ${periodoTexto}.
+      2. NÃO fale sobre demanda de vendas ou variedade de produtos. O usuário já controla isso.
+      3. FOCO TOTAL NAS MÁQUINAS: Identifique quais paradas foram mais frequentes (ex: se houve muita limpeza de cola, ajuste de sensor, quebra).
+      4. DIAGNÓSTICO: Diga claramente o que está quebrando ou parando a linha (ex: "A rotuladora está parando muito por limpeza, ajuste a dosagem").
+      5. METAS TÉCNICAS: Crie 3 metas baseadas em REDUZIR ESSAS PARADAS ESPECÍFICAS (ex: "Zerar paradas por limpeza de cola nos próximos 7 dias").
 
-      Seja extremamente direto, profissional e focado em resolver problemas mecânicos/operacionais. Máximo 200 caracteres.
+      Seja extremamente direto, profissional e focado em resolver problemas mecânicos/operacionais. Máximo 250 caracteres.
     `;
 
     try {
@@ -147,6 +151,21 @@ const RelatorioBoletimPro: React.FC = () => {
     if (isShareModalOpen) fetchContatos();
   }, [isShareModalOpen]);
 
+  const handleOpenShareModal = () => {
+    const periodoTexto = dataInicio === dataFim ? formatarDataBR(dataInicio) : `${formatarDataBR(dataInicio)} a ${formatarDataBR(dataFim)}`;
+    let msg = `*DIAGNÓSTICO OPERACIONAL - NEXUS PCP*\n_Período: ${periodoTexto}_\n`;
+    
+    Object.entries(lineAnalyses).forEach(([lineId, analysis]) => {
+      const lineName = analytics.linesSummary.find(l => l.id === lineId)?.nome || `Linha ${lineId}`;
+      const cleanAnalysis = analysis.replace(/\*\*/g, '*');
+      msg += `\n*📍 ${lineName.toUpperCase()}*\n${cleanAnalysis}\n`;
+    });
+
+    msg += `\n_Enviado via Nexus Intelligence_`;
+    setMessageToEdit(msg);
+    setIsShareModalOpen(true);
+  };
+
   const sendEvolutionAPI = async () => {
     if (!selectedContact) {
       alert("Selecione um contato!");
@@ -154,54 +173,34 @@ const RelatorioBoletimPro: React.FC = () => {
     }
 
     const contato = contatos.find(c => c.id === selectedContact);
-    if (!contato) return;
+    if (!contato || !messageToEdit) {
+      alert("Selecione um contato e certifique-se de que há diagnósticos gerados.");
+      return;
+    }
 
     setIsSending(true);
 
-    // Formatação da Mensagem Consolidada (Sem Emojis para evitar erro 400)
-    let mensagem = `*DIAGNÓSTICO OPERACIONAL - NEXUS PCP*\n`;
-    mensagem += `_Data: ${new Date().toLocaleDateString('pt-BR')}_\n\n`;
-
-    Object.entries(lineAnalyses).forEach(([lineId, analysis]) => {
-      const lineName = analytics.linesSummary.find(l => l.id === lineId)?.nome || `Linha ${lineId}`;
-      // Limpa negritos duplos da IA que podem confundir a API
-      const cleanAnalysis = analysis.replace(/\*\*/g, '*');
-      mensagem += `*📍 ${lineName.toUpperCase()}*\n${cleanAnalysis}\n\n`;
-    });
-
-    mensagem += `\n_Enviado via Nexus Intelligence_`;
-
     try {
-      // CONFIGURAÇÃO DA EVOLUTION API (Credenciais Reais)
       const API_URL = "https://evolution-evolution-api.lwv8jw.easypanel.host"; 
       const API_KEY = "B2B08F854A50-40DD-B222-C91ECAA63FF7";
       const INSTANCE_NAME = "nexusalmox";
 
-      // Limpeza agressiva do número
       let number = contato.telefone.replace(/\D/g, '');
-      // Se começar com 0, remove
       if (number.startsWith('0')) number = number.substring(1);
-      // Se não tiver 55 no começo e tiver 10 ou 11 dígitos, adiciona 55
       if (!number.startsWith('55') && (number.length === 10 || number.length === 11)) {
         number = '55' + number;
       }
-
-      console.log("Tentando enviar para:", number);
-
-      const payload = {
-        number: number,
-        text: mensagem
-      };
-
-      console.log("Tentativa Final Payload:", JSON.stringify(payload));
 
       const response = await fetch(`${API_URL}/message/sendText/${INSTANCE_NAME}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': API_KEY.trim() // Garante que não tenha espaços no Token
+          'apikey': API_KEY.trim()
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          number: number,
+          text: messageToEdit
+        })
       });
 
       if (response.ok) {
@@ -209,12 +208,10 @@ const RelatorioBoletimPro: React.FC = () => {
         setIsShareModalOpen(false);
       } else {
         const errorData = await response.json().catch(() => ({ message: "Erro desconhecido na API" }));
-        console.error("Erro da API:", errorData);
         alert(`A API recusou: ${errorData.message || "Erro de validação"}`);
       }
     } catch (err: any) {
-      console.error("Erro de Rede/CORS:", err);
-      alert(`Erro de Conexão: O navegador bloqueou a requisição ou o servidor está fora. (CORS?)`);
+      alert(`Erro de Conexão: O navegador bloqueou a requisição ou o servidor está fora.`);
     } finally {
       setIsSending(false);
     }
@@ -333,8 +330,16 @@ const RelatorioBoletimPro: React.FC = () => {
 
       // CÁLCULO DE OEE PRO
       // 1. Disponibilidade: (Tempo Total - Paradas) / Tempo Total
-      const tempoTotalMin = totalCargaHorariaLinha * 60;
-      const disponibilidade = tempoTotalMin > 0 ? ((tempoTotalMin - totalDowntimeLinha) / tempoTotalMin) * 100 : 0;
+      // Se não houver carga horária definida, usamos a soma das horas de produção dos SKUs como base
+      const horasPlanejadas = totalCargaHorariaLinha > 0 ? totalCargaHorariaLinha : Object.values(skusMap).reduce((acc, s) => acc + s.horas, 0);
+      const tempoTotalMin = (horasPlanejadas || 1) * 60; 
+      
+      let disponibilidade = 100;
+      if (totalDowntimeLinha > 0) {
+        disponibilidade = ((tempoTotalMin - totalDowntimeLinha) / tempoTotalMin) * 100;
+      }
+      if (disponibilidade < 0) disponibilidade = 0;
+      if (disponibilidade > 100) disponibilidade = 100;
       
       // 2. Performance: Produzido / Capacidade Nominal
       const performance = totalCapNominalLinha > 0 ? (totalQty / totalCapNominalLinha) * 100 : 0;
@@ -443,7 +448,7 @@ const RelatorioBoletimPro: React.FC = () => {
 
           {Object.keys(lineAnalyses).length > 0 && (
             <button
-              onClick={() => setIsShareModalOpen(true)}
+              onClick={handleOpenShareModal}
               className="group relative px-8 py-3 bg-emerald-600 overflow-hidden rounded-2xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -794,15 +799,13 @@ const RelatorioBoletimPro: React.FC = () => {
             <div className="p-8 space-y-8 overflow-y-auto max-h-[70vh]">
               {/* Preview da Mensagem */}
               <div className="space-y-3">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Preview do Texto Consolidado</label>
-                <div className="bg-black/40 border border-white/5 p-6 rounded-3xl max-h-48 overflow-y-auto no-scrollbar">
-                  <p className="text-[10px] font-bold text-slate-300 leading-relaxed whitespace-pre-line">
-                    *📋 DIAGNÓSTICO OPERACIONAL*\n
-                    {Object.entries(lineAnalyses).map(([lineId, analysis]) => {
-                      const lineName = analytics.linesSummary.find(l => l.id === lineId)?.nome || `Linha ${lineId}`;
-                      return `\n*📍 ${lineName.toUpperCase()}*\n${analysis}\n`;
-                    })}
-                  </p>
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Editar Mensagem Consolidada</label>
+                <div className="bg-black/40 border border-white/5 p-4 rounded-3xl">
+                  <textarea
+                    value={messageToEdit}
+                    onChange={e => setMessageToEdit(e.target.value)}
+                    className="w-full h-64 bg-transparent text-[11px] font-bold text-slate-300 leading-relaxed outline-none resize-none no-scrollbar"
+                  />
                 </div>
               </div>
 
