@@ -333,70 +333,7 @@ const RelatorioBoletimPro: React.FC = () => {
           </div>
         </header>
 
-        {/* TOTALIZAÇÃO GLOBAL DE FÁBRICA - ALICERCE */}
-        <section className="space-y-6 break-inside-avoid">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="h-8 w-1.5 bg-blue-600 rounded-full" />
-            <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.3em]">
-              III. TOTALIZAÇÃO GLOBAL DE FÁBRICA (ALICERCE OPERACIONAL)
-            </h3>
-          </div>
 
-          <div className="grid grid-cols-12 gap-6 w-full">
-            <div className="col-span-12 lg:col-span-8 bg-slate-900 text-white p-10 rounded-[40px] shadow-2xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full -mr-48 -mt-48 blur-3xl pointer-events-none" />
-              <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
-                <div className="text-center md:text-left">
-                  <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4">Volume Consolidado Total</p>
-                  <h4 className="text-7xl font-black tracking-tighter leading-none mb-2">
-                    {analytics.factoryTotals.totalUnits.toLocaleString()}
-                  </h4>
-                  <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest flex items-center justify-center md:justify-start gap-2">
-                    <Package className="w-3.5 h-3.5" /> Total de Unidades Produzidas
-                  </p>
-                </div>
-                <div className="h-24 w-px bg-white/10 hidden md:block" />
-                <div className="text-center md:text-right">
-                  <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4">Eficiência de Planta (Sincro)</p>
-                  <h4 className="text-6xl font-black text-emerald-400 tracking-tighter leading-none mb-2">
-                    {analytics.factoryTotals.avgEfficiency.toFixed(1)}%
-                  </h4>
-                  <div className="w-48 h-3 bg-white/5 rounded-full overflow-hidden mt-4 inline-block">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${analytics.factoryTotals.avgEfficiency}%` }} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-span-12 lg:col-span-4 grid grid-cols-1 gap-6">
-              <div className="bg-white border-2 border-slate-100 p-8 rounded-[40px] shadow-sm flex items-center justify-between">
-                <div>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">Média Diária</p>
-                  <h5 className="text-3xl font-black text-slate-900">
-                    {Math.round(analytics.factoryTotals.totalUnits / analytics.diffDays).toLocaleString()}
-                  </h5>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">UN / DIA</p>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-2xl">
-                  <BarChart3 className="w-8 h-8 text-blue-600" />
-                </div>
-              </div>
-
-              <div className="bg-slate-50 p-8 rounded-[40px] flex items-center justify-between border-2 border-transparent">
-                <div>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">Expedição (PLT)</p>
-                  <h5 className="text-3xl font-black text-blue-600">
-                    {analytics.factoryTotals.pallets.toFixed(1)}
-                  </h5>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">PALETES CONSOLIDADO</p>
-                </div>
-                <div className="p-4 bg-white rounded-2xl shadow-sm">
-                  <Layers className="w-8 h-8 text-blue-400" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* DESEMPENHO E EVOLUÇÃO POR CT */}
         <section className="space-y-8">
