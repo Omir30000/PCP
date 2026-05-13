@@ -276,14 +276,22 @@ const RelatorioBoletimPro: React.FC = () => {
         };
       }).filter(d => d.quantidade > 0);
 
+      let totalDowntimeLinha = 0;
+
       if (regsDaLinha.length > 0) {
         status = 'active';
         totalQty = regsDaLinha.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
-        totalCapNominalLinha = regsDaLinha.reduce((acc, r) => {
-          const cap = Number(r.capacidade_producao) || 0;
-          return acc + cap;
-        }, 0);
+        totalCapNominalLinha = regsDaLinha.reduce((acc, r) => acc + (Number(r.capacidade_producao) || 0), 0);
         totalCargaHorariaLinha = regsDaLinha.reduce((acc, r) => acc + (Number(r.carga_horaria) || 0), 0);
+        
+        // Somar downtime real
+        regsDaLinha.forEach(r => {
+          const pRaw = r.paradas;
+          const pArr = Array.isArray(pRaw) ? pRaw : [];
+          pArr.forEach((p: any) => {
+            totalDowntimeLinha += Number(p.duracao || p.tempo || p.total_min || 0);
+          });
+        });
 
         // Processar cada registro para o detalhamento por SKU
         regsDaLinha.forEach(r => {
@@ -323,6 +331,17 @@ const RelatorioBoletimPro: React.FC = () => {
       // SINCRO COM DASHBOARD: Eficiência = Produzido / Capacidade Nominal
       const eficiencia = totalCapNominalLinha > 0 ? (totalQty / totalCapNominalLinha) * 100 : 0;
 
+      // CÁLCULO DE OEE PRO
+      // 1. Disponibilidade: (Tempo Total - Paradas) / Tempo Total
+      const tempoTotalMin = totalCargaHorariaLinha * 60;
+      const disponibilidade = tempoTotalMin > 0 ? ((tempoTotalMin - totalDowntimeLinha) / tempoTotalMin) * 100 : 0;
+      
+      // 2. Performance: Produzido / Capacidade Nominal
+      const performance = totalCapNominalLinha > 0 ? (totalQty / totalCapNominalLinha) * 100 : 0;
+      
+      // 3. OEE Final (D x P)
+      const oee = (disponibilidade / 100) * (performance / 100) * 100;
+
       return {
         id: num,
         nome: `Linha ${num}`,
@@ -330,9 +349,13 @@ const RelatorioBoletimPro: React.FC = () => {
         producaoTotal: totalQty,
         totalBundles,
         totalPallets: parseFloat(totalPallets.toFixed(1)),
-        eficiencia,
+        eficiencia: performance,
+        disponibilidade,
+        performance,
+        oee,
         capNominal: totalCapNominalLinha,
         cargaHoraria: totalCargaHorariaLinha,
+        totalDowntime: totalDowntimeLinha,
         serieHistorica,
         skusSummary
       };
@@ -567,9 +590,16 @@ const RelatorioBoletimPro: React.FC = () => {
                   )}
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-slate-50 p-6 rounded-3xl">
-                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Carga / Meta</p>
-                      <p className="text-sm font-black text-slate-900">{(line.cargaHoraria || 0).toFixed(2)}h / {line.capNominal.toLocaleString()}</p>
+                    <div className="bg-slate-50 p-6 rounded-3xl relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-2 opacity-5"><Activity className="w-8 h-8 text-blue-600" /></div>
+                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">OEE GLOBAL</p>
+                      <p className={`text-3xl font-black ${(line.oee || 0) >= 80 ? 'text-emerald-500' : 'text-blue-600'}`}>
+                        {(line.oee || 0).toFixed(1)}%
+                      </p>
+                      <div className="flex gap-2 mt-2">
+                        <div className="px-2 py-0.5 bg-slate-200 rounded-md text-[7px] font-bold text-slate-600 uppercase">D: {(line.disponibilidade || 0).toFixed(0)}%</div>
+                        <div className="px-2 py-0.5 bg-slate-200 rounded-md text-[7px] font-bold text-slate-600 uppercase">P: {(line.performance || 0).toFixed(0)}%</div>
+                      </div>
                     </div>
                     <div className="bg-slate-50 p-6 rounded-3xl">
                       <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Eficiência (Sincro)</p>
