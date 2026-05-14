@@ -137,27 +137,59 @@ const RelatorioBoletimPro: React.FC = () => {
     }
     const contato = contatos.find(c => c.id === selectedContact);
     if (!contato) return;
+
     setIsSending(true);
     try {
       const API_URL = "https://evolution-evolution-api.lwv8jw.easypanel.host"; 
       const API_KEY = "B2B08F854A50-40DD-B222-C91ECAA63FF7";
       const INSTANCE_NAME = "nexusalmox";
+
       let number = contato.telefone.replace(/\D/g, '');
       if (number.startsWith('0')) number = number.substring(1);
       if (!number.startsWith('55') && (number.length === 10 || number.length === 11)) {
         number = '55' + number;
       }
-      const response = await fetch(`${API_URL}/message/sendText/${INSTANCE_NAME}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': API_KEY.trim() },
-        body: JSON.stringify({ number: number, text: messageToEdit })
-      });
-      if (response.ok) {
-        alert("Mensagem enviada com sucesso!");
-        setIsShareModalOpen(false);
-      } else {
-        alert("Erro ao enviar mensagem via API.");
+
+      // Mensagens Motivacionais Rotativas
+      const mensagensMotivacionais = [
+        "Juntos somos mais fortes! Vamos pra cima! 🚀",
+        "A excelência é o resultado de pequenos esforços repetidos dia após dia. 💎",
+        "O sucesso da equipe é o sucesso de todos. Vamos bater as metas! 🎯",
+        "Foco, força e fé. O próximo período será ainda melhor! 🔥",
+        "A persistência é o caminho do êxito. Orgulho dessa equipe! 🏆",
+        "Trabalho em equipe: o combustível que permite a pessoas comuns alcançarem resultados incomuns. ✨"
+      ];
+      const msgRotativa = mensagensMotivacionais[Math.floor(Math.random() * mensagensMotivacionais.length)];
+
+      // Dividir a mensagem pela marcação das linhas
+      const partes = messageToEdit.split('\n*📍');
+      const header = partes[0];
+      const analises = partes.slice(1).map(p => '*📍' + p);
+
+      const sendWithDelay = async (text: string) => {
+        await fetch(`${API_URL}/message/sendText/${INSTANCE_NAME}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': API_KEY.trim() },
+          body: JSON.stringify({ number: number, text: text.trim() })
+        });
+        await new Promise(resolve => setTimeout(resolve, 1200));
+      };
+
+      // 1. Enviar Cabeçalho
+      await sendWithDelay(header);
+
+      // 2. Enviar cada Linha
+      for (const analise of analises) {
+        const textoLimpo = analise.replace('\n_Gerado por Nexus Intelligence_', '');
+        await sendWithDelay(textoLimpo);
       }
+
+      // 3. Enviar Motivacional e Rodapé
+      await sendWithDelay(`*💡 MENSAGEM DO DIA*\n_${msgRotativa}_`);
+      await sendWithDelay(`_Enviado via Nexus Intelligence Terminal_`);
+
+      alert("Feedback enviado em sequência com sucesso!");
+      setIsShareModalOpen(false);
     } catch (err) {
       alert("Erro de conexão com a API de WhatsApp.");
     } finally {
