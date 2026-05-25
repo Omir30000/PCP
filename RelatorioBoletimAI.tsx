@@ -279,19 +279,30 @@ const RelatorioBoletimAI: React.FC = () => {
     };
 
     const prompt = `Você é um consultor de produção "pé no chão", com anos de experiência em fábrica e um toque de bom humor.
-Analise os seguintes dados de produção e forneça 3 a 4 insights curtos e diretos em português.
+Analise os dados de produção fornecidos e gere de 3 a 4 insights curtos, práticos e direto ao ponto.
 
-REGRAS DE LINGUAGEM:
-1. Use uma linguagem simples, de quem está no "chão de fábrica" (direta e sem frescura).
-2. Se usar termos técnicos em inglês (ex: OEE, Bottleneck, Lead Time, SKUs), coloque a tradução ou explicação simples entre parênteses.
-3. Pode usar um toque de humor ou gírias leves de produção (ex: "foguete não tem ré", "dar um gás", "máquina parada é prejuízo").
-4. Foque em: eficiência, comparação entre turnos e onde a equipe precisa focar para bater as metas.
+DIRETRIZ DE RELACIONAMENTO (IMPORTANTE):
+- NÃO compare os turnos entre si (ex: Evite "o turno A foi melhor que o B"). O foco é a eficiência global e a melhoria contínua da fábrica, sem criar atrito entre as equipes.
+
+REGRAS DE LINGUAGEM E ESTILO:
+1. PAPO RETO: Use linguagem simples, de quem conhece a rotina da fábrica (direta, sem frescura e sem termos corporativos excessivos).
+2. TRADUÇÃO DE SOPA DE LETRINHAS: Se usar termos técnicos (ex: OEE, Bottleneck/Gargalo, SKUs), coloque sempre a tradução ou uma explicação simples entre parênteses.
+3. ESTILO: Use gírias leves de produção e frases de impacto (ex: "máquina parada é prejuízo", "ajuste fino", "dar um gás").
+
+FOCO DOS INSIGHTS (DIAGNÓSTICO E AÇÃO):
+- O foco total deve ser em identificar a CAUSA-RAIZ dos problemas e sugerir ações reais.
+- Exemplos de direcionamento: Se a linha X parou por falta de pessoal, aponte a necessidade de contratação; se a máquina Y quebrou direto, sugira uma revisão pesada, reforma ou troca; se falta insumo, aponte o gargalo no suprimento.
+
+DIRETRIZES DE FORMATAÇÃO:
+- Escreva de 3 a 4 tópicos (bullet points) curtos. Cada tópico deve ter no máximo 2 frases.
+- Vá direto ao ponto: comece o tópico com o insight, sem introduções longas.
+- Use Markdown para destacar **palavras-chave** em negrito.
+- Termine a resposta com uma **frase motivacional curta e de impacto** em uma linha separada.
 
 DADOS DA PRODUÇÃO:
 ${JSON.stringify(resumoProducao, null, 2)}
 
-Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito em pontos chave. Seja motivador e profissional ao mesmo tempo!`;
-
+Gere os insights agora:`;
     try {
       const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
         method: "POST",
