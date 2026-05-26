@@ -364,6 +364,7 @@ const Dashboard: React.FC = () => {
                   <span className="text-[#facc15] uppercase tracking-widest truncate max-w-[150px]">{line.produto}</span>
                   <div className="flex items-center gap-2 sm:gap-4 uppercase font-black">
                     <span className="text-slate-500 hidden sm:inline">CARGA: {line.cargaHoraria}H</span>
+                    <span className="text-[#22c55e]">PROD: {line.produzido.toLocaleString()}</span>
                     <span>Meta: {line.metaPCP.toLocaleString()}</span>
                   </div>
                 </div>
