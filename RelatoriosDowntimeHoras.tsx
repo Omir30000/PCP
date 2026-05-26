@@ -194,7 +194,7 @@ const RelatoriosDowntimeHoras: React.FC = () => {
             regsDaLinha.forEach(reg => {
                 const paradas = Array.isArray(reg.paradas) ? reg.paradas : [];
                 totalProducedLinha += Number(reg.quantidade_produzida) || 0;
-                totalNominalLinha += Number(reg.produtos?.capacidade_nominal) || Number(reg.capacidade_producao) || 7200;
+                totalNominalLinha += Number(reg.capacidade_producao) || Number(reg.produtos?.capacidade_nominal) || 7200;
 
                 paradas.forEach((p: any) => {
                     const dur = parseMinutos(p.duracao || p.tempo || p.total_min || 0);
@@ -223,7 +223,7 @@ const RelatoriosDowntimeHoras: React.FC = () => {
             const paradasRaw = reg.paradas;
             const paradas = Array.isArray(paradasRaw) ? paradasRaw : [];
             totalProduced += Number(reg.quantidade_produzida) || 0;
-            const nominalCap = Number(reg.produtos?.capacidade_nominal) || Number(reg.capacidade_producao) || 7200;
+            const nominalCap = Number(reg.capacidade_producao) || Number(reg.produtos?.capacidade_nominal) || 7200;
             totalNominal += nominalCap;
             const capPerMin = nominalCap / 480;
 

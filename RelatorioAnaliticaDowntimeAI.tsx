@@ -158,7 +158,7 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
     const performanceTurnos = ['1º Turno', '2º Turno'].map(t => {
       const regsT = registros.filter(r => r.turno === t);
       const prodT = regsT.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
-      const nominalT = regsT.reduce((acc, r) => acc + (Number(r.produtos?.capacidade_nominal) || Number(r.capacidade_producao) || 0), 0);
+      const nominalT = regsT.reduce((acc, r) => acc + (Number(r.capacidade_producao) || Number(r.produtos?.capacidade_nominal) || 0), 0);
 
       let downtimeT = 0;
       regsT.forEach(r => {
@@ -259,8 +259,8 @@ Gere os insights estratégicos agora:`;
       const paradas = Array.isArray(paradasRaw) ? paradasRaw : [];
       totalProduced += Number(reg.quantidade_produzida) || 0;
 
-      // Prioriza EXATAMENTE o valor da tabela de produtos conforme solicitado pelo usuário
-      const nominalCap = Number(reg.produtos?.capacidade_nominal) || Number(reg.capacidade_producao) || 7200;
+      // Prioriza a capacidade calculada do registro, usando o valor do produto como fallback
+      const nominalCap = Number(reg.capacidade_producao) || Number(reg.produtos?.capacidade_nominal) || 7200;
       totalNominal += nominalCap;
 
       // Cálculo de eficiência: Nominal sempre baseada em 8 horas (480 min) para ser exato

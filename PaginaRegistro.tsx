@@ -95,6 +95,7 @@ const PaginaRegistro: React.FC = () => {
     observacoes: ''
   });
 
+  const [maquinasAtivas, setMaquinasAtivas] = useState<number>(5);
   const [enviarWhatsApp, setEnviarWhatsApp] = useState(true);
 
   const [paradas, setParadas] = useState<Parada[]>([]);
@@ -181,9 +182,10 @@ const PaginaRegistro: React.FC = () => {
     }
   }, [formData.turno]);
 
-  // Reseta produto ao mudar linha
+  // Reseta produto e máquinas ao mudar linha
   useEffect(() => {
     setFormData(prev => ({ ...prev, produto_volume: '' }));
+    setMaquinasAtivas(5);
   }, [formData.linha_producao]);
 
   const handleAddParada = () => {
@@ -293,6 +295,9 @@ const PaginaRegistro: React.FC = () => {
       const linhaSelecionada = linhas.find(l => l.id === formData.linha_producao);
       const produtoSelecionado = produtos.find(p => p.id === formData.produto_volume);
 
+      const isLinhaCopos = linhaSelecionada?.nome?.toLowerCase().includes('linha 4') || linhaSelecionada?.nome?.toLowerCase().includes('linha 04') || linhaSelecionada?.nome?.toLowerCase().includes('copo');
+      const multMaquinas = isLinhaCopos ? maquinasAtivas : 1;
+
       const payload: Database['public']['Tables']['registros_producao']['Insert'] = {
         data_registro: formData.data_registro,
         turno: formData.turno,
@@ -304,7 +309,7 @@ const PaginaRegistro: React.FC = () => {
         carga_horaria: Number(formData.carga_horaria),
         quantidade_produzida: Number(formData.quantidade_produced),
         capacidade_producao: produtoSelecionado?.capacidade_nominal 
-          ? Number(((produtoSelecionado.capacidade_nominal / 8) * Number(formData.carga_horaria)).toFixed(2))
+          ? Number((((produtoSelecionado.capacidade_nominal * multMaquinas) / 8) * Number(formData.carga_horaria)).toFixed(2))
           : null,
         observacoes: formData.observacoes || null,
         paradas: paradas.map(p => ({
@@ -339,6 +344,7 @@ const PaginaRegistro: React.FC = () => {
         observacoes: ''
       }));
       setParadas([]);
+      setMaquinasAtivas(5);
 
       // Retorna o foco para o campo de data após o reset
       setTimeout(() => {
@@ -361,6 +367,9 @@ const PaginaRegistro: React.FC = () => {
       </div>
     );
   }
+
+  const linhaSelecionada = linhas.find(l => l.id === formData.linha_producao);
+  const isLinhaCopos = linhaSelecionada?.nome?.toLowerCase().includes('linha 4') || linhaSelecionada?.nome?.toLowerCase().includes('linha 04') || linhaSelecionada?.nome?.toLowerCase().includes('copo');
 
   return (
     <div className="max-w-[98%] mx-auto space-y-8 w-full animate-in fade-in duration-700 pb-20 font-sans text-slate-900 dark:text-slate-100">
@@ -543,6 +552,25 @@ const PaginaRegistro: React.FC = () => {
                     .map(p => (<option key={p.id} value={p.id} className="bg-slate-900">{p.nome}</option>))}
                 </select>
               </div>
+
+              {isLinhaCopos && (
+                <div className="space-y-3 animate-in fade-in duration-300">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                    <Settings className="w-3 h-3 text-[#facc15]" /> Máquinas Ativas
+                  </label>
+                  <select
+                    value={maquinasAtivas}
+                    onChange={e => setMaquinasAtivas(Number(e.target.value))}
+                    className="w-full bg-white/10 border-2 border-white/5 p-4 rounded-xl text-[11px] font-black uppercase text-white transition-all outline-none focus:border-[#facc15]"
+                  >
+                    <option value={1} className="bg-slate-900">1 Máquina</option>
+                    <option value={2} className="bg-slate-900">2 Máquinas</option>
+                    <option value={3} className="bg-slate-900">3 Máquinas</option>
+                    <option value={4} className="bg-slate-900">4 Máquinas</option>
+                    <option value={5} className="bg-slate-900">5 Máquinas</option>
+                  </select>
+                </div>
+              )}
             </div>
           </div>
         </section>

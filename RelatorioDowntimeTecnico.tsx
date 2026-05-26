@@ -98,7 +98,7 @@ const RelatorioDowntimeTecnico: React.FC = () => {
       const paradas = Array.isArray(paradasRaw) ? paradasRaw : [];
       totalProduced += Number(reg.quantidade_produzida) || 0;
 
-      const nominalCap = Number(reg.produtos?.capacidade_nominal) || Number(reg.capacidade_producao) || 7200;
+      const nominalCap = Number(reg.capacidade_producao) || Number(reg.produtos?.capacidade_nominal) || 7200;
       totalNominal += nominalCap;
 
       const capPerMin = nominalCap / 480;

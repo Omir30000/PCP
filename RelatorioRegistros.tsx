@@ -76,6 +76,7 @@ const RelatorioRegistros: React.FC = () => {
 
     // Estado do Modal de Edição
     const [editingRecord, setEditingRecord] = useState<RegistroExpandido | null>(null);
+    const [maquinasAtivas, setMaquinasAtivas] = useState<number>(5);
     const [isSaving, setIsSaving] = useState(false);
 
     // Estado para Nova Parada no Modal
@@ -83,6 +84,9 @@ const RelatorioRegistros: React.FC = () => {
     const [editingParadaIndex, setEditingParadaIndex] = useState<number | null>(null);
     const horaFimRef = useRef<HTMLInputElement>(null);
     const motivoRef = useRef<HTMLInputElement>(null);
+
+    const modalSelectedLinha = editingRecord ? linhasOpcoes.find(l => l.id === editingRecord.linha_producao) : null;
+    const modalIsLinhaCopos = modalSelectedLinha ? (modalSelectedLinha.nome?.toLowerCase().includes('linha 4') || modalSelectedLinha.nome?.toLowerCase().includes('linha 04') || modalSelectedLinha.nome?.toLowerCase().includes('copo')) : false;
 
     useEffect(() => {
         loadAuxiliaryData();
@@ -201,11 +205,26 @@ const RelatorioRegistros: React.FC = () => {
             id: p.id || Math.random().toString(36).substr(2, 9)
         })) : [];
 
+        // Inferir enchedoras (máquinas) ativas para Linha 4 (Copo)
+        const selectedProdId = findValueForSelect(record.produto_volume, produtosOpcoes) || record.produto_id;
+        const selectedLineId = findValueForSelect(record.linha_producao, linhasOpcoes) || record.linha_id;
+        
+        const selectedProduto = produtosOpcoes.find(p => p.id === selectedProdId);
+        const selectedLinha = linhasOpcoes.find(l => l.id === selectedLineId);
+        const isLinhaCopos = selectedLinha?.nome?.toLowerCase().includes('linha 4') || selectedLinha?.nome?.toLowerCase().includes('linha 04') || selectedLinha?.nome?.toLowerCase().includes('copo');
+        
+        let inferredMaquinas = 5;
+        if (isLinhaCopos && selectedProduto?.capacidade_nominal && record.carga_horaria && record.capacidade_producao) {
+            inferredMaquinas = Math.round((Number(record.capacidade_producao) * 8) / (Number(selectedProduto.capacidade_nominal) * Number(record.carga_horaria)));
+            inferredMaquinas = Math.max(1, Math.min(5, inferredMaquinas));
+        }
+        setMaquinasAtivas(inferredMaquinas);
+
         setEditingRecord({
             ...record,
             // Ajusta referencias para os selects funcionarem
-            linha_producao: findValueForSelect(record.linha_producao, linhasOpcoes) || record.linha_producao,
-            produto_volume: findValueForSelect(record.produto_volume, produtosOpcoes) || record.produto_volume,
+            linha_producao: selectedLineId || record.linha_producao,
+            produto_volume: selectedProdId || record.produto_volume,
             paradas_detalhadas: (paradasIniciais as unknown) as ParadaCompleta[]
         });
         setNovaParada({ tipo: '', hora_inicio: '', hora_fim: '', duracao: 0, motivo: '', maquina_id: '' });
@@ -338,6 +357,9 @@ const RelatorioRegistros: React.FC = () => {
 
             console.log('🔍 Linha selecionada:', selectedLinha);
             console.log('🔍 Produto selecionado:', selectedProduto);
+            const isLinhaCopos = selectedLinha?.nome?.toLowerCase().includes('linha 4') || selectedLinha?.nome?.toLowerCase().includes('linha 04') || selectedLinha?.nome?.toLowerCase().includes('copo');
+            const multMaquinas = isLinhaCopos ? maquinasAtivas : 1;
+
             const payload = {
                 data_registro: editingRecord.data_registro,
                 turno: editingRecord.turno,
@@ -349,7 +371,9 @@ const RelatorioRegistros: React.FC = () => {
                 quantidade_produzida: Number(editingRecord.quantidade_produzida) || 0,
                 carga_horaria: Number(editingRecord.carga_horaria) || 8,
                 observacoes: editingRecord.observacoes || null,
-                capacidade_producao: Number(selectedProduto?.capacidade_nominal || editingRecord.capacidade_producao) || null,
+                capacidade_producao: selectedProduto?.capacidade_nominal 
+                    ? Number((((selectedProduto.capacidade_nominal * multMaquinas) / 8) * (Number(editingRecord.carga_horaria) || 8)).toFixed(2))
+                    : (editingRecord.capacidade_producao ? Number(editingRecord.capacidade_producao) : null),
                 paradas: (editingRecord.paradas_detalhadas || []).map(p => {
                     // Remove o ID temporário antes de salvar no banco de dados (JSONB)
                     const { id, ...rest } = p;
@@ -690,6 +714,23 @@ const RelatorioRegistros: React.FC = () => {
                                             className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
                                         />
                                     </div>
+
+                                    {modalIsLinhaCopos && (
+                                        <div className="space-y-2 animate-in fade-in duration-300">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Máquinas Ativas</label>
+                                            <select
+                                                value={maquinasAtivas}
+                                                onChange={e => setMaquinasAtivas(Number(e.target.value))}
+                                                className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                            >
+                                                <option value={1} className="text-slate-900">1 Máquina</option>
+                                                <option value={2} className="text-slate-900">2 Máquinas</option>
+                                                <option value={3} className="text-slate-900">3 Máquinas</option>
+                                                <option value={4} className="text-slate-900">4 Máquinas</option>
+                                                <option value={5} className="text-slate-900">5 Máquinas</option>
+                                            </select>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Seção Produção e Perdas */}
