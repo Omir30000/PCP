@@ -159,7 +159,7 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
       const regsT = registros.filter(r => r.turno === t);
       const prodT = regsT.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
       const nominalT = regsT.reduce((acc, r) => acc + (Number(r.produtos?.capacidade_nominal) || Number(r.capacidade_producao) || 0), 0);
-      
+
       let downtimeT = 0;
       regsT.forEach(r => {
         const pRaw = r.paradas;
@@ -190,20 +190,33 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
       topEquipamentos: analytics.topEquipments
     };
 
-    const prompt = `Você é um consultor de produção "pé no chão", com anos de experiência em fábrica e um toque de bom humor.
-Analise os seguintes dados de produção e paradas (Downtime) e forneça 3 a 4 insights curtos e diretos em português.
+    const prompt = `Você é um consultor de produção e engenharia industrial "pé no chão", com anos de experiência em fábrica e foco em dar diagnósticos estratégicos para os donos da empresa tomarem decisões.
+Analise os dados de produção e paradas (Downtime) fornecidos e gere de 3 a 4 insights profundos, práticos e direto ao ponto.
 
-REGRAS DE LINGUAGEM:
-1. Use uma linguagem simples, de quem está no "chão de fábrica" (direta e sem frescura).
-2. Se usar termos técnicos em inglês (ex: MTTR, Downtime, Bottleneck), coloque a tradução ou explicação simples entre parênteses.
-3. Pode usar um toque de humor ou gírias leves de produção (ex: "foguete não tem ré", "dar um gás", "máquina parada é prejuízo").
-4. Foque em: eficiência, comparação entre turnos e onde a equipe precisa focar para bater as metas.
+DIRETRIZ DE SEGURANÇA E RELACIONAMENTO (CRÍTICO / PROIBIDO):
+- NÃO compare os turnos entre si em hipótese alguma (ex: Nunca diga "Turno A é melhor que Turno B" ou "Turno X está pagando a conta"). 
+- Analise os dados de forma GLOBAL e SISTÊMICA. Se um período ou turno tem números ruins, trate isso como um problema do processo, da máquina ou de falta de braço na fábrica inteira, e nunca como corpo mole da equipe.
+
+REGRAS DE LINGUAGEM E ESTILO:
+1. PAPO RETO: Use linguagem simples, de quem conhece a rotina da fábrica (direta, sem frescura e sem termos corporativos excessivos).
+2. TRADUÇÃO DE SOPA DE LETRINHAS: Se usar termos técnicos (ex: MTTR, Downtime/Tempo de Máquina Parada, Bottleneck/Gargalo), coloque sempre a tradução ou explicação simples entre parênteses.
+3. ESTILO: Use gírias leves de produção e frases de impacto (ex: "máquina parada é prejuízo", "ajuste fino", "pedindo arrego").
+
+FOCO DOS INSIGHTS (DIRECIONAMENTO PARA OS DONOS DA EMPRESA):
+Seus insights devem converter os dados de paradas em necessidades reais de investimento. Foque em apontar:
+- REFORMA OU TROCA DE ATIVOS: Olhe o volume e a recorrência das paradas por máquina. Identifique quais equipamentos estão "pedindo arrego" e aponte claramente a necessidade de uma reforma pesada (overhaul), revisão geral ou troca da máquina.
+- MÃO DE OBRA E CAPACIDADE: Se o tempo total de parada está muito alto, avalie se o MTTR (Tempo Médio de Reparo) indica a necessidade urgente de contratar mais operadores, auxiliares ou técnicos para dar suporte na linha, ou se falta treinamento pesado de manutenção autônoma.
+- IMPACTO NO BOLSO: Mostre o tamanho do prejuízo em minutos acumulados ou unidades perdidas para justificar por que o dono precisa agir rápido.
+
+DIRETRIZES DE FORMATAÇÃO:
+- Escreva de 3 a 4 tópicos (bullet points). Cada tópico deve ser um parágrafo completo (3 a 4 frases) para detalhar bem o problema, o impacto e a solução recomendada.
+- Comece cada tópico destacando o **Equipamento, Linha ou Recurso** em negrito.
+- Termine a resposta com uma frase motivacional curta e de impacto para a fábrica inteira, em uma linha separada.
 
 DADOS DA PRODUÇÃO:
 ${JSON.stringify(resumoIA, null, 2)}
 
-Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito em pontos chave. Seja motivador e profissional ao mesmo tempo!`;
-
+Gere os insights estratégicos agora:`;
     try {
       const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
         method: "POST",
@@ -499,11 +512,11 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
                 </div>
               </div>
               <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-slate-200 shadow-sm">
-                 <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                 <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Análise de Causa Raiz em Tempo Real</span>
+                <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Análise de Causa Raiz em Tempo Real</span>
               </div>
             </div>
-            
+
             {isGeneratingInsights ? (
               <div className="flex flex-col items-center justify-center py-12 space-y-4 print:hidden">
                 <div className="flex gap-2">
@@ -516,39 +529,39 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
             ) : (
               <div className="space-y-4">
                 <div className="prose prose-indigo max-w-none">
-                   {insights.split('\n').filter(l => l.trim().length > 0).map((line, i) => (
-                     <p key={i} className="text-slate-700 font-medium leading-relaxed text-sm print:text-xs mb-2">
-                       {line.startsWith('-') || line.match(/^\d\./) || line.startsWith('###') ? (
-                         <span className="flex items-start gap-3">
-                           <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
-                           <span dangerouslySetInnerHTML={{ 
-                             __html: line
-                               .replace(/###\s*|\d\.\s*|^- \s*/, '')
-                               .replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>') 
-                           }} />
-                         </span>
-                       ) : (
-                         <span dangerouslySetInnerHTML={{ 
-                           __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>') 
-                         }} />
-                       )}
-                     </p>
-                   ))}
+                  {insights.split('\n').filter(l => l.trim().length > 0).map((line, i) => (
+                    <p key={i} className="text-slate-700 font-medium leading-relaxed text-sm print:text-xs mb-2">
+                      {line.startsWith('-') || line.match(/^\d\./) || line.startsWith('###') ? (
+                        <span className="flex items-start gap-3">
+                          <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
+                          <span dangerouslySetInnerHTML={{
+                            __html: line
+                              .replace(/###\s*|\d\.\s*|^- \s*/, '')
+                              .replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>')
+                          }} />
+                        </span>
+                      ) : (
+                        <span dangerouslySetInnerHTML={{
+                          __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>')
+                        }} />
+                      )}
+                    </p>
+                  ))}
                 </div>
                 <div className="flex justify-end pt-4 border-t border-indigo-100 print:hidden">
-                   <p className="text-[9px] font-bold text-indigo-300 uppercase tracking-widest italic flex items-center gap-2">
-                     <ShieldCheck className="w-3 h-3" /> Análise baseada em dados reais sincronizados
-                   </p>
+                  <p className="text-[9px] font-bold text-indigo-300 uppercase tracking-widest italic flex items-center gap-2">
+                    <ShieldCheck className="w-3 h-3" /> Análise baseada em dados reais sincronizados
+                  </p>
                 </div>
               </div>
             )}
 
             <div className="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center opacity-60">
-               <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Baseado no modelo open-mistral-7b • Análise probabilística</p>
-               <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-3 h-3 text-emerald-500" />
-                  <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Nexus Verified Insights</span>
-               </div>
+              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Baseado no modelo open-mistral-7b • Análise probabilística</p>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Nexus Verified Insights</span>
+              </div>
             </div>
           </div>
         )}
@@ -847,7 +860,8 @@ Formate sua resposta em tópicos claros (bullets), usando Markdown para negrito 
         </footer>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @media print {
           @page { margin: 15mm; size: A4 portrait; }
           
