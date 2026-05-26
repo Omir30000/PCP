@@ -39,7 +39,7 @@ const RelatorioBoletimAI: React.FC = () => {
   const [registros, setRegistros] = useState<any[]>([]);
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [filtroTurno, setFiltroTurno] = useState<'GLOBAL' | '1º Turno' | '2º Turno'>('GLOBAL');
-  
+
   // Estados para IA
   const [insights, setInsights] = useState<string>('');
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
@@ -146,11 +146,11 @@ const RelatorioBoletimAI: React.FC = () => {
       let totalCapNominalLinha = 0;
       let totalCargaHorariaLinha = 0;
       let status: 'active' | 'inactive' = 'inactive';
-      
-      const skusMap: Record<string, { 
-        nome: string, 
-        unidades: number, 
-        pacotes: number, 
+
+      const skusMap: Record<string, {
+        nome: string,
+        unidades: number,
+        pacotes: number,
         paletes: number,
         horas: number,
         unidadesPorFardo: number,
@@ -178,7 +178,7 @@ const RelatorioBoletimAI: React.FC = () => {
         regsDaLinha.forEach(r => {
           const prod = r.produtos;
           if (!prod) return;
-          
+
           const skuId = prod.id;
           if (!skusMap[skuId]) {
             skusMap[skuId] = {
@@ -191,7 +191,7 @@ const RelatorioBoletimAI: React.FC = () => {
               fardosPorPalete: Number(prod.fardos_por_palete) || 100
             };
           }
-          
+
           const qtd = Number(r.quantidade_produzida) || 0;
           const carga = Number(r.carga_horaria) || 0;
           skusMap[skuId].unidades += qtd;
@@ -249,7 +249,7 @@ const RelatorioBoletimAI: React.FC = () => {
     setInsights('');
 
     const MISTRAL_API_KEY = "VUM0jYdoE3DFV4txchjU70t0QiCir6sx";
-    
+
     // Cálculo específico por turno para comparação
     const performanceTurnos = ['1º Turno', '2º Turno'].map(t => {
       const regsTurno = registros.filter(r => r.turno === t);
@@ -278,31 +278,31 @@ const RelatorioBoletimAI: React.FC = () => {
       }))
     };
 
-    const prompt = `Você é um consultor de produção "pé no chão", com anos de experiência em fábrica e um toque de bom humor.
-Analise os dados de produção fornecidos e gere de 3 a 4 insights curtos, práticos e direto ao ponto.
+    const prompt = `Você é um consultor sênior de produção e engenharia industrial, com anos de experiência em "chão de fábrica" e foco estratégico para apoiar tomadas de decisão da diretoria e donos da empresa.
+Analise os dados de produção fornecidos e gere de 3 a 4 insights profundos, realistas e focados em ações estruturais.
 
-DIRETRIZ DE RELACIONAMENTO (IMPORTANTE):
-- NÃO compare os turnos entre si (ex: Evite "o turno A foi melhor que o B"). O foco é a eficiência global e a melhoria contínua da fábrica, sem criar atrito entre as equipes.
+DIRETRIZES DE SEGURANÇA E RELACIONAMENTO (CRÍTICO):
+- PROIBIDO comparar turnos entre si (ex: Nunca diga "Turno A é melhor que Turno B"). Foque estritamente nos problemas sistêmicos da fábrica, independente de quem estava rodando.
 
-REGRAS DE LINGUAGEM E ESTILO:
-1. PAPO RETO: Use linguagem simples, de quem conhece a rotina da fábrica (direta, sem frescura e sem termos corporativos excessivos).
-2. TRADUÇÃO DE SOPA DE LETRINHAS: Se usar termos técnicos (ex: OEE, Bottleneck/Gargalo, SKUs), coloque sempre a tradução ou uma explicação simples entre parênteses.
-3. ESTILO: Use gírias leves de produção e frases de impacto (ex: "máquina parada é prejuízo", "ajuste fino", "dar um gás").
+REGRAS DE LINGUAGEM E TOM:
+1. DIRETO AO PONTO: Use linguagem simples, técnica e "pé no chão" (sem enrolação corporativa). 
+2. ESTILO: Mantenha um tom profissional, sério para decisões, mas com gírias leves de quem conhece o dia a dia da operação (ex: "máquina pedindo arrego", "gargalo", "ajuste fino").
 
-FOCO DOS INSIGHTS (DIAGNÓSTICO E AÇÃO):
-- O foco total deve ser em identificar a CAUSA-RAIZ dos problemas e sugerir ações reais.
-- Exemplos de direcionamento: Se a linha X parou por falta de pessoal, aponte a necessidade de contratação; se a máquina Y quebrou direto, sugira uma revisão pesada, reforma ou troca; se falta insumo, aponte o gargalo no suprimento.
+FOCO DOS INSIGHTS (DIRECIONAMENTO PARA OS DONOS DA EMPRESA):
+Seus insights devem ajudar os proprietários a decidirem onde investir ou mudar. Foque exclusivamente em:
+- DISPONIBILIDADE E ATIVOS: Se uma linha/máquina está quebrando direto ou performando muito abaixo, aponte a necessidade real de uma reforma pesada (overhaul), revisão geral ou se já passou da hora de realizar a troca/compra de um novo equipamento.
+- MÃO DE OBRA E CAPACIDADE: Analise as paradas. Se a eficiência caiu por falta de braço ou gargalo operacional, indique claramente se há necessidade extrema de contratação de operadores/auxiliares ou se falta treinamento técnico para a equipe.
+- PROCESSOS E INFRAESTRUTURA: Identifique gargalos físicos (ex: falta de insumo, problemas de setup/troca de produto demorada, restrições de utilidades).
 
-DIRETRIZES DE FORMATAÇÃO:
-- Escreva de 3 a 4 tópicos (bullet points) curtos. Cada tópico deve ter no máximo 2 frases.
-- Vá direto ao ponto: comece o tópico com o insight, sem introduções longas.
-- Use Markdown para destacar **palavras-chave** em negrito.
-- Termine a resposta com uma **frase motivacional curta e de impacto** em uma linha separada.
+DIRETRIZES DE FORMATAÇÃO (ESTREITAS):
+- Escreva de 3 a 4 tópicos (bullet points). Cada tópico deve ser um parágrafo completo e bem fundamentado (pode usar de 3 a 4 frases por tópico para detalhar bem a causa-raiz e a recomendação).
+- Inicie cada tópico destacando a **Linha, Equipamento ou Recurso** afetado em negrito.
+- Termine a resposta com uma frase de impacto focada em eficiência e resultado, em uma linha separada.
 
 DADOS DA PRODUÇÃO:
 ${JSON.stringify(resumoProducao, null, 2)}
 
-Gere os insights agora:`;
+Gere a análise estratégica para os donos agora:`;
     try {
       const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
         method: "POST",
@@ -455,7 +455,7 @@ Gere os insights agora:`;
                 <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest leading-none mt-1">Análise de Performance e Sugestões Operacionais</p>
               </div>
             </div>
-            
+
             {isGeneratingInsights ? (
               <div className="flex flex-col items-center justify-center py-12 space-y-4 print:hidden">
                 <div className="flex gap-2">
@@ -468,23 +468,23 @@ Gere os insights agora:`;
             ) : (
               <div className="space-y-4">
                 <div className="prose prose-indigo max-w-none">
-                   {insights.split('\n').filter(l => l.trim().length > 0).map((line, i) => (
-                     <p key={i} className="text-slate-700 font-medium leading-relaxed text-sm print:text-xs mb-2">
-                       {line.startsWith('-') || line.match(/^\d\./) ? (
-                         <span className="flex items-start gap-3">
-                           <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
-                           <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>').replace(/^- /, '') }} />
-                         </span>
-                       ) : (
-                         <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>') }} />
-                       )}
-                     </p>
-                   ))}
+                  {insights.split('\n').filter(l => l.trim().length > 0).map((line, i) => (
+                    <p key={i} className="text-slate-700 font-medium leading-relaxed text-sm print:text-xs mb-2">
+                      {line.startsWith('-') || line.match(/^\d\./) ? (
+                        <span className="flex items-start gap-3">
+                          <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
+                          <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>').replace(/^- /, '') }} />
+                        </span>
+                      ) : (
+                        <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>') }} />
+                      )}
+                    </p>
+                  ))}
                 </div>
                 <div className="flex justify-end pt-4 border-t border-indigo-100 print:hidden">
-                   <p className="text-[9px] font-bold text-indigo-300 uppercase tracking-widest italic flex items-center gap-2">
-                     <ShieldCheck className="w-3 h-3" /> Análise baseada em dados reais sincronizados
-                   </p>
+                  <p className="text-[9px] font-bold text-indigo-300 uppercase tracking-widest italic flex items-center gap-2">
+                    <ShieldCheck className="w-3 h-3" /> Análise baseada em dados reais sincronizados
+                  </p>
                 </div>
               </div>
             )}
