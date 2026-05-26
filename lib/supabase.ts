@@ -3,9 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import { Database } from '../types/database';
 
 // Credenciais Nexus PCP Atualizadas
-// Credenciais Nexus PCP Atualizadas
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 /**
  * Inicialização do cliente Supabase.
