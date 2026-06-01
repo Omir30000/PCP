@@ -23,6 +23,7 @@ import Auth from './Auth';
 import Perfil from './Perfil';
 import Usuarios from './Usuarios';
 import AgendaContatos from './AgendaContatos';
+import BaseConhecimento from './BaseConhecimento';
 import { supabase } from './lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
@@ -53,7 +54,8 @@ import {
   Timer,
   Zap,
   Users,
-  Sparkles
+  Sparkles,
+  BookOpen
 } from 'lucide-react';
 
 type Tab =
@@ -77,12 +79,14 @@ type Tab =
   | 'analitica_downtime_ai'
   | 'agenda'
   | 'perfil'
-  | 'usuarios';
+  | 'usuarios'
+  | 'base_conhecimento';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [isReportsOpen, setIsReportsOpen] = useState(true);
+  const [isKnowledgeOpen, setIsKnowledgeOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Auth State
@@ -305,6 +309,22 @@ const App: React.FC = () => {
             url="https://nexus-cmms.vercel.app/" 
             isDesktopSidebar={true} 
           />
+
+          <div className="h-px bg-white/5 my-6 mx-4" />
+
+          {isSidebarExpanded && (
+            <button
+              onClick={() => setIsKnowledgeOpen(!isKnowledgeOpen)}
+              className="w-full flex items-center justify-between px-4 mb-4 group ring-0 outline-none"
+            >
+              <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] group-hover:text-slate-400 transition-colors">Base de Conhecimento</p>
+              <ChevronDown className={`w-3 h-3 text-slate-600 transition-transform duration-300 ${isKnowledgeOpen ? '' : '-rotate-90'}`} />
+            </button>
+          )}
+
+          <div className={`space-y-0.5 transition-all duration-500 overflow-hidden ${isKnowledgeOpen || !isSidebarExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+            <NavItem id="base_conhecimento" icon={FileText} label="Descrição Geral" isSubItem={isSidebarExpanded} />
+          </div>
         </div>
 
         <div className={`p-4 mt-auto border-t border-white/5 bg-black/40 flex flex-col gap-4`}>
@@ -362,6 +382,7 @@ const App: React.FC = () => {
           {activeTab === 'perfil' && <Perfil userProfile={userProfile} onProfileUpdate={handleProfileUpdate} />}
           {activeTab === 'usuarios' && userProfile?.nivel_acesso === 'admin' && <Usuarios />}
           {activeTab === 'agenda' && <AgendaContatos />}
+          {activeTab === 'base_conhecimento' && <BaseConhecimento />}
         </div>
       </main>
 
@@ -436,6 +457,10 @@ const App: React.FC = () => {
                 url="https://nexus-cmms.vercel.app/" 
                 isDesktopSidebar={false} 
               />
+
+              <div className="h-px bg-white/5 my-4" />
+              <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] px-4 mb-2">Base de Conhecimento</p>
+              <NavItem id="base_conhecimento" icon={BookOpen} label="Documentação" onClick={() => setIsMobileMenuOpen(false)} />
               
               {(role === 'admin' || role === 'lider') && (
                 <>
