@@ -174,6 +174,32 @@ const RelatorioDowntimeTecnico: React.FC = () => {
       .slice(0, 3)
       .map(([name, count]) => ({ name, count }));
 
+    const equipmentDetails = topEquipments.map(eq => {
+      const [equipName, linhaPart] = eq.name.split(' (');
+      const linhaName = linhaPart ? linhaPart.replace(')', '').trim() : '';
+
+      const failures = detailedFailures.filter(f =>
+        f.equipamento === equipName && f.linha === linhaName
+      );
+
+      const byDay: Record<string, any[]> = {};
+      failures.forEach(f => {
+        if (!byDay[f.data]) byDay[f.data] = [];
+        byDay[f.data].push(f);
+      });
+
+      const days = Object.entries(byDay)
+        .map(([data, stops]) => ({
+          data,
+          totalStops: stops.length,
+          totalDuration: stops.reduce((sum, s) => sum + s.duracao, 0),
+          stops
+        }))
+        .sort((a, b) => a.data.localeCompare(b.data));
+
+      return { name: eq.name, count: eq.count, days };
+    });
+
     return {
       totalDowntime,
       totalStopsCount,
@@ -183,7 +209,8 @@ const RelatorioDowntimeTecnico: React.FC = () => {
       volumeLost: Math.round(totalProduced - totalNominal),
       typeTableData,
       top3Details,
-      topEquipments
+      topEquipments,
+      equipmentDetails
     };
   }, [registros, maquinas]);
 
@@ -581,6 +608,89 @@ const RelatorioDowntimeTecnico: React.FC = () => {
                 </div>
              </div>
            ))}
+        </div>
+      </div>
+
+      {/* TOP 3 EQUIPAMENTOS - DETALHAMENTO DIÁRIO */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-white/5 rounded-lg border border-white/10">
+            <History className="w-4 h-4 text-[#facc15]" />
+          </div>
+          <h3 className="text-[11px] font-black text-white uppercase tracking-[0.3em]">III. Histórico Diário dos Equipamentos Críticos</h3>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6">
+          {analytics.equipmentDetails.map((eq, eqIdx) => (
+            <div key={eqIdx} className="bg-[#0d0d0d] border border-white/5 rounded-3xl overflow-hidden shadow-xl">
+              <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${eqIdx === 0 ? 'bg-red-500 text-white' : 'bg-white/10 text-slate-400'}`}>
+                    {eqIdx + 1}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-white uppercase tracking-widest">{eq.name}</h4>
+                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">{eq.count} paradas no total</p>
+                  </div>
+                </div>
+                <span className="text-[9px] font-black text-slate-600 uppercase">{eq.days.length} dias com ocorrências</span>
+              </div>
+
+              <div className="divide-y divide-white/5">
+                {eq.days.map((day, dayIdx) => (
+                  <div key={dayIdx}>
+                    <div className="px-6 py-3 bg-white/[0.02] flex items-center justify-between border-b border-white/5">
+                      <div className="flex items-center gap-4">
+                        <Calendar className="w-4 h-4 text-[#facc15]" />
+                        <span className="text-xs font-black text-white uppercase tracking-widest">{formatarDataBR(day.data)}</span>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase">{day.totalStops} paradas</span>
+                        <span className="text-xs font-black text-red-400">{formatDuration(day.totalDuration)}</span>
+                      </div>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-white/5">
+                            <th className="px-6 py-3 text-[8px] font-black text-slate-500 uppercase tracking-widest">Turno</th>
+                            <th className="px-6 py-3 text-[8px] font-black text-slate-500 uppercase tracking-widest">Tipo</th>
+                            <th className="px-6 py-3 text-[8px] font-black text-slate-500 uppercase tracking-widest">Motivo</th>
+                            <th className="px-6 py-3 text-[8px] font-black text-slate-500 uppercase tracking-widest text-right">Tempo</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                          {day.stops.map((stop, stopIdx) => (
+                            <tr key={stopIdx} className="hover:bg-white/[0.02] transition-colors">
+                              <td className="px-6 py-3">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase">{stop.turno}</span>
+                              </td>
+                              <td className="px-6 py-3">
+                                <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded border ${stop.tipo === 'NÃO PLANEJADA' || stop.tipo === 'QUEBRA' ? 'text-red-400 border-red-500/20 bg-red-500/10' : 'text-amber-400 border-amber-500/20 bg-amber-500/10'}`}>
+                                  {stop.tipo}
+                                </span>
+                              </td>
+                              <td className="px-6 py-3">
+                                <span className="text-[10px] font-bold text-slate-300 uppercase">{stop.motivo}</span>
+                              </td>
+                              <td className="px-6 py-3 text-right">
+                                <span className="text-xs font-black text-white">{formatDuration(stop.duracao)}</span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+                {eq.days.length === 0 && (
+                  <div className="px-6 py-12 text-center text-slate-600 uppercase font-black text-[10px] tracking-widest italic">
+                    Nenhuma parada registrada para este equipamento no período
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
