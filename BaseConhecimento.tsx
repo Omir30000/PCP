@@ -29,7 +29,11 @@ import {
   Star,
   Zap,
   TrendingUp,
-  Package
+  Package,
+  Calculator,
+  ZapOff,
+  Activity,
+  Scale
 } from 'lucide-react';
 
 type ConhecimentoTab = 'descricao' | 'manual';
