@@ -94,6 +94,15 @@ const App: React.FC = () => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
+  // PWA: ler aba da URL (shortcuts)
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    if (tabParam && ['dashboard', 'registro', 'kanban', 'vendas', 'relatorios'].includes(tabParam)) {
+      setActiveTab(tabParam as Tab);
+    }
+  }, []);
+
   // Forçar Dark Mode fixo
   React.useEffect(() => {
     document.documentElement.classList.add('dark');
