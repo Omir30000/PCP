@@ -161,7 +161,7 @@ const Dashboard: React.FC = () => {
   const lineMonitor = useMemo(() => {
     const dbValueTarget = mapTurnoParaDB(filtroTurno);
     return linhas
-      .filter(l => !l.nome.toUpperCase().includes('BARRACÃO'))
+      .filter(l => l.nome && l.nome.trim() !== '' && !l.nome.toUpperCase().includes('BARRACÃO'))
       .map(l => {
       const lineRegsAll = registros.filter(r =>
         String(r.linha_producao).toUpperCase() === String(l.id).toUpperCase() ||
