@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { ToastProvider } from './lib/toast';
 import Dashboard from './Dashboard';
 import Vendas from './Vendas';
 import ProgramacaoKanban from './ProgramacaoKanban';
@@ -42,8 +43,6 @@ import {
   Layers,
   LayoutGrid,
   TrendingDown,
-  Sun,
-  Moon,
   Calculator,
   Clock,
   LogOut,
@@ -217,6 +216,7 @@ const App: React.FC = () => {
   };
 
   return (
+    <ToastProvider>
     <div className={`min-h-screen flex overflow-hidden font-sans selection:bg-[#facc15]/30 bg-[#0a0a0a] text-slate-100`}>
       
       {/* Desktop Sidebar */}
@@ -472,6 +472,7 @@ const App: React.FC = () => {
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}} />
     </div>
+    </ToastProvider>
   );
 };
 

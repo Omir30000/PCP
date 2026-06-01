@@ -22,16 +22,16 @@ import {
   ChevronRight,
   Pencil,
   Database,
-  ArrowDownRight,
   Check as CheckIcon,
   Factory,
-  BarChartHorizontal,
   Calendar,
   User,
   Trash
 } from 'lucide-react';
+import { useToast } from './lib/toast';
 
 const Vendas: React.FC = () => {
+  const { toast } = useToast();
   const [pedidos, setPedidos] = useState<any[]>([]);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [todosRegistrosProducao, setTodosRegistrosProducao] = useState<any[]>([]);
@@ -153,11 +153,11 @@ const Vendas: React.FC = () => {
 
       if (error) throw error;
 
-      alert("✅ Pedido removido com sucesso.");
+      toast("✅ Pedido removido com sucesso.", 'success');
       fetchData();
     } catch (err) {
       console.error("Erro ao deletar pedido:", err);
-      alert("Falha ao remover pedido.");
+      toast("Falha ao remover pedido.", 'error');
     }
   };
 
@@ -186,7 +186,7 @@ const Vendas: React.FC = () => {
     );
 
     if (!todosProntos) {
-      alert("❌ IMPOSSÍVEL FINALIZAR: Saldo insuficiente em um ou mais SKUs para atender a carga.");
+      toast("❌ IMPOSSÍVEL FINALIZAR: Saldo insuficiente em um ou mais SKUs para atender a carga.", 'error');
       return;
     }
 
@@ -199,12 +199,12 @@ const Vendas: React.FC = () => {
 
       if (error) throw error;
 
-      alert("✅ ESTOQUE ATUALIZADO: O pedido foi finalizado e o saldo real dos SKUs foi baixado logicamente.");
+      toast("✅ ESTOQUE ATUALIZADO: O pedido foi finalizado e o saldo real dos SKUs foi baixado logicamente.", 'success');
       setSelectedPedido(null);
       await fetchData(); // Recarrega tudo para garantir sincronia visual
     } catch (err) {
       console.error("Nexus Finalize Error:", err);
-      alert("Falha crítica ao finalizar pedido. Tente novamente.");
+      toast("Falha crítica ao finalizar pedido. Tente novamente.", 'error');
     } finally {
       setSaving(false);
     }
@@ -231,7 +231,7 @@ const Vendas: React.FC = () => {
 
   const salvarNovoPedido = async () => {
     if (!novoCliente || !novaDataEntrega || itensNovoPedido.length === 0) {
-      alert("Preencha todos os campos e adicione pelo menos um item.");
+      toast("Preencha todos os campos e adicione pelo menos um item.", 'info');
       return;
     }
 
@@ -316,7 +316,7 @@ const Vendas: React.FC = () => {
       fetchData(); // Sincronização automática
     } catch (err) {
       console.error("Erro ao salvar pedido:", err);
-      alert("Falha ao registrar pedido industrial.");
+      toast("Falha ao registrar pedido industrial.", 'error');
     } finally {
       setSaving(false);
     }

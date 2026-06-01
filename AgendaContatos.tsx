@@ -20,6 +20,7 @@ import {
   Star,
   FileText
 } from 'lucide-react';
+import { useToast } from './lib/toast';
 
 interface Contato {
   id: string;
@@ -35,6 +36,7 @@ interface Contato {
 const CATEGORIAS = ['Geral', 'Manutenção', 'Fornecedor', 'Operador', 'Diretoria', 'PCP', 'Logística'];
 
 const AgendaContatos: React.FC = () => {
+  const { toast } = useToast();
   const [contatos, setContatos] = useState<Contato[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -119,7 +121,7 @@ const AgendaContatos: React.FC = () => {
       fetchContatos();
     } catch (err) {
       console.error('Erro ao salvar contato:', err);
-      alert('Erro ao salvar contato');
+      toast('Erro ao salvar contato', 'error');
     } finally {
       setIsSaving(false);
     }
@@ -136,7 +138,7 @@ const AgendaContatos: React.FC = () => {
       fetchContatos();
     } catch (err) {
       console.error('Erro ao excluir contato:', err);
-      alert('Erro ao excluir contato');
+      toast('Erro ao excluir contato', 'error');
     }
   };
 

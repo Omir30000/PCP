@@ -19,4 +19,3 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   }
 });
 
-console.log('Nexus Connectivity: Sistema operando em', supabaseUrl);

@@ -22,6 +22,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+import { useToast } from './lib/toast';
 
 const COLORS = [
   '#0f172a', '#2563eb', '#10b981', '#f59e0b', '#7c3aed',
@@ -30,6 +31,7 @@ const COLORS = [
 ];
 
 const RelatoriosProdutos: React.FC = () => {
+  const { toast } = useToast();
   const getHoje = () => new Date().toISOString().split('T')[0];
   const [dataInicio, setDataInicio] = useState(getHoje());
   const [dataFim, setDataFim] = useState(getHoje());
@@ -69,7 +71,7 @@ const RelatoriosProdutos: React.FC = () => {
     // Bypass sandbox constraints using window.open para garantir compatibilidade
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      alert("Por favor, habilite pop-ups para imprimir o relatório.");
+      toast("Por favor, habilite pop-ups para imprimir o relatório.", 'warning');
       return;
     }
 

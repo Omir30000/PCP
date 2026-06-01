@@ -25,12 +25,13 @@ import {
   TrendingUp,
   MessageSquare
 } from 'lucide-react';
+import { useToast } from './lib/toast';
 
 const EVO_CONFIG = {
-  baseURL: 'https://evo.servidorpremium.duckdns.org',
-  apiKey: '27FF670803F3-4BD9-B0DB-66CA428410C8',
-  instance: 'lima',
-  destination: '553599586919'
+  baseURL: import.meta.env.VITE_EVO_BASE_URL,
+  apiKey: import.meta.env.VITE_EVO_API_KEY,
+  instance: import.meta.env.VITE_EVO_INSTANCE,
+  destination: import.meta.env.VITE_EVO_DESTINATION
 };
 
 const MOTIVOS_COMUNS: Record<string, string[]> = {
@@ -74,6 +75,7 @@ const LISTA_EQUIPAMENTOS = [
 
 
 const PaginaRegistro: React.FC = () => {
+  const { toast } = useToast();
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [maquinasDaLinha, setMaquinasDaLinha] = useState<Maquina[]>([]);
@@ -97,6 +99,7 @@ const PaginaRegistro: React.FC = () => {
 
   const [maquinasAtivas, setMaquinasAtivas] = useState<number>(5);
   const [enviarWhatsApp, setEnviarWhatsApp] = useState(true);
+  const [operadorNome, setOperadorNome] = useState('OPERADOR NEXUS');
 
   const [paradas, setParadas] = useState<Parada[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -118,13 +121,21 @@ const PaginaRegistro: React.FC = () => {
   useEffect(() => {
     async function loadInitialData() {
       try {
-        const [linesRes, productsRes] = await Promise.all([
+        const [linesRes, productsRes, userRes] = await Promise.all([
           supabase.from('linhas').select('*').order('nome'),
-          supabase.from('produtos').select('*').order('nome')
+          supabase.from('produtos').select('*').order('nome'),
+          supabase.auth.getUser()
         ]);
 
         if (linesRes.data) setLinhas(linesRes.data);
         if (productsRes.data) setProdutos(productsRes.data);
+
+        const user = userRes?.data?.user;
+        if (user?.user_metadata?.nome) {
+          setOperadorNome(user.user_metadata.nome);
+        } else if (user?.email) {
+          setOperadorNome(user.email.split('@')[0].toUpperCase());
+        }
       } catch (err) {
         console.error("Erro ao carregar dados iniciais:", err);
       } finally {
@@ -224,7 +235,7 @@ const PaginaRegistro: React.FC = () => {
 
   const handleSaveParada = () => {
     if (!tempParada.tipo || !tempParada.motivo || tempParada.duracao <= 0) {
-      alert("Por favor, preencha todos os campos da parada corretamente (Tipo, Motivo e Horários).");
+      toast("Por favor, preencha todos os campos da parada corretamente (Tipo, Motivo e Horários).", 'warning');
       return;
     }
     setParadas([...paradas, { ...tempParada, id: Math.random().toString(36).substr(2, 9) }]);
@@ -393,7 +404,7 @@ const PaginaRegistro: React.FC = () => {
             <User className="w-4 h-4 text-[#facc15]" />
             <div className="flex flex-col leading-none">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Colaborador</span>
-              <span className="text-xs font-black text-white uppercase">OPERADOR NEXUS</span>
+              <span className="text-xs font-black text-white uppercase">{operadorNome}</span>
             </div>
           </div>
 

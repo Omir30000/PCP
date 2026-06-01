@@ -32,6 +32,56 @@ export type EscalaProducaoRecord = {
 export type Database = {
   public: {
     Tables: {
+      programacao_semanal: {
+        Row: {
+          id: string;
+          created_at: string;
+          item_pedido_id: string | null;
+          linha_id: string;
+          data: string;
+          turno: string;
+          produto_id: string | null;
+          maquina_id: string | null;
+          ordem: number | null;
+          status: string | null;
+          observacoes: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          item_pedido_id?: string | null;
+          linha_id: string;
+          data: string;
+          turno: string;
+          produto_id?: string | null;
+          maquina_id?: string | null;
+          ordem?: number | null;
+          status?: string | null;
+          observacoes?: string | null;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          item_pedido_id?: string | null;
+          linha_id?: string;
+          data?: string;
+          turno?: string;
+          produto_id?: string | null;
+          maquina_id?: string | null;
+          ordem?: number | null;
+          status?: string | null;
+          observacoes?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "programacao_semanal_linha_id_fkey";
+            columns: ["linha_id"];
+            isOneToOne: false;
+            referencedRelation: "linhas";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       linhas: {
         Row: {
           id: string;
@@ -347,3 +397,4 @@ export type RegistroProducao = Database['public']['Tables']['registros_producao'
 export type Pedido = Database['public']['Tables']['pedidos']['Row'];
 export type ItemPedido = Database['public']['Tables']['itens_pedido']['Row'];
 export type EscalaProducao = Database['public']['Tables']['escalas_producao']['Row'];
+export type ProgramacaoSemanal = Database['public']['Tables']['programacao_semanal']['Row'];

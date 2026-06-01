@@ -28,7 +28,16 @@ const Relatorios: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [registros, setRegistros] = useState<any[]>([]);
   const [linhas, setLinhas] = useState<Linha[]>([]);
+  const [idsLinhas, setIdsLinhas] = useState<string[]>(['1', '2', '3', '4', '5']);
   const reportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    supabase.from('linhas').select('id').then(({ data }) => {
+      if (data && data.length > 0) {
+        setIdsLinhas(data.map(l => l.id));
+      }
+    });
+  }, []);
 
   // Helper técnico para extração segura de minutos do JSONB
   const parseMinutos = (val: any): number => {
@@ -105,7 +114,6 @@ const Relatorios: React.FC = () => {
   };
 
   const analytics = useMemo(() => {
-    const idsLinhas = ['1', '2', '3', '4', '5'];
     const d1 = new Date(dataInicio);
     const d2 = new Date(dataFim);
     const diffTime = Math.abs(d2.getTime() - d1.getTime());

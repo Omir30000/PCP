@@ -28,8 +28,10 @@ import {
   Check,
   Info
 } from 'lucide-react';
+import { useToast } from './lib/toast';
 
 const EscalaProducao: React.FC = () => {
+  const { toast } = useToast();
   const [backlog, setBacklog] = useState<any[]>([]);
   const [escalas, setEscalas] = useState<any[]>([]);
   const [linhas, setLinhas] = useState<Linha[]>([]);
@@ -101,7 +103,7 @@ const EscalaProducao: React.FC = () => {
 
   const otimizarComIA = async () => {
     if (backlog.length === 0) {
-      alert("Não há pedidos no backlog para otimizar.");
+      toast("Não há pedidos no backlog para otimizar.", 'warning');
       return;
     }
 
@@ -155,7 +157,7 @@ const EscalaProducao: React.FC = () => {
       setAiSuggestion(suggestion);
     } catch (err) {
       console.error("Erro na otimização:", err);
-      alert("Falha na inteligência artificial. Tente novamente.");
+      toast("Falha na inteligência artificial. Tente novamente.", 'error');
     } finally {
       setIsOptimizing(false);
     }
@@ -177,11 +179,11 @@ const EscalaProducao: React.FC = () => {
       const { error } = await supabase.from('escalas_producao').insert(inserts);
       if (error) throw error;
 
-      alert("Escala otimizada aplicada com sucesso!");
+      toast("Escala otimizada aplicada com sucesso!", 'success');
       setAiSuggestion(null);
       await fetchData();
     } catch (err: any) {
-      alert("Erro ao aplicar sugestão: " + err.message);
+      toast("Erro ao aplicar sugestão: " + err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -194,7 +196,7 @@ const EscalaProducao: React.FC = () => {
       if (error) throw error;
       await fetchData();
     } catch (err: any) {
-      alert("Erro ao remover: " + err.message);
+      toast("Erro ao remover: " + err.message, 'error');
     }
   };
 

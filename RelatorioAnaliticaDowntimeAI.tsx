@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from './lib/supabase';
+import { sanitizeAndRender } from './lib/sanitize';
 import { Linha, Maquina, RegistroProducao, Produto } from './types/database';
 import {
   Printer,
@@ -27,6 +28,7 @@ import {
   Zap
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
+import { useToast } from './lib/toast';
 
 const EmptyChartState = () => (
   <div className="h-full flex flex-col items-center justify-center text-slate-300">
@@ -36,6 +38,7 @@ const EmptyChartState = () => (
 );
 
 const RelatorioAnaliticaDowntimeAI: React.FC = () => {
+  const { toast } = useToast();
   const getHoje = () => new Date().toISOString().split('T')[0];
   const [dataInicio, setDataInicio] = useState(getHoje());
   const [dataFim, setDataFim] = useState(getHoje());
@@ -94,7 +97,7 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
       setInsights(''); // Limpa insights ao buscar novos dados
     } catch (err: any) {
       console.error("Nexus Downtime Sync Error:", err);
-      alert("Erro ao sincronizar dados: " + (err.message || "Erro de conexão"));
+      toast("Erro ao sincronizar dados: " + (err.message || "Erro de conexão"), 'error');
     } finally {
       setLoading(false);
     }
@@ -145,7 +148,7 @@ const RelatorioAnaliticaDowntimeAI: React.FC = () => {
 
   const generateAIInsights = async () => {
     if (registros.length === 0) {
-      alert("Não há dados de produção para analisar no período selecionado.");
+      toast("Não há dados de produção para analisar no período selecionado.", 'warning');
       return;
     }
 
@@ -534,16 +537,13 @@ Gere os insights estratégicos agora:`;
                       {line.startsWith('-') || line.match(/^\d\./) || line.startsWith('###') ? (
                         <span className="flex items-start gap-3">
                           <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
-                          <span dangerouslySetInnerHTML={{
-                            __html: line
+                          <span dangerouslySetInnerHTML={sanitizeAndRender(line
                               .replace(/###\s*|\d\.\s*|^- \s*/, '')
                               .replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>')
-                          }} />
+                          )} />
                         </span>
                       ) : (
-                        <span dangerouslySetInnerHTML={{
-                          __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>')
-                        }} />
+                        <span dangerouslySetInnerHTML={sanitizeAndRender(line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>'))} />
                       )}
                     </p>
                   ))}
@@ -860,8 +860,7 @@ Gere os insights estratégicos agora:`;
         </footer>
       </div>
 
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style dangerouslySetInnerHTML={sanitizeAndRender(`
         @media print {
           @page { margin: 15mm; size: A4 portrait; }
           
@@ -917,7 +916,7 @@ Gere os insights estratégicos agora:`;
           /* Remove animations that might mess with rendering */
           .animate-in { animation: none !important; opacity: 1 !important; }
         }
-      `}} />
+      `)} />
 
     </div>
   );

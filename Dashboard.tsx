@@ -7,7 +7,6 @@ import {
   Timer,
   AlertTriangle,
   Package,
-  RefreshCw,
   TrendingUp,
   BarChart3,
   Clock,
@@ -19,15 +18,8 @@ import {
   AlertCircle,
   X,
   History,
-  Target,
   Scale,
-  ShieldAlert,
-  ListChecks,
-  CalendarCheck,
-  CheckCircle2,
-  AlertCircle as AlertIcon,
-  ChevronDown,
-  LayoutGrid
+  ListChecks
 } from 'lucide-react';
 
 const COLORS = ['#facc15', '#ef4444', '#3b82f6', '#10b981', '#a78bfa', '#f43f5e', '#06b6d4'];

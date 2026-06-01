@@ -19,8 +19,10 @@ import {
   Users,
   Target
 } from 'lucide-react';
+import { useToast } from './lib/toast';
 
 const RelatorioBoletimPro: React.FC = () => {
+  const { toast } = useToast();
   const getHoje = () => new Date().toISOString().split('T')[0];
   const [dataInicio, setDataInicio] = useState(getHoje());
   const [dataFim, setDataFim] = useState(getHoje());
@@ -188,10 +190,10 @@ const RelatorioBoletimPro: React.FC = () => {
       await sendWithDelay(`*💡 MENSAGEM DO DIA*\n_${msgRotativa}_`);
       await sendWithDelay(`_Enviado via Nexus Intelligence Terminal_`);
 
-      alert("Feedback enviado em sequência com sucesso!");
+      toast("Feedback enviado em sequência com sucesso!", 'success');
       setIsShareModalOpen(false);
     } catch (err) {
-      alert("Erro de conexão com a API de WhatsApp.");
+      toast("Erro de conexão com a API de WhatsApp.", 'error');
     } finally {
       setIsSending(false);
     }

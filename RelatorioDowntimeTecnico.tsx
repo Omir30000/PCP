@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from './lib/supabase';
+import { sanitizeAndRender } from './lib/sanitize';
 import { Linha, Maquina } from './types/database';
 import {
   Printer,
@@ -603,7 +604,7 @@ const RelatorioDowntimeTecnico: React.FC = () => {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={sanitizeAndRender(`
         @media print {
           @page { margin: 15mm; size: A4 portrait; }
           
@@ -659,7 +660,7 @@ const RelatorioDowntimeTecnico: React.FC = () => {
           /* Remove animations that might mess with rendering */
           .animate-in { animation: none !important; opacity: 1 !important; }
         }
-      `}} />
+      `)} />
 
     </div>
   );

@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from './lib/supabase';
+import { sanitizeAndRender } from './lib/sanitize';
 import { Produto, Linha, RegistroProducao } from './types/database';
 import {
   AreaChart,
@@ -30,8 +31,10 @@ import {
   Sparkles,
   MessageSquareQuote
 } from 'lucide-react';
+import { useToast } from './lib/toast';
 
 const RelatorioBoletimAI: React.FC = () => {
+  const { toast } = useToast();
   const getHoje = () => new Date().toISOString().split('T')[0];
   const [dataInicio, setDataInicio] = useState(getHoje());
   const [dataFim, setDataFim] = useState(getHoje());
@@ -241,7 +244,7 @@ const RelatorioBoletimAI: React.FC = () => {
 
   const generateAIInsights = async () => {
     if (analytics.factoryTotals.totalUnits === 0) {
-      alert("Não há dados de produção para analisar no período selecionado.");
+      toast("Não há dados de produção para analisar no período selecionado.", 'warning');
       return;
     }
 
@@ -473,10 +476,10 @@ Gere a análise estratégica para os donos agora:`;
                       {line.startsWith('-') || line.match(/^\d\./) ? (
                         <span className="flex items-start gap-3">
                           <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
-                          <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>').replace(/^- /, '') }} />
+                          <span dangerouslySetInnerHTML={sanitizeAndRender(line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>').replace(/^- /, ''))} />
                         </span>
                       ) : (
-                        <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>') }} />
+                        <span dangerouslySetInnerHTML={sanitizeAndRender(line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>'))} />
                       )}
                     </p>
                   ))}

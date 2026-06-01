@@ -22,10 +22,10 @@ import {
   Zap,
   CupSoda,
   Milk,
-  ArrowUpRight,
   Activity,
   CheckCircle2
 } from 'lucide-react';
+import { useToast } from './lib/toast';
 
 const TIPO_CONFIG: Record<string, { bg: string, text: string, shadow: string, icon: React.ReactNode }> = {
   'Natural': {
@@ -67,6 +67,7 @@ const TIPO_CONFIG: Record<string, { bg: string, text: string, shadow: string, ic
 };
 
 const Produtos: React.FC = () => {
+  const { toast } = useToast();
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -176,7 +177,7 @@ const Produtos: React.FC = () => {
       if (error) throw error;
       fetchProdutos();
     } catch (err) {
-      alert("Erro ao excluir: verifique registros vinculados.");
+      toast("Erro ao excluir: verifique registros vinculados.", 'error');
     }
   };
 

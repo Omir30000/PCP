@@ -24,6 +24,7 @@ import {
   X
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
+import { useToast } from './lib/toast';
 
 const EmptyChartState = () => (
   <div className="h-full flex flex-col items-center justify-center text-slate-300">
@@ -33,6 +34,7 @@ const EmptyChartState = () => (
 );
 
 const RelatoriosDowntime: React.FC = () => {
+  const { toast } = useToast();
   const getHoje = () => new Date().toISOString().split('T')[0];
   const [dataInicio, setDataInicio] = useState(getHoje());
   const [dataFim, setDataFim] = useState(getHoje());
@@ -86,7 +88,7 @@ const RelatoriosDowntime: React.FC = () => {
 
     } catch (err: any) {
       console.error("Nexus Downtime Sync Error:", err);
-      alert("Erro ao sincronizar dados: " + (err.message || "Erro de conexão"));
+      toast("Erro ao sincronizar dados: " + (err.message || "Erro de conexão"), 'error');
     } finally {
       setLoading(false);
     }

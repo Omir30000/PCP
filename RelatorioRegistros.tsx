@@ -16,6 +16,7 @@ import {
     History
 } from 'lucide-react';
 import { RegistroProducao, Linha, Produto } from './types/database';
+import { useToast } from './lib/toast';
 
 const LISTA_EQUIPAMENTOS = [
     'GERAL',
@@ -58,6 +59,7 @@ type RegistroExpandido = RegistroProducao & {
 };
 
 const RelatorioRegistros: React.FC = () => {
+    const { toast } = useToast();
     const [registros, setRegistros] = useState<RegistroExpandido[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -127,7 +129,7 @@ const RelatorioRegistros: React.FC = () => {
 
             fetchData();
         } catch (err) {
-            console.error("Erro ao carregar dados auxiliares:", err);
+            
         }
     };
 
@@ -170,8 +172,7 @@ const RelatorioRegistros: React.FC = () => {
             }
 
         } catch (error: any) {
-            console.error('Erro ao buscar registros:', error);
-            alert(`Erro ao buscar dados: ${error.message}`);
+            toast(`Erro ao buscar dados: ${error.message}`, 'error');
         } finally {
             setLoading(false);
         }
@@ -270,7 +271,7 @@ const RelatorioRegistros: React.FC = () => {
 
     const handleSaveParada = () => {
         if (!novaParada.tipo || !novaParada.hora_inicio || !novaParada.hora_fim || !novaParada.motivo) {
-            alert("Preencha Tipo, Início, Fim e Motivo");
+            toast("Preencha Tipo, Início, Fim e Motivo", 'error');
             return;
         }
 
@@ -338,14 +339,10 @@ const RelatorioRegistros: React.FC = () => {
 
     const handleSaveRecord = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('🔵 handleSaveRecord INICIADO');
-
         if (!editingRecord) {
-            console.log('❌ Nenhum registro em edição');
             return;
         }
 
-        console.log('📝 Registro em edição:', editingRecord.id);
         setIsSaving(true);
 
         try {
@@ -355,8 +352,7 @@ const RelatorioRegistros: React.FC = () => {
             const selectedLinha = linhasOpcoes.find(l => l.id === editingRecord.linha_producao);
             const selectedProduto = produtosOpcoes.find(p => p.id === editingRecord.produto_volume);
 
-            console.log('🔍 Linha selecionada:', selectedLinha);
-            console.log('🔍 Produto selecionado:', selectedProduto);
+
             const isLinhaCopos = selectedLinha?.nome?.toLowerCase().includes('linha 4') || selectedLinha?.nome?.toLowerCase().includes('linha 04') || selectedLinha?.nome?.toLowerCase().includes('copo');
             const multMaquinas = isLinhaCopos ? maquinasAtivas : 1;
 
@@ -396,8 +392,7 @@ const RelatorioRegistros: React.FC = () => {
 
             (payload as any).eficiencia_calculada = Number(eficiencia.toFixed(2));
 
-            console.log('📦 Payload preparado:', JSON.stringify(payload, null, 2));
-            console.log('🚀 Enviando para Supabase...');
+
 
             // Diagnóstico Prévio: Verificar se o registro existe e é acessível
             const { count, error: checkError } = await supabase
@@ -405,8 +400,7 @@ const RelatorioRegistros: React.FC = () => {
                 .select('id', { count: 'exact', head: true })
                 .eq('id', editingRecord.id);
 
-            console.log(`🔍 Check pré-update: Encontrados ${count} registros com ID ${editingRecord.id}`);
-            if (checkError) console.error('❌ Erro no check pré-update:', checkError);
+
 
             const { data, error } = await supabase
                 .from('registros_producao')
@@ -414,13 +408,12 @@ const RelatorioRegistros: React.FC = () => {
                 .eq('id', editingRecord.id)
                 .select();
 
-            console.log('📥 Resposta do Supabase - Data:', data);
-            console.log('📥 Resposta do Supabase - Error:', JSON.stringify(error, null, 2));
+
 
             if (error) throw error;
 
             if (!data || data.length === 0) {
-                console.warn("⚠️ Update realizado, mas nenhum dado retornado (possível RLS). Usando payload local.");
+
             }
 
             const updatedRow = (data && data.length > 0) ? data[0] : { ...editingRecord, ...payload, id: editingRecord.id };
@@ -434,11 +427,10 @@ const RelatorioRegistros: React.FC = () => {
             } : r));
 
             handleCloseModal();
-            alert('Registro salvo com sucesso!');
+            toast('Registro salvo com sucesso!', 'success');
         } catch (err: any) {
-            console.error('❌ Erro ao atualizar registro:', JSON.stringify(err, null, 2));
             const msg = err.message || JSON.stringify(err);
-            alert(`Falha ao salvar: ${msg}`);
+            toast(`Falha ao salvar: ${msg}`, 'error');
         } finally {
             setIsSaving(false);
         }
@@ -459,10 +451,9 @@ const RelatorioRegistros: React.FC = () => {
 
             setRegistros(prev => prev.filter(r => r.id !== editingRecord.id));
             handleCloseModal();
-            alert('Registro excluído com sucesso!');
+            toast('Registro excluído com sucesso!', 'success');
         } catch (err: any) {
-            console.error('Erro ao excluir registro:', err);
-            alert(`Falha ao excluir: ${err.message}`);
+            toast(`Falha ao excluir: ${err.message}`, 'error');
         } finally {
             setIsSaving(false);
         }
