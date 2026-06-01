@@ -333,7 +333,7 @@ const Vendas: React.FC = () => {
     <div className="space-y-8 animate-in fade-in duration-700">
 
       {/* Nexus Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-4 lg:p-6 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
         <div className="flex items-center gap-6 relative z-10">
           <div className="bg-[#facc15] p-4 rounded-xl shadow-[0_0_20px_rgba(250,204,21,0.2)]">
             <ShoppingCart className="text-black w-7 h-7" />
@@ -430,7 +430,7 @@ const Vendas: React.FC = () => {
       </section>
 
       {/* Grid de Pedidos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredPedidos.map((ped) => {
           const totalRequisitado = ped.itens_pedido?.reduce((a: number, b: any) => a + (Number(b.quantidade) || 0), 0) || 0;
           const totalDisponivel = ped.itens_pedido?.reduce((acc: number, item: any) => {
@@ -441,8 +441,8 @@ const Vendas: React.FC = () => {
           const estaPronto = progresso >= 100;
 
           return (
-            <div key={ped.id} className="bg-slate-900/40 backdrop-blur-md rounded-2xl p-8 border border-white/5 group hover:border-[#facc15]/30 transition-all duration-500 relative overflow-hidden">
-              <div className="flex justify-between items-start mb-6">
+            <div key={ped.id} className="bg-slate-900/40 backdrop-blur-md rounded-2xl p-4 lg:p-6 border border-white/5 group hover:border-[#facc15]/30 transition-all duration-500 relative overflow-hidden">
+              <div className="flex justify-between items-start mb-3">
                 <div>
                   <span className="text-[9px] font-mono text-slate-600 font-bold mb-1 block tracking-widest">REF: {ped.id.slice(0, 8).toUpperCase()}</span>
                   <h5 className="text-xl font-black text-white uppercase tracking-tighter truncate max-w-[200px]">{ped.cliente_nome}</h5>
@@ -465,7 +465,7 @@ const Vendas: React.FC = () => {
                   </button>
                 </div>
               </div>
-              <div className="mb-8 space-y-3">
+              <div className="mb-4 space-y-3">
                 <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest">
                   <span className={estaPronto ? 'text-green-500 flex items-center gap-1' : 'text-slate-500'}>
                     {estaPronto ? <><CheckCircle className="w-3 h-3" /> Carga Validada</> : 'Processamento Industrial'}
@@ -479,12 +479,12 @@ const Vendas: React.FC = () => {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 mb-8">
-                <div className="bg-white/5 p-4 rounded-xl border border-white/5 text-center">
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
                   <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">Previsão Entrega</span>
                   <div className="text-white font-black text-xs">{new Date(ped.data_entrega).toLocaleDateString('pt-BR')}</div>
                 </div>
-                <div className="bg-white/5 p-4 rounded-xl border border-white/5 text-center">
+                <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
                   <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">Total Requisitado</span>
                   <div className="text-[#facc15] font-black text-xs">
                     {(() => {
@@ -514,7 +514,7 @@ const Vendas: React.FC = () => {
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => !saving && setIsModalOpen(false)} />
           <div className="bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl relative z-10 border border-white/10 overflow-hidden animate-in zoom-in-95">
-            <header className="px-10 py-10 border-b border-white/5 flex items-center justify-between">
+            <header className="px-6 py-6 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-6">
                 <div className="p-4 bg-[#facc15] rounded-xl shadow-[0_0_15px_rgba(250,204,21,0.3)]">
                   <ShoppingCart className="w-8 h-8 text-black" />
@@ -532,7 +532,7 @@ const Vendas: React.FC = () => {
               <button onClick={() => setIsModalOpen(false)} className="text-slate-500 hover:text-white transition-colors"><X className="w-10 h-10" /></button>
             </header>
 
-            <div className="p-10 space-y-8 max-h-[70vh] overflow-y-auto no-scrollbar">
+            <div className="p-6 space-y-8 max-h-[70vh] overflow-y-auto no-scrollbar">
               {/* Contexto do Pedido */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
@@ -648,7 +648,7 @@ const Vendas: React.FC = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setSelectedPedido(null)} />
           <div className="bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl relative z-10 border border-white/10 overflow-hidden animate-in zoom-in-95">
-            <header className="px-10 py-10 border-b border-white/5 flex items-center justify-between">
+            <header className="px-6 py-6 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-6">
                 <div className="p-4 bg-[#facc15] rounded-xl"><Package className="w-8 h-8 text-black" /></div>
                 <div>
@@ -668,11 +668,11 @@ const Vendas: React.FC = () => {
                   <table className="w-full text-left">
                     <thead className="bg-white/5 text-[9px] text-slate-500 font-black uppercase tracking-widest border-b border-white/5">
                       <tr>
-                        <th className="px-8 py-5">Ativo SKU</th>
-                        <th className="px-8 py-5 text-center">Req. (FARDOS)</th>
-                        <th className="px-8 py-5 text-center">Disp. (FARDOS)</th>
-                        <th className="px-8 py-5 text-center">Saldo em UN</th>
-                        <th className="px-8 py-5 text-right">Prontidão</th>
+                        <th className="px-4 py-3">Ativo SKU</th>
+                        <th className="px-4 py-3 text-center">Req. (FARDOS)</th>
+                        <th className="px-4 py-3 text-center">Disp. (FARDOS)</th>
+                        <th className="px-4 py-3 text-center">Saldo em UN</th>
+                        <th className="px-4 py-3 text-right">Prontidão</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5 text-[11px] text-slate-400">
@@ -681,17 +681,17 @@ const Vendas: React.FC = () => {
                         const pronto = produzido >= item.quantidade;
                         return (
                           <tr key={idx} className={pronto ? 'bg-green-500/5' : 'bg-transparent'}>
-                            <td className="px-8 py-5 font-black text-white uppercase">{item.produtos?.nome || 'SKU'}</td>
-                            <td className="px-8 py-5 text-center font-bold text-white">
+                            <td className="px-4 py-3 font-black text-white uppercase">{item.produtos?.nome || 'SKU'}</td>
+                            <td className="px-4 py-3 text-center font-bold text-white">
                               {Math.ceil(item.quantidade / (item.produtos?.unidades_por_fardo || 1)).toLocaleString('pt-BR')}
                             </td>
-                            <td className="px-8 py-5 text-center font-black text-[#facc15] text-lg">
+                            <td className="px-4 py-3 text-center font-black text-[#facc15] text-lg">
                               {Math.floor(produzido / (item.produtos?.unidades_por_fardo || 1)).toLocaleString('pt-BR')}
                             </td>
-                            <td className="px-8 py-5 text-center font-bold text-slate-500">
+                            <td className="px-4 py-3 text-center font-bold text-slate-500">
                               {produzido.toLocaleString('pt-BR')} <span className="text-[8px]">UN</span>
                             </td>
-                            <td className="px-8 py-5 text-right">
+                            <td className="px-4 py-3 text-right">
                               {pronto ? (
                                 <span className="text-[#22c55e] font-black uppercase text-[10px] flex items-center justify-end gap-2">OK <CheckCircle className="w-4 h-4" /></span>
                               ) : (
@@ -788,7 +788,7 @@ const Vendas: React.FC = () => {
           overflow-y: hidden !important;
           width: 100% !important;
           gap: 16px !important;
-          padding: 15px 0 25px 0 !important;
+          padding: 10px 0 15px 0 !important;
           -webkit-overflow-scrolling: touch;
           scroll-snap-type: x mandatory;
         }

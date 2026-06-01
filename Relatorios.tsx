@@ -251,7 +251,7 @@ const Relatorios: React.FC = () => {
   }, [registros, dataInicio, dataFim]);
 
   return (
-    <div className="w-full max-w-[98%] mx-auto space-y-8 animate-in fade-in duration-500 pb-12 font-sans text-slate-900 print:text-black">
+    <div className="w-full max-w-[98%] mx-auto space-y-4 lg:space-y-6 animate-in fade-in duration-500 pb-12 font-sans text-slate-900 print:text-black">
 
       {/* Controles do Relatório Premium */}
       <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-2xl print:hidden">
@@ -529,8 +529,8 @@ const Relatorios: React.FC = () => {
         </section>
 
         {/* Rodapé Nexus */}
-        <footer className="pt-12 border-t-2 border-slate-900 break-inside-avoid">
-          <div className="flex justify-between items-end mb-16">
+        <footer className="pt-8 border-t-2 border-slate-900 break-inside-avoid">
+          <div className="flex justify-between items-end mb-8">
             <div className="flex items-center gap-4">
               <ShieldCheck className="w-8 h-8 text-slate-400" />
               <div>
@@ -544,7 +544,7 @@ const Relatorios: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-20">
+          <div className="grid grid-cols-2 gap-12">
             <div className="text-center">
               <div className="border-t border-slate-900 pt-2 mb-1"></div>
               <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Gestão de PCP / Planejamento</p>

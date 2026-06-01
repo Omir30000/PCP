@@ -383,9 +383,9 @@ const PaginaRegistro: React.FC = () => {
   const isLinhaCopos = linhaSelecionada?.nome?.toLowerCase().includes('linha 4') || linhaSelecionada?.nome?.toLowerCase().includes('linha 04') || linhaSelecionada?.nome?.toLowerCase().includes('copo');
 
   return (
-    <div className="max-w-[98%] mx-auto space-y-8 w-full animate-in fade-in duration-700 pb-20 font-sans text-slate-900 dark:text-slate-100">
+    <div className="max-w-[98%] mx-auto space-y-4 lg:space-y-6 w-full animate-in fade-in duration-700 pb-20 font-sans text-slate-900 dark:text-slate-100">
 
-      <header className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 lg:p-8 rounded-2xl border border-white/10 shadow-2xl w-full relative overflow-hidden">
+      <header className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-4 lg:p-6 rounded-2xl border border-white/10 shadow-2xl w-full relative overflow-hidden">
         <div className="absolute top-0 left-0 w-64 h-64 bg-[#facc15]/10 rounded-full -ml-32 -mt-32 blur-3xl pointer-events-none" />
         <div className="flex items-center gap-6 relative z-10 w-full xl:w-auto">
           <div className="bg-[#facc15] p-4 rounded-xl shadow-lg shadow-[#facc15]/20 shrink-0 text-black">
@@ -451,7 +451,7 @@ const PaginaRegistro: React.FC = () => {
               <h2 className="text-sm font-black text-slate-200 uppercase tracking-[0.2em]">Contexto da Operação</h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-8 gap-6 lg:gap-4 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-8 gap-4 lg:gap-2 w-full">
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
                   <Calendar className="w-3 h-3 text-[#facc15]" /> Data
@@ -586,13 +586,13 @@ const PaginaRegistro: React.FC = () => {
           </div>
         </section>
         {/* II. Fluxo de Volumes */}
-        <section className="bg-slate-900/40 backdrop-blur-md p-8 lg:p-12 rounded-2xl border border-white/5 shadow-xl relative overflow-hidden group">
+        <section className="bg-slate-900/40 backdrop-blur-md p-6 lg:p-8 rounded-2xl border border-white/5 shadow-xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full -mr-48 -mt-48 blur-3xl pointer-events-none group-hover:bg-blue-500/10 transition-all duration-700" />
           <div className="relative z-10 space-y-6">
             <div className="flex items-center gap-4 border-l-4 border-blue-500 pl-6">
               <h2 className="text-sm font-black text-slate-200 uppercase tracking-[0.2em]">Volume Produzido</h2>
             </div>
-            <div className="bg-white/5 p-8 rounded-2xl border border-white/10">
+            <div className="bg-white/5 p-6 rounded-2xl border border-white/10">
               <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
                 Digite a quantidade produzida:
               </label>
@@ -603,7 +603,7 @@ const PaginaRegistro: React.FC = () => {
                   const val = e.target.value;
                   setFormData({ ...formData, quantidade_produced: val === '' ? 0 : Number(val) });
                 }}
-                className="w-full bg-black/20 border-2 border-white/5 p-6 rounded-xl text-6xl font-black text-blue-400 outline-none focus:border-blue-500 transition-all text-center"
+                className="w-full bg-black/20 border-2 border-white/5 p-6 rounded-xl text-4xl lg:text-6xl font-black text-blue-400 outline-none focus:border-blue-500 transition-all text-center"
                 placeholder="0"
                 required
               />
@@ -612,7 +612,7 @@ const PaginaRegistro: React.FC = () => {
         </section>
 
         {/* III. Registro de Inatividade */}
-        <section className="bg-slate-900/40 backdrop-blur-md p-8 lg:p-12 rounded-2xl border border-white/5 shadow-xl relative overflow-hidden group">
+        <section className="bg-slate-900/40 backdrop-blur-md p-6 lg:p-8 rounded-2xl border border-white/5 shadow-xl relative overflow-hidden group">
           <div className="relative z-10 space-y-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6 border-l-4 border-red-500 pl-6">
               <h2 className="text-sm font-black text-slate-200 uppercase tracking-[0.2em]">Registro de Inatividade</h2>
@@ -636,9 +636,9 @@ const PaginaRegistro: React.FC = () => {
                   {paradas.map((parada, index) => (
                     <div
                       key={index}
-                      className="bg-white/5 p-4 lg:p-6 rounded-xl border border-white/5 shadow-sm flex flex-col xl:flex-row items-center gap-6 relative group hover:border-red-500/30 transition-all"
+                      className="bg-white/5 p-3 rounded-xl border border-white/5 shadow-sm flex flex-col xl:flex-row items-center gap-3 relative group hover:border-red-500/30 transition-all"
                     >
-                      <div className="w-full lg:w-40">
+                      <div className="w-full lg:w-32">
                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Equipamento</label>
                         <select
                           value={parada.maquina_id}
@@ -667,7 +667,7 @@ const PaginaRegistro: React.FC = () => {
                         />
                       </div>
 
-                      <div className="w-full lg:w-40">
+                      <div className="w-full lg:w-32">
                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Tipo</label>
                         <select
                           value={parada.tipo}
@@ -681,7 +681,7 @@ const PaginaRegistro: React.FC = () => {
                         </select>
                       </div>
 
-                      <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 w-full lg:w-64">
+                      <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 w-full lg:w-48">
                         <div className="space-y-2">
                           <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Início</label>
                           <input
@@ -725,7 +725,7 @@ const PaginaRegistro: React.FC = () => {
         </section>
 
         {/* IV. Observações / Ocorrências */}
-        <section className="bg-slate-900/40 backdrop-blur-md p-8 lg:p-12 rounded-2xl border border-white/5 shadow-xl relative">
+        <section className="bg-slate-900/40 backdrop-blur-md p-6 lg:p-8 rounded-2xl border border-white/5 shadow-xl relative">
           <div className="flex items-center gap-4 mb-8 border-l-4 border-slate-500 pl-6">
             <h2 className="text-sm font-black text-slate-200 uppercase tracking-[0.2em]">Observações / Ocorrências</h2>
           </div>
@@ -733,7 +733,7 @@ const PaginaRegistro: React.FC = () => {
             value={formData.observacoes}
             onChange={e => setFormData({ ...formData, observacoes: e.target.value })}
             placeholder="Registre aqui observações relevantes, ocorrências ou detalhes adicionais do turno..."
-            className="w-full p-6 bg-white/5 border-2 border-white/5 focus:border-[#facc15] focus:bg-white/10 rounded-xl text-xs font-bold text-slate-300 transition-all outline-none min-h-[150px] shadow-inner"
+            className="w-full p-6 bg-white/5 border-2 border-white/5 focus:border-[#facc15] focus:bg-white/10 rounded-xl text-xs font-bold text-slate-300 transition-all outline-none min-h-[100px] shadow-inner"
           />
         </section>
 
@@ -741,11 +741,11 @@ const PaginaRegistro: React.FC = () => {
           <button
             type="submit"
             disabled={saving}
-            className="w-full relative group overflow-hidden bg-[#facc15] text-black font-black py-8 md:py-10 rounded-2xl shadow-2xl hover:scale-[1.01] transition-all flex items-center justify-center gap-6 disabled:opacity-50"
+            className="w-full relative group overflow-hidden bg-[#facc15] text-black font-black py-6 md:py-8 rounded-2xl shadow-2xl hover:scale-[1.01] transition-all flex items-center justify-center gap-6 disabled:opacity-50"
           >
             <div className="relative z-10 flex items-center gap-6">
               {saving ? <Loader2 className="animate-spin w-10 h-10 text-black" /> : <Save className="w-10 h-10 text-black" />}
-              <span className="text-sm md:text-lg tracking-[0.5em] uppercase font-black">
+              <span className="text-xs md:text-base tracking-[0.5em] uppercase font-black">
                 {saving ? 'Publicando...' : 'Gravar Apontamento Industrial'}
               </span>
             </div>
@@ -776,7 +776,7 @@ const PaginaRegistro: React.FC = () => {
               </button>
             </div>
 
-            <div className="p-6 md:p-10 space-y-8 max-h-[70vh] overflow-y-auto">
+            <div className="p-4 md:p-6 space-y-8 max-h-[70vh] overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tipo de Parada</label>
@@ -811,7 +811,7 @@ const PaginaRegistro: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
                     <Clock className="w-3 h-3 text-red-500" /> Início

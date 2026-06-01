@@ -190,7 +190,7 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
     };
 
     return (
-        <div className="w-full max-w-[1600px] mx-auto space-y-8 animate-in fade-in duration-500 pb-20">
+        <div className="w-full max-w-[98%] mx-auto space-y-4 lg:space-y-6 animate-in fade-in duration-500 pb-20">
 
             {/* Header de Filtros Premium */}
             <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-3xl border border-white/10 shadow-2xl">
@@ -281,28 +281,28 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
 
                     {/* Dashboard de Elite */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <div className="bg-slate-900 p-8 rounded-[40px] text-white relative overflow-hidden group shadow-2xl">
+                        <div className="bg-slate-900 p-6 rounded-[40px] text-white relative overflow-hidden group shadow-2xl">
                             <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform"><Timer className="w-16 h-16" /></div>
                             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Total Downtime</p>
                             <h2 className="text-5xl font-black tracking-tighter mb-1">{analytics.totalDowntime} <span className="text-sm">min</span></h2>
                             <div className="w-12 h-1 bg-blue-500 rounded-full mt-4" />
                         </div>
 
-                        <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl relative overflow-hidden group">
+                        <div className="bg-white p-6 rounded-[40px] border border-slate-100 shadow-xl relative overflow-hidden group">
                             <div className="absolute top-0 right-0 p-6 text-red-100 group-hover:scale-110 transition-transform"><AlertCircle className="w-16 h-16" /></div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Ponto Crítico (Gargalo)</p>
                             <h2 className="text-3xl font-black text-red-600 tracking-tighter uppercase truncate pr-16">{analytics.mostCriticalEquipment || '--'}</h2>
                             <p className="text-[10px] font-bold text-slate-300 mt-2 uppercase">Maior acumulador de parada</p>
                         </div>
 
-                        <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl relative overflow-hidden group">
+                        <div className="bg-white p-6 rounded-[40px] border border-slate-100 shadow-xl relative overflow-hidden group">
                             <div className="absolute top-0 right-0 p-6 text-blue-100 group-hover:scale-110 transition-transform"><Activity className="w-16 h-16" /></div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">MTTR (Reparo Médio)</p>
                             <h2 className="text-5xl font-black text-slate-900 tracking-tighter mb-1">{analytics.mttr.toFixed(1)} <span className="text-sm">min</span></h2>
                             <div className="w-12 h-1 bg-slate-100 rounded-full mt-4" />
                         </div>
 
-                        <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl relative overflow-hidden group">
+                        <div className="bg-white p-6 rounded-[40px] border border-slate-100 shadow-xl relative overflow-hidden group">
                             <div className="absolute top-0 right-0 p-6 text-emerald-100 group-hover:scale-110 transition-transform"><LayoutGrid className="w-16 h-16" /></div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Ocorrência Totais</p>
                             <h2 className="text-5xl font-black text-slate-900 tracking-tighter mb-1">{analytics.totalStopsCount}</h2>
@@ -310,9 +310,9 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Pizza Maquinas */}
-                        <section className="bg-white p-10 rounded-[48px] border border-slate-100 shadow-2xl space-y-8">
+                        <section className="bg-white p-6 rounded-[48px] border border-slate-100 shadow-2xl space-y-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-red-50 rounded-2xl text-red-500"><Settings className="w-6 h-6" /></div>
@@ -320,7 +320,7 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="h-[400px]">
+                            <div className="h-[250px] lg:h-[350px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
                                         <Pie
@@ -348,7 +348,7 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                         </section>
 
                         {/* Pizza Detalhes do Gargalo */}
-                        <section className="bg-white p-10 rounded-[48px] border border-slate-100 shadow-2xl space-y-8">
+                        <section className="bg-white p-6 rounded-[48px] border border-slate-100 shadow-2xl space-y-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-blue-50 rounded-2xl text-blue-500"><BarChart2 className="w-6 h-6" /></div>
@@ -359,7 +359,7 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="h-[400px]">
+                            <div className="h-[250px] lg:h-[350px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
                                         <Pie
@@ -388,8 +388,8 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                     </div>
 
                     {/* Histórico Detalhado */}
-                    <section className="bg-white p-10 rounded-[48px] border border-slate-100 shadow-2xl">
-                        <div className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-100">
+                    <section className="bg-white p-6 rounded-[48px] border border-slate-100 shadow-2xl">
+                        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
                             <div className="p-3 bg-slate-900 rounded-2xl text-white"><History className="w-6 h-6" /></div>
                             <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Log Analítico de Paradas</h3>
                         </div>
@@ -398,31 +398,31 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                             <table className="w-full">
                                 <thead className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                                     <tr>
-                                        <th className="px-6 py-4 text-left">Data</th>
-                                        <th className="px-6 py-4 text-left">Tipo</th>
-                                        <th className="px-6 py-4 text-left">Equipamento</th>
-                                        <th className="px-6 py-4 text-left">Motivo</th>
-                                        <th className="px-6 py-4 text-right">Duração</th>
+                                        <th className="px-4 py-3 text-left">Data</th>
+                                        <th className="px-4 py-3 text-left">Tipo</th>
+                                        <th className="px-4 py-3 text-left">Equipamento</th>
+                                        <th className="px-4 py-3 text-left">Motivo</th>
+                                        <th className="px-4 py-3 text-right">Duração</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
                                     {analytics.detailedFailures.map((fail, idx) => (
                                         <tr key={idx} className="group hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-6 py-5 text-xs font-bold text-slate-400">{new Date(fail.data).toLocaleDateString('pt-BR')}</td>
-                                            <td className="px-6 py-5 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-xs font-bold text-slate-400">{new Date(fail.data).toLocaleDateString('pt-BR')}</td>
+                                            <td className="px-4 py-3 whitespace-nowrap">
                                                 <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider ${fail.tipo.includes('Planejada') ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'
                                                     }`}>
                                                     {fail.tipo}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-5">
+                                            <td className="px-4 py-3">
                                                 <p className="text-xs font-black text-slate-800 uppercase">{fail.equipamento}</p>
                                             </td>
-                                            <td className="px-6 py-5">
+                                            <td className="px-4 py-3">
                                                 <p className="text-xs font-bold text-slate-600 uppercase mb-1">{fail.motivo}</p>
                                                 {fail.obs && <p className="text-[10px] text-slate-400 italic font-medium truncate max-w-sm">{fail.obs}</p>}
                                             </td>
-                                            <td className="px-6 py-5 text-right">
+                                            <td className="px-4 py-3 text-right">
                                                 <div className="flex items-center justify-end gap-2">
                                                     {fail.duracao > 30 && <AlertTriangle className="w-3.5 h-3.5 text-red-500" />}
                                                     <span className={`text-sm font-black ${fail.duracao > 30 ? 'text-red-600' : 'text-slate-900'}`}>{fail.duracao} min</span>

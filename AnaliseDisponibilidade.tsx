@@ -115,7 +115,7 @@ const AnaliseDisponibilidade: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-20 w-full max-w-[98%] mx-auto font-sans">
+    <div className="space-y-4 lg:space-y-6 animate-in fade-in duration-700 pb-20 w-full max-w-[98%] mx-auto font-sans">
 
       {/* Header Analítico */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-slate-900/90 backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-2xl w-full relative overflow-hidden">
@@ -156,21 +156,21 @@ const AnaliseDisponibilidade: React.FC = () => {
 
       {/* Resumo de Saúde da Carteira */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-8 rounded-[32px] border border-white shadow-sm flex items-center gap-6">
+        <div className="bg-white p-6 rounded-[32px] border border-white shadow-sm flex items-center gap-6">
           <div className="p-4 bg-red-50 text-red-500 rounded-2xl"><AlertTriangle className="w-6 h-6" /></div>
           <div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Itens em Ruptura</p>
             <h4 className="text-3xl font-black text-slate-800">{balanco.filter(b => b.status === 'critico').length}</h4>
           </div>
         </div>
-        <div className="bg-white p-8 rounded-[32px] border border-white shadow-sm flex items-center gap-6">
+        <div className="bg-white p-6 rounded-[32px] border border-white shadow-sm flex items-center gap-6">
           <div className="p-4 bg-emerald-50 text-emerald-500 rounded-2xl"><CheckCircle2 className="w-6 h-6" /></div>
           <div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Itens Otimizados</p>
             <h4 className="text-3xl font-black text-slate-800">{balanco.filter(b => b.status === 'equilibrado').length}</h4>
           </div>
         </div>
-        <div className="bg-white p-8 rounded-[32px] border border-white shadow-sm flex items-center gap-6">
+        <div className="bg-white p-6 rounded-[32px] border border-white shadow-sm flex items-center gap-6">
           <div className="p-4 bg-amber-50 text-amber-500 rounded-2xl"><TrendingUp className="w-6 h-6" /></div>
           <div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Excesso de Estoque</p>
@@ -185,7 +185,7 @@ const AnaliseDisponibilidade: React.FC = () => {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-50/80 text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] border-b border-slate-100">
-                <th className="px-10 py-6">Produto / SKU</th>
+                <th className="px-4 py-4">Produto / SKU</th>
                 <th className="px-10 py-6 text-center">📦 Estoque Atual</th>
                 <th className="px-10 py-6 text-center">🛒 Pedidos (Fila)</th>
                 <th className="px-10 py-6 text-center">🗓️ Programado</th>
@@ -201,9 +201,9 @@ const AnaliseDisponibilidade: React.FC = () => {
                       'hover:bg-slate-50'
                     }`}
                 >
-                  <td className="px-10 py-6">
-                    <div className="flex items-center gap-4">
-                      <div className={`p-3 rounded-xl bg-white shadow-sm border border-slate-100 ${p.status === 'critico' ? 'text-red-500' : 'text-blue-500'}`}>
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-xl bg-white shadow-sm border border-slate-100 ${p.status === 'critico' ? 'text-red-500' : 'text-blue-500'}`}>
                         <Box className="w-5 h-5" />
                       </div>
                       <div>
@@ -243,7 +243,7 @@ const AnaliseDisponibilidade: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-8 bg-blue-50 rounded-[32px] border border-blue-100 flex items-start gap-6">
+      <div className="p-6 bg-blue-50 rounded-[32px] border border-blue-100 flex items-start gap-6">
         <Info className="w-8 h-8 text-blue-400 shrink-0" />
         <div>
           <h4 className="text-sm font-black text-blue-900 uppercase tracking-tight mb-2">Entendendo o Cálculo de Saldo</h4>

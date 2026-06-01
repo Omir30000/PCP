@@ -293,7 +293,7 @@ const ProgramacaoKanban: React.FC = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-100px)] flex flex-col bg-[#050505] text-slate-300 font-sans overflow-hidden p-2">
+    <div className="h-[calc(100vh-80px)] flex flex-col bg-[#050505] text-slate-300 font-sans overflow-hidden p-2">
 
       {/* Toast Feedback */}
       {toast && (
@@ -342,7 +342,7 @@ const ProgramacaoKanban: React.FC = () => {
       <div className="flex flex-1 gap-4 overflow-hidden px-2">
 
         {/* Catálogo Mix de Ativos (Lateral Esquerda) */}
-        <aside className="w-64 shrink-0 bg-slate-900/40 rounded-2xl border border-white/5 flex flex-col overflow-hidden shadow-2xl">
+        <aside className="w-52 shrink-0 bg-slate-900/40 rounded-2xl border border-white/5 flex flex-col overflow-hidden shadow-2xl">
           <div className="p-4 border-b border-white/5 bg-black/20">
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600 group-focus-within:text-[#facc15]" />
@@ -397,7 +397,7 @@ const ProgramacaoKanban: React.FC = () => {
                 </div>
 
                 {/* Cards de Programação */}
-                <div className="flex-1 overflow-y-auto no-scrollbar space-y-2.5 p-1 pb-10">
+                <div className="flex-1 overflow-y-auto no-scrollbar space-y-2.5 p-1 pb-6">
                   {planejamento.filter(p => p.dia_semana === dia.iso).map(item => {
                     const prod = produtos.find(pr => pr.id === item.produto_id);
                     const linha = linhas.find(l => l.id === item.linha_id);
@@ -408,7 +408,7 @@ const ProgramacaoKanban: React.FC = () => {
                         key={item.id}
                         draggable
                         onDragStart={e => onDragStartExisting(e, item)}
-                        className={`bg-slate-900 border ${shift.border} p-3.5 rounded-2xl shadow-2xl group/card hover:scale-[1.02] transition-all cursor-grab active:cursor-grabbing relative overflow-hidden`}
+                        className={`bg-slate-900 border ${shift.border} p-2.5 rounded-2xl shadow-2xl group/card hover:scale-[1.02] transition-all cursor-grab active:cursor-grabbing relative overflow-hidden`}
                       >
                         {/* Efeito Visual Nexus */}
                         <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
@@ -430,7 +430,7 @@ const ProgramacaoKanban: React.FC = () => {
                         </div>
 
                         {/* SKU Center Display */}
-                        <h5 className="text-[9px] font-black text-white uppercase leading-tight mb-3 tracking-tighter text-center border-y border-white/[0.03] py-2">
+                        <h5 className="text-[9px] font-black text-white uppercase leading-tight mb-3 tracking-tighter text-center border-y border-white/[0.03] py-1.5">
                           {prod?.nome || 'SKU INDEFINIDO'}
                         </h5>
 
@@ -450,7 +450,7 @@ const ProgramacaoKanban: React.FC = () => {
                   })}
 
                   {/* Slot Vazio p/ Drop */}
-                  <div className="h-16 border-2 border-dashed border-white/5 rounded-2xl flex items-center justify-center opacity-10 group-hover/col:opacity-30 transition-opacity">
+                  <div className="h-10 border-2 border-dashed border-white/5 rounded-2xl flex items-center justify-center opacity-10 group-hover/col:opacity-30 transition-opacity">
                     <Plus className="w-6 h-6 text-slate-500" />
                   </div>
                 </div>
@@ -466,7 +466,7 @@ const ProgramacaoKanban: React.FC = () => {
         <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-500" onClick={() => !savingDrop && setIsDropModalOpen(false)} />
 
-          <div className="bg-slate-900 rounded-2xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] w-full max-w-lg relative z-10 animate-in zoom-in-95 duration-500 overflow-hidden border border-white/10 flex flex-col p-10">
+          <div className="bg-slate-900 rounded-2xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] w-full max-w-lg relative z-10 animate-in zoom-in-95 duration-500 overflow-hidden border border-white/10 flex flex-col p-6">
             <header className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-[#facc15] rounded-xl shadow-lg">
@@ -482,7 +482,7 @@ const ProgramacaoKanban: React.FC = () => {
               </button>
             </header>
 
-            <div className="space-y-8">
+            <div className="space-y-6">
               {/* Seleção de Linha */}
               <div className="space-y-4">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">

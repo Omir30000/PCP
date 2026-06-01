@@ -537,19 +537,19 @@ const RelatorioRegistros: React.FC = () => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-900/80 border-b border-white/10">
-                                <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Data</th>
-                                <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Turno</th>
-                                <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Linha</th>
-                                <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Produto</th>
-                                <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Lote</th>
-                                <th className="p-4 text-[10px] font-black text-blue-400 uppercase tracking-widest text-right whitespace-nowrap">Produzido</th>
-                                <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right whitespace-nowrap">Eficiência</th>
+                                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Data</th>
+                                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Turno</th>
+                                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Linha</th>
+                                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Produto</th>
+                                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Lote</th>
+                                <th className="px-3 py-3 text-[10px] font-black text-blue-400 uppercase tracking-widest text-right whitespace-nowrap">Produzido</th>
+                                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right whitespace-nowrap">Eficiência</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
                             {registros.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="p-10 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">
+                                    <td colSpan={8} className="px-3 py-3 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">
                                         {loading ? 'Carregando registros...' : 'Nenhum registro encontrado para o período.'}
                                     </td>
                                 </tr>
@@ -566,25 +566,25 @@ const RelatorioRegistros: React.FC = () => {
                                             className="hover:bg-white/5 transition-colors cursor-pointer group"
                                             title="Clique para editar"
                                         >
-                                            <td className="p-4 text-xs font-bold text-slate-300 whitespace-nowrap group-hover:text-white">
+                                            <td className="px-3 py-3 text-xs font-bold text-slate-300 whitespace-nowrap group-hover:text-white">
                                                 {(reg as any).data_exibicao || '-'}
                                             </td>
-                                            <td className="p-4 text-xs font-bold text-slate-300 whitespace-nowrap uppercase">
+                                            <td className="px-3 py-3 text-xs font-bold text-slate-300 whitespace-nowrap uppercase">
                                                 {reg.turno}
                                             </td>
-                                            <td className="p-4 text-xs font-bold text-white whitespace-nowrap uppercase">
+                                            <td className="px-3 py-3 text-xs font-bold text-white whitespace-nowrap uppercase">
                                                 {reg.nome_linha}
                                             </td>
-                                            <td className="p-4 text-xs font-bold text-slate-300 whitespace-nowrap uppercase">
+                                            <td className="px-3 py-3 text-xs font-bold text-slate-300 whitespace-nowrap uppercase">
                                                 {reg.nome_produto}
                                             </td>
-                                            <td className="p-4 text-xs font-mono font-bold text-slate-400 whitespace-nowrap uppercase">
+                                            <td className="px-3 py-3 text-xs font-mono font-bold text-slate-400 whitespace-nowrap uppercase">
                                                 {reg.lote || '-'}
                                             </td>
-                                            <td className="p-4 text-sm font-black text-blue-400 text-right whitespace-nowrap group-hover:text-blue-300">
+                                            <td className="px-3 py-3 text-sm font-black text-blue-400 text-right whitespace-nowrap group-hover:text-blue-300">
                                                 {reg.quantidade_produzida?.toLocaleString()}
                                             </td>
-                                            <td className="p-4 text-xs font-bold text-right whitespace-nowrap">
+                                            <td className="px-3 py-3 text-xs font-bold text-right whitespace-nowrap">
                                                 <span className={`px-2 py-1 rounded-full text-[10px] ${eficiencia >= 90 ? 'bg-emerald-500/20 text-emerald-400' :
                                                     eficiencia >= 70 ? 'bg-yellow-500/20 text-yellow-400' :
                                                         'bg-red-500/20 text-red-400'
@@ -607,7 +607,7 @@ const RelatorioRegistros: React.FC = () => {
                     <div className="bg-[#1a1a1a] border border-white/10 rounded-[32px] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
 
                         {/* Modal Header */}
-                        <div className="p-5 md:p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#1a1a1a] z-10">
+                        <div className="p-4 md:p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#1a1a1a] z-10">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
                                     <FileText className="w-5 h-5" />
@@ -627,10 +627,10 @@ const RelatorioRegistros: React.FC = () => {
 
                         {/* Modal Body */}
                         <form onSubmit={handleSaveRecord} className="flex flex-col max-h-full">
-                            <div className="p-5 md:p-8 space-y-8 overflow-y-auto">
+                            <div className="p-4 md:p-6 space-y-8 overflow-y-auto">
 
                                 {/* Seção Principal */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="flex items-center gap-3 bg-black/40 px-4 py-2 rounded-xl border-2 border-white/10 focus-within:border-blue-500 transition-all shadow-sm">
                                         <Calendar className="w-5 h-5 text-blue-500" />
                                         <div className="flex flex-col">
@@ -650,7 +650,7 @@ const RelatorioRegistros: React.FC = () => {
                                         <select
                                             value={editingRecord.turno}
                                             onChange={e => setEditingRecord({ ...editingRecord, turno: e.target.value })}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
                                         >
                                             <option value="1º Turno" className="text-slate-900">1º TURNO</option>
                                             <option value="2º Turno" className="text-slate-900">2º TURNO</option>
@@ -662,7 +662,7 @@ const RelatorioRegistros: React.FC = () => {
                                         <select
                                             value={editingRecord.linha_producao}
                                             onChange={e => setEditingRecord({ ...editingRecord, linha_producao: e.target.value })}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
                                         >
                                             <option value="" className="text-slate-900">Selecione...</option>
                                             {linhasOpcoes.map(l => (
@@ -676,7 +676,7 @@ const RelatorioRegistros: React.FC = () => {
                                         <select
                                             value={editingRecord.produto_volume}
                                             onChange={e => setEditingRecord({ ...editingRecord, produto_volume: e.target.value })}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
                                         >
                                             <option value="" className="text-slate-900">Selecione...</option>
                                             {produtosOpcoes.map(p => (
@@ -691,7 +691,7 @@ const RelatorioRegistros: React.FC = () => {
                                             type="text"
                                             value={editingRecord.lote || ''}
                                             onChange={e => setEditingRecord({ ...editingRecord, lote: e.target.value })}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold font-mono"
+                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold font-mono"
                                         />
                                     </div>
 
@@ -702,7 +702,7 @@ const RelatorioRegistros: React.FC = () => {
                                             step="0.1"
                                             value={editingRecord.carga_horaria || 0}
                                             onChange={e => setEditingRecord({ ...editingRecord, carga_horaria: Number(e.target.value) })}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
                                         />
                                     </div>
 
@@ -712,7 +712,7 @@ const RelatorioRegistros: React.FC = () => {
                                             <select
                                                 value={maquinasAtivas}
                                                 onChange={e => setMaquinasAtivas(Number(e.target.value))}
-                                                className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                                className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
                                             >
                                                 <option value={1} className="text-slate-900">1 Máquina</option>
                                                 <option value={2} className="text-slate-900">2 Máquinas</option>
@@ -752,7 +752,7 @@ const RelatorioRegistros: React.FC = () => {
                                     </div>
 
                                     {/* Formulário de Nova Parada */}
-                                    <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-4">
+                                    <div className="bg-white/5 p-3 rounded-xl border border-white/5 space-y-4">
                                         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                                             <div className="space-y-1">
                                                 <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Máquina</label>
@@ -913,7 +913,7 @@ const RelatorioRegistros: React.FC = () => {
                                 </div>
 
                                 {/* Modal Footer */}
-                                <div className="flex items-center justify-between gap-4 pt-6 mt-6 border-t border-white/5 sticky bottom-0 bg-[#1a1a1a] z-50">
+                                <div className="flex items-center justify-between gap-4 pt-4 mt-4 border-t border-white/5 sticky bottom-0 bg-[#1a1a1a] z-50">
                                     <button
                                         type="button"
                                         onClick={handleDeleteRecord}

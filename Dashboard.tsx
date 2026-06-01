@@ -224,7 +224,7 @@ const Dashboard: React.FC = () => {
   }, [linhas, registros, filtroTurno, produtos]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-20">
+    <div className="space-y-4 lg:space-y-6 animate-in fade-in duration-700 pb-20">
       {/* Header Nexus Premium */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-2xl mb-4">
         <div className="flex items-center gap-5">
@@ -286,7 +286,7 @@ const Dashboard: React.FC = () => {
 
       {/* KPIs Globais */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div className="bg-[#141414] border border-white/5 p-4 sm:p-6 rounded-2xl relative overflow-hidden group">
+        <div className="bg-[#141414] border border-white/5 p-3 sm:p-4 rounded-2xl relative overflow-hidden group">
           <div className="flex items-center justify-between mb-2 sm:mb-4">
             <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-[#facc15]" />
             <span className="text-[8px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest">Rendimento</span>
@@ -298,7 +298,7 @@ const Dashboard: React.FC = () => {
             <Activity className="w-2.5 h-2.5 sm:w-3 h-3" /> Eficiência
           </p>
         </div>
-        <div className="bg-[#141414] border border-white/5 p-4 sm:p-6 rounded-2xl relative overflow-hidden">
+        <div className="bg-[#141414] border border-white/5 p-3 sm:p-4 rounded-2xl relative overflow-hidden">
           <div className="flex items-center justify-between mb-2 sm:mb-4">
             <AlertCircle className={`w-4 h-4 sm:w-5 sm:h-5 ${metrics.totalIncidentes > 0 ? 'text-rose-500 animate-pulse' : 'text-slate-600'}`} />
             <span className="text-[8px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest">Incidentes</span>
@@ -307,14 +307,14 @@ const Dashboard: React.FC = () => {
             {metrics.totalIncidentes}
           </h3>
         </div>
-        <div className="bg-[#141414] border border-white/5 p-4 sm:p-6 rounded-2xl relative overflow-hidden">
+        <div className="bg-[#141414] border border-white/5 p-3 sm:p-4 rounded-2xl relative overflow-hidden">
           <div className="flex items-center justify-between mb-2 sm:mb-4">
             <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
             <span className="text-[8px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest">Downtime</span>
           </div>
           <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tighter leading-none mb-1">{metrics.totalDowntime}m</h3>
         </div>
-        <div className="bg-[#141414] border border-white/5 p-4 sm:p-6 rounded-2xl relative overflow-hidden">
+        <div className="bg-[#141414] border border-white/5 p-3 sm:p-4 rounded-2xl relative overflow-hidden">
           <div className="flex items-center justify-between mb-2 sm:mb-4">
             <Package className="w-4 h-4 sm:w-5 sm:h-5 text-[#facc15]" />
             <span className="text-[8px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest">Produzido</span>
@@ -326,11 +326,11 @@ const Dashboard: React.FC = () => {
       {/* Cockpit de Linhas */}
       <div className="space-y-6">
         <h2 className="text-xl font-black text-white uppercase tracking-tighter border-l-4 border-[#facc15] pl-4">Cockpit de Produção</h2>
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           {lineMonitor.map(line => (
-            <div key={line.id} className={`bg-[#141414] border p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] transition-all duration-500 shadow-xl ${line.alertSeverity === 'CRITICAL' ? 'border-rose-500 shadow-[0_0_30px_rgba(244,63,94,0.15)]' : 'border-white/5 hover:border-[#facc15]/20'
+            <div key={line.id} className={`bg-[#141414] border p-4 lg:p-6 rounded-[24px] sm:rounded-[32px] transition-all duration-500 shadow-xl ${line.alertSeverity === 'CRITICAL' ? 'border-rose-500 shadow-[0_0_30px_rgba(244,63,94,0.15)]' : 'border-white/5 hover:border-[#facc15]/20'
               }`}>
-              <div className="flex items-center justify-between mb-6 sm:mb-8">
+                <div className="flex items-center justify-between mb-3 lg:mb-6">
                 <div className="flex items-center gap-4 sm:gap-6">
                   <div className={`p-4 sm:p-5 rounded-2xl ${line.alertSeverity === 'CRITICAL' ? 'bg-rose-500/20 text-rose-500' : 'bg-[#22c55e]/10 text-[#22c55e]'}`}>
                     <Cpu className="w-6 h-6 sm:w-8 sm:h-8" />
@@ -370,8 +370,8 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Metas Semanais */}
-      <div className="bg-[#141414] border border-white/5 p-10 rounded-[40px] shadow-2xl overflow-hidden">
-        <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-10 flex items-center gap-4">
+      <div className="bg-[#141414] border border-white/5 p-6 lg:p-8 rounded-[40px] shadow-2xl overflow-hidden">
+        <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-6 flex items-center gap-4">
           <ListChecks className="w-6 h-6 text-blue-400" /> Metas Semanais
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -392,11 +392,11 @@ const Dashboard: React.FC = () => {
 
       {/* Pareto e Impacto */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-[#141414] border border-white/5 p-8 rounded-[40px] shadow-2xl overflow-hidden">
+        <div className="lg:col-span-2 bg-[#141414] border border-white/5 p-6 rounded-[40px] shadow-2xl overflow-hidden">
           <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-8 flex items-center gap-4">
             <TrendingUp className="w-5 h-5 text-blue-400" /> Pareto de Inatividade
           </h3>
-          <div className="h-[250px]">
+          <div className="h-[180px] lg:h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={metrics.chartData} innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value" stroke="none">
@@ -438,7 +438,7 @@ const Dashboard: React.FC = () => {
                 <p className="text-center text-slate-600 font-bold uppercase tracking-widest py-10 text-[10px]">Sem registros de parada</p>
               ) : (
                 modalLinha.paradas.map((p: any, idx: number) => (
-                  <div key={idx} className="bg-black/40 border border-white/5 p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] flex items-center justify-between">
+                  <div key={idx} className="bg-black/40 border border-white/5 p-3 sm:p-4 rounded-[20px] sm:rounded-[24px] flex items-center justify-between">
                     <div className="flex items-center gap-4 sm:gap-5">
                       <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-slate-500" />
                       <div>
