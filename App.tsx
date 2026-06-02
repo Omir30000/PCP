@@ -191,19 +191,22 @@ const App: React.FC = () => {
           if (onClick) onClick();
           if (isMobileMenuOpen) setIsMobileMenuOpen(false);
         }}
-        className={`w-full flex items-center transition-all duration-300 relative group/item
+        className={`w-full flex items-center transition-all duration-300 relative group/item select-none
           ${isDesktopSidebar ? (isSidebarExpanded ? (isSubItem ? 'pl-12 pr-4 py-2.5' : 'px-4 py-3 gap-4') : 'justify-center py-4') : 'px-4 py-3.5 gap-4 rounded-xl mb-1'}
-          ${isActive ? 'text-[#facc15] bg-[#facc15]/5' : 'text-slate-500 hover:text-white hover:bg-white/5'}
-          ${!isSubItem && isDesktopSidebar ? 'rounded-xl mb-1' : 'mb-0.5'}
+          ${isSubItem && isDesktopSidebar ? 'pl-12' : ''}
+          ${isDesktopSidebar ? 'rounded-xl mb-0.5' : 'mb-0.5'}
+          ${isActive
+            ? 'text-[#facc15] bg-gradient-to-r from-[#facc15]/10 to-transparent'
+            : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'}
           ${!isDesktopSidebar && isActive ? 'bg-[#facc15]/10 border border-[#facc15]/20' : ''}
         `}
       >
-        {isActive && !isSubItem && isDesktopSidebar && (
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#facc15] rounded-r-full shadow-[0_0_15px_#facc15]" />
+        {isActive && isDesktopSidebar && (
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#facc15] rounded-r-full shadow-[0_0_12px_rgba(250,204,21,0.4)]" />
         )}
-        <Icon className={`${isDesktopSidebar ? (isSidebarExpanded ? (isSubItem ? 'w-3.5 h-3.5' : 'w-5 h-5') : 'w-6 h-6') : 'w-5 h-5'} shrink-0`} />
+        <Icon className={`${isDesktopSidebar ? (isSidebarExpanded ? (isSubItem ? 'w-3.5 h-3.5' : 'w-5 h-5') : 'w-6 h-6') : 'w-5 h-5'} shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover/item:scale-110'}`} />
         {(isSidebarExpanded || !isDesktopSidebar) && (
-          <span className={`font-black uppercase tracking-[0.15em] whitespace-nowrap overflow-hidden text-[10px]`}>
+          <span className={`font-bold uppercase tracking-[0.12em] whitespace-nowrap overflow-hidden text-[10px] transition-all duration-300 ${isActive ? 'text-[#facc15]' : 'group-hover/item:text-slate-200'}`}>
             {label}
           </span>
         )}
@@ -217,14 +220,14 @@ const App: React.FC = () => {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className={`w-full flex items-center transition-all duration-300 relative group/item
+        className={`w-full flex items-center transition-all duration-300 relative group/item select-none
           ${isDesktopSidebar ? (isSidebarExpanded ? 'px-4 py-3 gap-4' : 'justify-center py-4') : 'px-4 py-3.5 gap-4 rounded-xl mb-1'}
-          text-slate-500 hover:text-[#facc15] hover:bg-[#facc15]/5 rounded-xl mb-1
+          text-slate-400 hover:text-[#facc15] hover:bg-white/[0.04] rounded-xl mb-0.5
         `}
       >
-        <Icon className={`${isDesktopSidebar ? (isSidebarExpanded ? 'w-5 h-5' : 'w-6 h-6') : 'w-5 h-5'} shrink-0 group-hover:scale-110 transition-transform`} />
+        <Icon className={`${isDesktopSidebar ? (isSidebarExpanded ? 'w-5 h-5' : 'w-6 h-6') : 'w-5 h-5'} shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(250,204,21,0.3)]`} />
         {(isSidebarExpanded || !isDesktopSidebar) && (
-          <span className={`font-black uppercase tracking-[0.15em] whitespace-nowrap overflow-hidden text-[10px]`}>
+          <span className={`font-bold uppercase tracking-[0.12em] whitespace-nowrap overflow-hidden text-[10px] transition-colors duration-300 group-hover:text-[#facc15]`}>
             {label}
           </span>
         )}
@@ -242,17 +245,17 @@ const App: React.FC = () => {
         onMouseLeave={() => setIsSidebarExpanded(false)}
         className={`hidden lg:flex flex-col h-screen sticky top-0 z-50 transition-all duration-500 border-r border-white/5 shadow-2xl
           ${isSidebarExpanded ? 'w-64' : 'w-20'}
-          bg-[#0d0d0d] backdrop-blur-xl
+          bg-[#0a0a0a] border-r border-white/[0.04]
         `}
       >
-        <div className={`p-6 mb-8 flex items-center ${isSidebarExpanded ? 'gap-4' : 'justify-center'}`}>
-          <div className="w-10 h-10 bg-[#facc15] rounded-lg flex items-center justify-center font-black text-black text-xl shadow-[0_0_20px_rgba(250,204,21,0.3)] shrink-0">
+        <div className={`pt-6 pb-4 mb-6 flex items-center ${isSidebarExpanded ? 'gap-4 px-5' : 'justify-center'}`}>
+          <div className="w-9 h-9 bg-gradient-to-br from-[#facc15] to-[#f59e0b] rounded-xl flex items-center justify-center font-black text-black text-lg shadow-[0_0_20px_rgba(250,204,21,0.25)] shrink-0">
             N
           </div>
           {isSidebarExpanded && (
             <div className="flex flex-col">
-              <span className="text-white font-black text-base tracking-tighter uppercase leading-none">Nexus PCP</span>
-              <span className="text-[#facc15] text-[8px] font-black tracking-[0.4em] mt-1 italic">PREMIUM</span>
+              <span className="text-white font-bold text-sm tracking-tight uppercase leading-none">Nexus PCP</span>
+              <span className="text-[#facc15]/70 text-[7px] font-bold tracking-[0.35em] mt-1">MONITOR</span>
             </div>
           )}
         </div>
@@ -268,7 +271,7 @@ const App: React.FC = () => {
             </>
           )}
 
-          <div className="h-px bg-white/5 my-6 mx-4" />
+          <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-5 mx-4" />
 
           <NavItem id="registro" icon={ClipboardPenLine} label="Apontamento" />
           
@@ -279,18 +282,20 @@ const App: React.FC = () => {
             <NavItem id="produtos" icon={Package} label="Catálogo" />
           )}
 
-          <div className="h-px bg-white/5 my-6 mx-4" />
+          <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-5 mx-4" />
 
           {isSidebarExpanded && (role === 'admin' || role === 'lider') && (
             <button
               onClick={() => setIsReportsOpen(!isReportsOpen)}
-              className="w-full flex items-center justify-between px-4 mb-4 group ring-0 outline-none"
+              className="w-full flex items-center justify-between px-4 mb-3 group ring-0 outline-none select-none"
             >
-              <div className="flex items-center gap-2">
-                <FileText className="w-3.5 h-3.5 text-slate-500" />
-                <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Relatórios de Produção</p>
+              <div className="flex items-center gap-2.5">
+                <div className="w-5 h-5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center group-hover:bg-white/[0.06] transition-all">
+                  <FileText className="w-3 h-3 text-slate-500 group-hover:text-slate-300 transition-colors" />
+                </div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Relatórios de Produção</p>
               </div>
-              <ChevronDown className={`w-3 h-3 text-slate-600 transition-transform duration-300 ${isReportsOpen ? '' : '-rotate-90'}`} />
+              <ChevronDown className={`w-3 h-3 text-slate-600 transition-all duration-300 ${isReportsOpen ? '' : '-rotate-90'}`} />
             </button>
           )}
 
@@ -310,13 +315,15 @@ const App: React.FC = () => {
           {isSidebarExpanded && (role === 'admin' || role === 'lider') && (
             <button
               onClick={() => setIsAIReportsOpen(!isAIReportsOpen)}
-              className="w-full flex items-center justify-between px-4 mb-4 mt-2 group ring-0 outline-none"
+              className="w-full flex items-center justify-between px-4 mb-3 mt-3 group ring-0 outline-none select-none"
             >
-              <div className="flex items-center gap-2">
-                <BrainCircuit className="w-3.5 h-3.5 text-slate-500" />
-                <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Relatórios com IA</p>
+              <div className="flex items-center gap-2.5">
+                <div className="w-5 h-5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center group-hover:bg-white/[0.06] transition-all">
+                  <BrainCircuit className="w-3 h-3 text-slate-500 group-hover:text-slate-300 transition-colors" />
+                </div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Relatórios com IA</p>
               </div>
-              <ChevronDown className={`w-3 h-3 text-slate-600 transition-transform duration-300 ${isAIReportsOpen ? '' : '-rotate-90'}`} />
+              <ChevronDown className={`w-3 h-3 text-slate-600 transition-all duration-300 ${isAIReportsOpen ? '' : '-rotate-90'}`} />
             </button>
           )}
           {(role === 'admin' || role === 'lider') && (
@@ -327,7 +334,7 @@ const App: React.FC = () => {
             </div>
           )}
 
-          <div className="h-px bg-white/5 my-6 mx-4" />
+          <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-5 mx-4" />
 
           <NavItem id="perfil" icon={User} label="Meu Perfil" />
           
@@ -335,7 +342,7 @@ const App: React.FC = () => {
             <NavItem id="usuarios" icon={Settings} label="Gestão de Equipe" />
           )}
 
-          <div className="h-px bg-white/5 my-6 mx-4" />
+          <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-5 mx-4" />
 
           <ExternalNavItem 
             icon={Wrench} 
@@ -349,13 +356,15 @@ const App: React.FC = () => {
           {isSidebarExpanded && (
             <button
               onClick={() => setIsKnowledgeOpen(!isKnowledgeOpen)}
-              className="w-full flex items-center justify-between px-4 mb-4 group ring-0 outline-none"
+              className="w-full flex items-center justify-between px-4 mb-3 mt-2 group ring-0 outline-none select-none"
             >
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-3.5 h-3.5 text-slate-500" />
-                <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Base de Conhecimento</p>
+              <div className="flex items-center gap-2.5">
+                <div className="w-5 h-5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center group-hover:bg-white/[0.06] transition-all">
+                  <BookOpen className="w-3 h-3 text-slate-500 group-hover:text-slate-300 transition-colors" />
+                </div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Base de Conhecimento</p>
               </div>
-              <ChevronDown className={`w-3 h-3 text-slate-600 transition-transform duration-300 ${isKnowledgeOpen ? '' : '-rotate-90'}`} />
+              <ChevronDown className={`w-3 h-3 text-slate-600 transition-all duration-300 ${isKnowledgeOpen ? '' : '-rotate-90'}`} />
             </button>
           )}
 
@@ -364,12 +373,12 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <div className={`p-4 mt-auto border-t border-white/5 bg-black/40 flex flex-col gap-4`}>
+        <div className={`p-3 mt-auto border-t border-white/[0.04] bg-black/20`}>
           <div 
             onClick={() => setActiveTab('perfil')}
-            className="flex items-center gap-4 cursor-pointer hover:bg-white/5 p-2 rounded-xl transition-colors group/profile"
+            className="flex items-center gap-3 cursor-pointer hover:bg-white/[0.04] p-2 rounded-xl transition-all duration-300 group/profile"
           >
-            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-[#facc15] shrink-0 border border-white/5 uppercase font-black text-xs overflow-hidden">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-[#facc15] shrink-0 border border-white/[0.06] uppercase font-black text-xs overflow-hidden shadow-lg">
               {userProfile?.foto_url ? (
                 <img src={userProfile.foto_url} alt="Profile" className="w-full h-full object-cover" />
               ) : (
@@ -378,17 +387,17 @@ const App: React.FC = () => {
             </div>
             {isSidebarExpanded && (
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-black text-white uppercase truncate group-hover/profile:text-[#facc15] transition-colors">{userProfile?.nome || 'Usuário Nexus'}</p>
-                <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{userProfile?.nivel_acesso || 'Operacional'}</p>
+                <p className="text-[10px] font-bold text-white/90 uppercase truncate group-hover/profile:text-[#facc15] transition-colors">{userProfile?.nome || 'Usuário Nexus'}</p>
+                <p className="text-[7px] font-bold text-slate-500 uppercase tracking-[0.15em]">{userProfile?.nivel_acesso || 'Operacional'}</p>
               </div>
             )}
             
             {isSidebarExpanded && (
               <button 
                 onClick={(e) => { e.stopPropagation(); handleLogout(); }}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-400/10 transition-colors shrink-0"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-600 hover:text-red-400 hover:bg-red-400/10 transition-all duration-300 shrink-0 opacity-0 group-hover/profile:opacity-100"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
