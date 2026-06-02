@@ -240,7 +240,8 @@ const ProgramacaoKanban: React.FC = () => {
           const infoSlots = itensDia.map(item => {
             const l = linhas.find(lin => lin.id === item.linha_id);
             const lineName = l ? (l.nome.toLowerCase().includes('linha') ? `L${l.nome.match(/\d+/)?.[0] || l.nome.slice(-1)}` : l.nome.slice(0, 3).toUpperCase()) : 'L?';
-            return `${lineName}-T${item.turno}`;
+            const turnoLabel = item.turno === '2' ? 'Noite' : 'Dia';
+            return `${lineName}-${turnoLabel}`;
           }).join(' / ');
           row.push(infoSlots);
         } else {
