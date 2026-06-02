@@ -418,9 +418,10 @@ const RelatorioRegistros: React.FC = () => {
 
             const updatedRow = (data && data.length > 0) ? data[0] : { ...editingRecord, ...payload, id: editingRecord.id };
 
+            const [yr, mo, dy] = (updatedRow.data_registro || '').split('-');
             setRegistros(prev => prev.map(r => r.id === editingRecord.id ? {
                 ...updatedRow,
-                // Recalcula nomes para exibição na tabela se necessário
+                data_exibicao: dy && mo && yr ? `${dy}/${mo}/${yr}` : r.data_exibicao,
                 nome_linha: linhasMap[updatedRow.linha_id || updatedRow.linha_producao] || updatedRow.linha_producao || r.nome_linha || '-',
                 nome_produto: produtosMap[updatedRow.produto_id || updatedRow.produto_volume] || updatedRow.produto_volume || r.nome_produto || '-',
                 paradas_detalhadas: (updatedRow.paradas as any) || payload.paradas || []
