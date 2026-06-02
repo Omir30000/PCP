@@ -6,11 +6,16 @@ import {
   Calendar,
   Loader2,
   Gauge,
-  TrendingUp,
-  Clock,
-  AlertTriangle
+  TrendingUp
 } from 'lucide-react';
 import { useToast } from './lib/toast';
+
+const fmtData = (data: string) => {
+  if (!data || data === '-') return '-';
+  const [ano, mes, dia] = data.split('-');
+  if (!ano || !mes || !dia) return data;
+  return `${dia}/${mes}/${ano}`;
+};
 
 const parseMinutos = (val: any): number => {
   if (val === null || val === undefined) return 0;
@@ -216,56 +221,31 @@ const RelatorioTop5Equipamentos: React.FC = () => {
           <p className="text-slate-600 font-black uppercase tracking-widest text-xs">Nenhum downtime no período</p>
         </div>
       ) : (
-        <div className="flex flex-col xl:flex-row gap-6">
-          <div className="xl:w-96 space-y-3">
-            {equipamentos.map((eq, idx) => (
-              <div key={eq.nome} className="bg-slate-900/40 backdrop-blur-md rounded-xl border border-white/5 p-3 hover:border-red-500/20 transition-all">
-                <Speedometro nome={eq.nome} minutos={eq.totalMinutos} maxMinutos={maxMinutos} rank={idx + 1} />
-              </div>
-            ))}
-          </div>
-
-          <div className="flex-1 bg-slate-900/30 backdrop-blur-md rounded-2xl border border-white/5 p-4 overflow-hidden">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-              <Clock className="w-3 h-3 text-red-400" /> Paradas por Equipamento
-            </h4>
-            <div className="overflow-y-auto max-h-[600px] space-y-3 pr-1">
-              {equipamentos.map(eq => (
-                <div key={eq.nome} className="bg-white/5 rounded-xl p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-black text-white uppercase tracking-tight">{eq.nome}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-red-400">{Math.floor(eq.totalMinutos / 60)}h {Math.round(eq.totalMinutos % 60)}m ({eq.ocorrencias}x)</span>
-                      {eq.paradas.length > 10 && (
-                        <button onClick={() => setModalEquip(eq)} className="text-[8px] font-black text-slate-500 uppercase tracking-widest bg-white/5 hover:bg-white/10 px-2 py-1 rounded-lg transition-all cursor-pointer">
-                          ver todas
-                        </button>
-                      )}
+        <div className="space-y-3">
+          {equipamentos.map((eq, idx) => (
+            <div key={eq.nome} onClick={() => setModalEquip(eq)} className="bg-slate-900/40 backdrop-blur-md rounded-xl border border-white/5 p-4 hover:border-red-500/30 hover:bg-slate-900/60 transition-all cursor-pointer">
+              <Speedometro nome={eq.nome} minutos={eq.totalMinutos} maxMinutos={maxMinutos} rank={idx + 1} />
+              <div className="mt-3 pt-3 border-t border-white/5 space-y-1">
+                {[...eq.paradas].sort((a, b) => a.data.localeCompare(b.data)).slice(0, 3).map((p, i) => (
+                  <div key={i} className="flex items-center justify-between bg-black/20 rounded-lg px-3 py-1.5 text-[9px]">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="text-slate-500 font-mono w-[72px] shrink-0">{fmtData(p.data)}</span>
+                      <span className="text-slate-400 uppercase font-bold truncate">{p.motivo}</span>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0 ml-2">
+                      <span className="text-slate-500">{p.turno}</span>
+                      <span className="font-black text-white w-14 text-right">{p.duracao}min</span>
                     </div>
                   </div>
-                  <div className="space-y-1">
-                    {eq.paradas.slice(0, 10).map((p, i) => (
-                      <div key={i} onClick={() => setModalEquip(eq)} className="flex items-center justify-between bg-black/20 rounded-lg px-3 py-1.5 text-[9px] cursor-pointer hover:bg-red-500/10 transition-all">
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <span className="text-slate-500 font-mono w-16 shrink-0">{p.data}</span>
-                          <span className="text-slate-400 uppercase font-bold truncate">{p.motivo}</span>
-                        </div>
-                        <div className="flex items-center gap-3 shrink-0 ml-2">
-                          <span className="text-slate-500">{p.turno}</span>
-                          <span className="font-black text-white w-14 text-right">{p.duracao}min</span>
-                        </div>
-                      </div>
-                    ))}
-                    {eq.paradas.length > 10 && (
-                      <button onClick={() => setModalEquip(eq)} className="w-full text-[8px] text-slate-600 text-center pt-1 hover:text-red-400 transition-colors cursor-pointer font-bold uppercase tracking-widest">
-                        +{eq.paradas.length - 10} ocorrências — ver todas
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                ))}
+                {eq.paradas.length > 3 && (
+                  <p className="text-[8px] text-slate-600 text-center pt-1 font-bold uppercase tracking-widest">
+                    +{eq.paradas.length - 3} paradas — clique para ver tudo
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
+          ))}
         </div>
       )}
 
@@ -283,10 +263,10 @@ const RelatorioTop5Equipamentos: React.FC = () => {
               </button>
             </div>
             <div className="overflow-y-auto p-5 space-y-1.5 flex-1">
-              {modalEquip.paradas.map((p, i) => (
+              {[...modalEquip.paradas].sort((a, b) => a.data.localeCompare(b.data)).map((p, i) => (
                 <div key={i} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-2.5 text-xs hover:bg-red-500/5 transition-all">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <span className="text-slate-500 font-mono w-20 shrink-0">{p.data}</span>
+                    <span className="text-slate-500 font-mono w-[72px] shrink-0">{fmtData(p.data)}</span>
                     <span className="text-slate-300 uppercase font-bold truncate">{p.motivo}</span>
                   </div>
                   <div className="flex items-center gap-4 shrink-0 ml-3">
