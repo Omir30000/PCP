@@ -178,7 +178,7 @@ const PaginaRegistro: React.FC = () => {
     if (formData.hora_inicio_turno && formData.hora_fim_turno) {
       const duracaoBruta = calculateDuration(formData.hora_inicio_turno, formData.hora_fim_turno);
       // Subtrai 60 minutos do intervalo, mas garante que não fique negativo
-      const duracaoLiquida = Math.max(0, duracaoBruta - 60);
+      const duracaoLiquida = duracaoBruta >= 480 ? Math.max(0, duracaoBruta - 60) : duracaoBruta;
       const duracaoHoras = Number((duracaoLiquida / 60).toFixed(2));
       setFormData(prev => ({ ...prev, carga_horaria: duracaoHoras }));
     }
