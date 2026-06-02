@@ -225,131 +225,94 @@ const Produtos: React.FC = () => {
         </div>
       </div>
 
-      {/* Grid de Cards (Vitrine Industrial) */}
-      <div className="space-y-4 w-full">
-        {loading ? (
-          <div className="py-48 flex flex-col items-center justify-center text-slate-500">
-            <Loader2 className="w-12 h-12 animate-spin mb-6 text-[#facc15]" />
-            <span className="text-[11px] font-black uppercase tracking-[0.4em] opacity-40">Sincronizando Catálogo...</span>
-          </div>
-        ) : filteredProdutos.length > 0 ? (
-          filteredProdutos.map((p) => {
+      {/* Grid de Cards (Vitrine Compacta) */}
+      {loading ? (
+        <div className="py-48 flex flex-col items-center justify-center text-slate-500">
+          <Loader2 className="w-12 h-12 animate-spin mb-6 text-[#facc15]" />
+          <span className="text-[11px] font-black uppercase tracking-[0.4em] opacity-40">Sincronizando Catálogo...</span>
+        </div>
+      ) : filteredProdutos.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {filteredProdutos.map((p) => {
             const config = TIPO_CONFIG[p.tipo || 'Padrão'] || TIPO_CONFIG['Padrão'];
             return (
               <div
                 key={p.id}
-                className="group bg-slate-900/40 backdrop-blur-md p-6 md:p-8 rounded-2xl border border-white/5 transition-all duration-500 shadow-xl hover:shadow-[#facc15]/5 hover:border-[#facc15]/20 flex flex-col xl:flex-row items-center gap-8 md:gap-12 relative overflow-hidden"
+                className="group bg-slate-900/40 backdrop-blur-md p-4 rounded-xl border border-white/5 transition-all duration-300 hover:border-[#facc15]/20 hover:shadow-lg hover:shadow-[#facc15]/5 relative overflow-hidden"
               >
-                {/* Background Decorativo */}
-                <div className={`absolute -right-20 -bottom-20 w-64 h-64 ${config.bg} rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none`} />
+                <div className={`absolute -right-16 -bottom-16 w-40 h-40 ${config.bg} rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none`} />
 
-                {/* Bloco de Identificação */}
-                <div className="flex items-center gap-6 w-full xl:w-1/3 shrink-0">
-                  <div className={`w-20 h-20 rounded-xl ${config.bg} ${config.text} flex items-center justify-center shadow-lg ${config.shadow} shrink-0 group-hover:scale-110 transition-transform duration-500`}>
-                    {React.isValidElement(config.icon) ? (
-                      React.cloneElement(config.icon as React.ReactElement<any>, { className: 'w-10 h-10' })
-                    ) : (
-                      <Package className="w-10 h-10" />
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-2 min-w-0">
-                    <h3 className="text-xl md:text-2xl font-black text-white tracking-tighter leading-tight truncate">
-                      {p.nome}
-                    </h3>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${config.bg} ${config.text}`}>
-                        {p.tipo || 'COMUM'}
-                      </span>
-                      {p.linhas_ids && p.linhas_ids.length > 0 && (
-                        <div className="flex items-center gap-1">
-                          {p.linhas_ids.map(lId => {
-                            const linha = linhas.find(l => l.id === lId);
-                            if (!linha) return null;
-                            return (
-                              <span key={lId} className="px-3 py-1 bg-white/5 border border-white/5 rounded-full text-[8px] font-bold text-slate-400">
-                                {linha.nome}
-                              </span>
-                            );
-                          })}
-                        </div>
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-9 h-9 rounded-lg ${config.bg} ${config.text} flex items-center justify-center shrink-0`}>
+                      {React.isValidElement(config.icon) ? (
+                        React.cloneElement(config.icon as React.ReactElement<any>, { className: 'w-4 h-4' })
+                      ) : (
+                        <Package className="w-4 h-4" />
                       )}
                     </div>
-                  </div>
-                </div>
-
-                {/* Bloco de Métricas */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 md:gap-12 w-full xl:flex-1 items-center px-4">
-
-                  {/* Litragem */}
-                  <div className="flex items-center gap-4 group/item">
-                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-blue-400 group-hover/item:bg-blue-600 group-hover/item:text-white transition-all">
-                      <Droplets className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-0.5">Litragem</span>
-                      <span className="text-base font-black text-white tracking-tight">{p.volume || 'N/A'}</span>
-                    </div>
-                  </div>
-
-                  {/* Logística de Pack */}
-                  <div className="flex items-center gap-4 group/item">
-                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 group-hover/item:bg-white group-hover/item:text-black transition-all">
-                      <Box className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-0.5">Pack / Palete</span>
-                      <span className="text-base font-black text-white tracking-tight">
-                        {p.unidades_por_fardo}u • {p.fardos_por_palete}p
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-black text-white tracking-tight truncate max-w-[160px]">{p.nome}</h3>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest ${config.bg} ${config.text}`}>
+                        {p.tipo || 'COMUM'}
                       </span>
                     </div>
                   </div>
 
-                  {/* Meta Nominal */}
-                  <div className="flex items-center gap-5 group/item">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover/item:bg-emerald-500 group-hover/item:text-white transition-all shadow-sm">
-                      <Target className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-0.5">Meta Nominal (8h)</span>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-black text-emerald-500 tracking-tighter">
-                          {p.capacidade_nominal?.toLocaleString()}
-                        </span>
-                        <span className="text-[10px] font-bold text-slate-500 uppercase">un</span>
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button onClick={() => openModal(p)} className="p-1.5 bg-white/5 hover:bg-blue-600 hover:text-white text-slate-500 rounded-lg transition-all">
+                      <Pencil className="w-3 h-3" />
+                    </button>
+                    <button onClick={() => handleDelete(p.id)} className="p-1.5 bg-white/5 hover:bg-red-500 hover:text-white text-slate-500 rounded-lg transition-all">
+                      <Trash2 className="w-3 h-3" />
+                    </button>
                   </div>
-
                 </div>
 
-                {/* Bloco de Ações */}
-                <div className="flex items-center gap-3 w-full xl:w-auto xl:opacity-0 group-hover:opacity-100 transition-all duration-300 justify-end">
-                  <button
-                    onClick={() => openModal(p)}
-                    className="p-4 bg-white/5 hover:bg-blue-600 hover:text-white text-slate-500 rounded-xl border border-white/5 shadow-sm transition-all active:scale-95"
-                  >
-                    <Pencil className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(p.id)}
-                    className="p-4 bg-white/5 hover:bg-red-500 hover:text-white text-slate-500 rounded-xl border border-white/5 shadow-sm transition-all active:scale-95"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                  <div className="xl:hidden w-10 h-10 flex items-center justify-center">
-                    <ChevronRight className="w-6 h-6 text-slate-700" />
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  <div className="bg-white/5 rounded-lg p-2 text-center">
+                    <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest block">Volume</span>
+                    <span className="text-xs font-black text-white">{p.volume || '-'}</span>
                   </div>
+                  <div className="bg-white/5 rounded-lg p-2 text-center">
+                    <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest block">Pack</span>
+                    <span className="text-xs font-black text-white">{p.unidades_por_fardo}u</span>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-2 text-center">
+                    <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest block">Palete</span>
+                    <span className="text-xs font-black text-white">{p.fardos_por_palete}p</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest block">Meta (8h)</span>
+                    <span className="text-xs font-black text-emerald-500">{p.capacidade_nominal?.toLocaleString()} un</span>
+                  </div>
+                  {p.linhas_ids && p.linhas_ids.length > 0 && (
+                    <div className="flex items-center gap-1">
+                      {p.linhas_ids.map(lId => {
+                        const linha = linhas.find(l => l.id === lId);
+                        if (!linha) return null;
+                        return (
+                          <span key={lId} className="px-1.5 py-0.5 bg-white/5 border border-white/5 rounded text-[6px] font-bold text-slate-400">
+                            {linha.nome}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             );
-          })
-        ) : (
-          <div className="py-40 text-center bg-slate-900/40 backdrop-blur-md rounded-2xl border border-dashed border-white/10">
-            <Box className="w-16 h-16 text-slate-800 mx-auto mb-6" />
-            <p className="text-slate-600 font-black uppercase tracking-[0.3em] text-sm">Catálogo de SKUs Vazio</p>
-          </div>
-        )}
-      </div>
+          })}
+        </div>
+      ) : (
+        <div className="py-40 text-center bg-slate-900/40 backdrop-blur-md rounded-2xl border border-dashed border-white/10">
+          <Box className="w-16 h-16 text-slate-800 mx-auto mb-6" />
+          <p className="text-slate-600 font-black uppercase tracking-[0.3em] text-sm">Catálogo de SKUs Vazio</p>
+        </div>
+      )}
 
       {/* Modal Glassmorphism Overhaul */}
       {isModalOpen && (
