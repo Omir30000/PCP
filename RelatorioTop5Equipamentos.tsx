@@ -90,6 +90,7 @@ const RelatorioTop5Equipamentos: React.FC = () => {
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [loading, setLoading] = useState(false);
   const [equipamentos, setEquipamentos] = useState<EquipamentoStats[]>([]);
+  const [modalEquip, setModalEquip] = useState<EquipamentoStats | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -233,11 +234,18 @@ const RelatorioTop5Equipamentos: React.FC = () => {
                 <div key={eq.nome} className="bg-white/5 rounded-xl p-3">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-black text-white uppercase tracking-tight">{eq.nome}</span>
-                    <span className="text-[10px] font-bold text-red-400">{Math.floor(eq.totalMinutos / 60)}h {Math.round(eq.totalMinutos % 60)}m ({eq.ocorrencias}x)</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-red-400">{Math.floor(eq.totalMinutos / 60)}h {Math.round(eq.totalMinutos % 60)}m ({eq.ocorrencias}x)</span>
+                      {eq.paradas.length > 10 && (
+                        <button onClick={() => setModalEquip(eq)} className="text-[8px] font-black text-slate-500 uppercase tracking-widest bg-white/5 hover:bg-white/10 px-2 py-1 rounded-lg transition-all cursor-pointer">
+                          ver todas
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="space-y-1">
-                    {eq.paradas.slice(0, 8).map((p, i) => (
-                      <div key={i} className="flex items-center justify-between bg-black/20 rounded-lg px-3 py-1.5 text-[9px]">
+                    {eq.paradas.slice(0, 10).map((p, i) => (
+                      <div key={i} onClick={() => setModalEquip(eq)} className="flex items-center justify-between bg-black/20 rounded-lg px-3 py-1.5 text-[9px] cursor-pointer hover:bg-red-500/10 transition-all">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                           <span className="text-slate-500 font-mono w-16 shrink-0">{p.data}</span>
                           <span className="text-slate-400 uppercase font-bold truncate">{p.motivo}</span>
@@ -248,9 +256,43 @@ const RelatorioTop5Equipamentos: React.FC = () => {
                         </div>
                       </div>
                     ))}
-                    {eq.paradas.length > 8 && (
-                      <p className="text-[8px] text-slate-600 text-center pt-1">+{eq.paradas.length - 8} ocorrências</p>
+                    {eq.paradas.length > 10 && (
+                      <button onClick={() => setModalEquip(eq)} className="w-full text-[8px] text-slate-600 text-center pt-1 hover:text-red-400 transition-colors cursor-pointer font-bold uppercase tracking-widest">
+                        +{eq.paradas.length - 10} ocorrências — ver todas
+                      </button>
                     )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {modalEquip && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setModalEquip(null)}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div className="relative bg-slate-900 border border-white/10 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-white/5">
+              <div>
+                <h2 className="text-base font-black text-white uppercase tracking-tight">{modalEquip.nome}</h2>
+                <p className="text-[10px] text-slate-500 font-bold mt-0.5">{modalEquip.paradas.length} paradas · {Math.floor(modalEquip.totalMinutos / 60)}h {Math.round(modalEquip.totalMinutos % 60)}m total</p>
+              </div>
+              <button onClick={() => setModalEquip(null)} className="text-slate-500 hover:text-white transition-colors cursor-pointer p-1">
+                ✕
+              </button>
+            </div>
+            <div className="overflow-y-auto p-5 space-y-1.5 flex-1">
+              {modalEquip.paradas.map((p, i) => (
+                <div key={i} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-2.5 text-xs hover:bg-red-500/5 transition-all">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <span className="text-slate-500 font-mono w-20 shrink-0">{p.data}</span>
+                    <span className="text-slate-300 uppercase font-bold truncate">{p.motivo}</span>
+                  </div>
+                  <div className="flex items-center gap-4 shrink-0 ml-3">
+                    <span className="text-slate-600 text-[10px] font-bold uppercase w-16 text-right">{p.turno}</span>
+                    <span className="text-slate-500 font-mono w-12 text-right">{p.linha}</span>
+                    <span className="font-black text-white w-16 text-right">{p.duracao}min</span>
                   </div>
                 </div>
               ))}
