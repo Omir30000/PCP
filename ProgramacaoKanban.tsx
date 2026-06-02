@@ -239,7 +239,7 @@ const ProgramacaoKanban: React.FC = () => {
           // Concatena informações de linha e turno (ex: L3-T1)
           const infoSlots = itensDia.map(item => {
             const l = linhas.find(lin => lin.id === item.linha_id);
-            const lineName = l ? (l.nome.toLowerCase().includes('linha') ? `L${l.nome.match(/\d+/)?.[0] || l.nome.slice(-1)}` : l.nome.slice(0, 3).toUpperCase()) : 'L?';
+            const lineName = l ? (l.nome.toLowerCase().includes('linha') ? `Linha ${l.nome.match(/\d+/)?.[0] || l.nome.slice(-1)}` : l.nome.slice(0, 3).toUpperCase()) : 'LINHA';
             const turnoLabel = item.turno === '2' ? 'Noite' : 'Dia';
             return `${lineName}-${turnoLabel}`;
           }).join(' / ');
