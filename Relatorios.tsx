@@ -28,16 +28,7 @@ const Relatorios: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [registros, setRegistros] = useState<any[]>([]);
   const [linhas, setLinhas] = useState<Linha[]>([]);
-  const [idsLinhas, setIdsLinhas] = useState<string[]>(['1', '2', '3', '4', '5']);
   const reportRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    supabase.from('linhas').select('id').then(({ data }) => {
-      if (data && data.length > 0) {
-        setIdsLinhas(data.map(l => l.id));
-      }
-    });
-  }, []);
 
   // Helper técnico para extração segura de minutos do JSONB
   const parseMinutos = (val: any): number => {
@@ -132,12 +123,9 @@ const Relatorios: React.FC = () => {
     let totalCargaHorariaGlobalMin = 0;
     const bottlenecksMap: Record<string, number> = {};
 
-    const linesSummary = idsLinhas.map(num => {
-      const regsDaLinha = registros.filter(r =>
-        String(r.linha_producao).includes(num) ||
-        String(r.linha_producao).toUpperCase().includes(`LINHA ${num}`) ||
-        String(r.linha_producao).toUpperCase().includes(`LINHA 0${num}`)
-      );
+    const linesSummary = linhas.length > 0
+      ? linhas.map(linha => {
+      const regsDaLinha = registros.filter(r => r.linha_id === linha.id);
 
       let totalQty = 0;
       let totalDowntimeLinha = 0;
@@ -212,8 +200,8 @@ const Relatorios: React.FC = () => {
       const eficiencia = totalCapNominalLinha > 0 ? (totalQty / totalCapNominalLinha) * 100 : 0;
 
       return {
-        id: num,
-        nome: `Linha ${num}`,
+        id: linha.id,
+        nome: linha.nome,
         status,
         producaoTotal: totalQty,
         totalBundles,
@@ -224,8 +212,8 @@ const Relatorios: React.FC = () => {
         downtime: totalDowntimeLinha || 0,
         skusSummary
       };
-    });
-
+    })
+      : [];
 
     const totalProduzidoGeral = linesSummary.reduce((acc, l) => acc + l.producaoTotal, 0);
     const totalCapNominalGeral = linesSummary.reduce((acc, l) => acc + (l.capNominal || 0), 0);
@@ -258,7 +246,7 @@ const Relatorios: React.FC = () => {
       }));
 
     return { linesSummary, bottlenecks, factoryTotals, observations, diffDays };
-  }, [registros, dataInicio, dataFim]);
+  }, [registros, dataInicio, dataFim, linhas]);
 
   return (
     <div className="w-full max-w-[98%] mx-auto space-y-4 lg:space-y-6 animate-in fade-in duration-500 pb-12 font-sans text-slate-900 print:text-black">
