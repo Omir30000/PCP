@@ -19,15 +19,24 @@ const parseMinutos = (val: any): number => {
   return match ? parseInt(match[0]) : 0;
 };
 
+interface ParadaDetalhe {
+  motivo: string;
+  duracao: number;
+  data: string;
+  turno: string;
+  linha: string;
+}
+
 interface EquipamentoStats {
   nome: string;
   totalMinutos: number;
   ocorrencias: number;
+  paradas: ParadaDetalhe[];
 }
 
-const Speedometro: React.FC<{ nome: string; minutos: number; maxMinutos: number }> = ({ nome, minutos, maxMinutos }) => {
-  const raio = 70;
-  const espessura = 12;
+const Speedometro: React.FC<{ nome: string; minutos: number; maxMinutos: number; rank: number }> = ({ nome, minutos, maxMinutos, rank }) => {
+  const raio = 52;
+  const espessura = 10;
   const centro = raio + espessura;
   const tamanho = centro * 2;
   const anguloMax = 180;
@@ -47,31 +56,26 @@ const Speedometro: React.FC<{ nome: string; minutos: number; maxMinutos: number 
   };
 
   const cor = proporcao > 0.7 ? '#ef4444' : proporcao > 0.4 ? '#facc15' : '#22c55e';
-
   const horas = Math.floor(minutos / 60);
   const minsRestantes = Math.round(minutos % 60);
 
   return (
-    <div className="flex flex-col items-center">
-      <svg width={tamanho} height={tamanho} viewBox={`0 0 ${tamanho} ${tamanho}`}>
+    <div className="flex items-center gap-4">
+      <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+        <span className="text-sm font-black text-red-400">{rank}</span>
+      </div>
+      <svg width={tamanho} height={tamanho} viewBox={`0 0 ${tamanho} ${tamanho}`} className="shrink-0">
         <path d={descricaoArco(0, anguloMax, raio)} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={espessura} strokeLinecap="round" />
         <path d={descricaoArco(0, angulo, raio)} fill="none" stroke={cor} strokeWidth={espessura} strokeLinecap="round" style={{ transition: 'all 0.8s ease-out' }} />
-        <line
-          x1={centro} y1={centro}
-          x2={polarToCartesian(centro, centro, raio - espessura, angulo).x}
-          y2={polarToCartesian(centro, centro, raio - espessura, angulo).y}
-          stroke={cor} strokeWidth="2.5" strokeLinecap="round"
-          style={{ transition: 'all 0.8s ease-out' }}
-        />
-        <circle cx={centro} cy={centro} r="4" fill={cor} />
-        <text x={centro} y={centro + 28} textAnchor="middle" fill="white" fontSize="16" fontWeight="900" fontFamily="monospace">
-          {horas}h{minsRestantes}m
-        </text>
-        <text x={centro} y={centro + 44} textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="8" fontWeight="700" fontFamily="monospace" letterSpacing="2">
-          DOWNTIME
-        </text>
+        <line x1={centro} y1={centro} x2={polarToCartesian(centro, centro, raio - espessura, angulo).x} y2={polarToCartesian(centro, centro, raio - espessura, angulo).y} stroke={cor} strokeWidth="2" strokeLinecap="round" style={{ transition: 'all 0.8s ease-out' }} />
+        <circle cx={centro} cy={centro} r="3" fill={cor} />
+        <text x={centro} y={centro + 22} textAnchor="middle" fill="white" fontSize="13" fontWeight="900" fontFamily="monospace">{horas}h{minsRestantes}m</text>
+        <text x={centro} y={centro + 34} textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="7" fontWeight="700" fontFamily="monospace" letterSpacing="2">DOWNTIME</text>
       </svg>
-      <span className="text-[10px] font-black text-white uppercase tracking-widest text-center mt-1 truncate max-w-[120px]">{nome}</span>
+      <div className="min-w-0">
+        <span className="text-sm font-black text-white uppercase tracking-tight block truncate">{nome}</span>
+        <span className="text-[9px] text-slate-500 font-bold">{minutos}min em {Math.ceil(minutos / 60)}h</span>
+      </div>
     </div>
   );
 };
@@ -108,26 +112,35 @@ const RelatorioTop5Equipamentos: React.FC = () => {
         return true;
       });
 
-      const mapa = new Map<string, { totalMin: number; ocorr: number }>();
+      const mapa = new Map<string, { totalMin: number; ocorr: number; paradas: ParadaDetalhe[] }>();
 
       registros.forEach(r => {
         const paradas = Array.isArray(r.paradas) ? r.paradas : [];
         paradas.forEach((p: any) => {
           const nome = p.maquina || p.maquina_id || p.equipamento || 'GERAL';
+          if (nome.toUpperCase() === 'INTERVALO') return;
           const dur = parseMinutos(p.duracao || p.tempo || p.total_min || 0);
           if (dur <= 0) return;
           const existing = mapa.get(nome);
+          const detalhe: ParadaDetalhe = {
+            motivo: p.motivo || 'N/I',
+            duracao: dur,
+            data: r.data_registro || '-',
+            turno: r.turno || '-',
+            linha: r.linha_producao || '-'
+          };
           if (existing) {
             existing.totalMin += dur;
             existing.ocorr += 1;
+            existing.paradas.push(detalhe);
           } else {
-            mapa.set(nome, { totalMin: dur, ocorr: 1 });
+            mapa.set(nome, { totalMin: dur, ocorr: 1, paradas: [detalhe] });
           }
         });
       });
 
       const sorted = Array.from(mapa.entries())
-        .map(([nome, stats]) => ({ nome, totalMinutos: stats.totalMin, ocorrencias: stats.ocorr }))
+        .map(([nome, stats]) => ({ nome, totalMinutos: stats.totalMin, ocorrencias: stats.ocorr, paradas: stats.paradas }))
         .sort((a, b) => b.totalMinutos - a.totalMinutos)
         .slice(0, 5);
 
@@ -202,53 +215,46 @@ const RelatorioTop5Equipamentos: React.FC = () => {
           <p className="text-slate-600 font-black uppercase tracking-widest text-xs">Nenhum downtime no período</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
-          {equipamentos.map((eq, idx) => (
-            <div key={eq.nome} className="bg-slate-900/40 backdrop-blur-md rounded-2xl border border-white/5 p-4 flex flex-col items-center relative overflow-hidden">
-              <div className="absolute top-3 left-3 w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center">
-                <span className="text-[10px] font-black text-red-400">{idx + 1}</span>
+        <div className="flex flex-col xl:flex-row gap-6">
+          <div className="xl:w-96 space-y-3">
+            {equipamentos.map((eq, idx) => (
+              <div key={eq.nome} className="bg-slate-900/40 backdrop-blur-md rounded-xl border border-white/5 p-3 hover:border-red-500/20 transition-all">
+                <Speedometro nome={eq.nome} minutos={eq.totalMinutos} maxMinutos={maxMinutos} rank={idx + 1} />
               </div>
-              <Speedometro nome={eq.nome} minutos={eq.totalMinutos} maxMinutos={maxMinutos} />
-              <div className="flex items-center gap-3 mt-2 text-[9px] text-slate-500 font-bold uppercase tracking-widest">
-                <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {eq.ocorrencias}x</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
 
-      {equipamentos.length > 0 && (
-        <div className="bg-slate-900/30 backdrop-blur-md rounded-2xl border border-white/5 p-4">
-          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-            <AlertTriangle className="w-3 h-3 text-red-400" /> Detalhamento por Equipamento
-          </h4>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-[10px]">
-              <thead>
-                <tr className="text-slate-500 font-black uppercase tracking-widest border-b border-white/5">
-                  <th className="pb-2 pr-4">#</th>
-                  <th className="pb-2 pr-4">Equipamento</th>
-                  <th className="pb-2 pr-4 text-right">Downtime Total</th>
-                  <th className="pb-2 pr-4 text-right">Ocorrências</th>
-                  <th className="pb-2 text-right">Média/Ocorrência</th>
-                </tr>
-              </thead>
-              <tbody>
-                {equipamentos.map((eq, idx) => (
-                  <tr key={eq.nome} className="border-b border-white/5 text-slate-300 font-bold">
-                    <td className="py-2 pr-4 text-red-400">{idx + 1}</td>
-                    <td className="py-2 pr-4 uppercase">{eq.nome}</td>
-                    <td className="py-2 pr-4 text-right text-white">
-                      {Math.floor(eq.totalMinutos / 60)}h {Math.round(eq.totalMinutos % 60)}m
-                    </td>
-                    <td className="py-2 pr-4 text-right">{eq.ocorrencias}x</td>
-                    <td className="py-2 text-right text-slate-400">
-                      {Math.round(eq.totalMinutos / eq.ocorrencias)}min
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="flex-1 bg-slate-900/30 backdrop-blur-md rounded-2xl border border-white/5 p-4 overflow-hidden">
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <Clock className="w-3 h-3 text-red-400" /> Paradas por Equipamento
+            </h4>
+            <div className="overflow-y-auto max-h-[600px] space-y-3 pr-1">
+              {equipamentos.map(eq => (
+                <div key={eq.nome} className="bg-white/5 rounded-xl p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-black text-white uppercase tracking-tight">{eq.nome}</span>
+                    <span className="text-[10px] font-bold text-red-400">{Math.floor(eq.totalMinutos / 60)}h {Math.round(eq.totalMinutos % 60)}m ({eq.ocorrencias}x)</span>
+                  </div>
+                  <div className="space-y-1">
+                    {eq.paradas.slice(0, 8).map((p, i) => (
+                      <div key={i} className="flex items-center justify-between bg-black/20 rounded-lg px-3 py-1.5 text-[9px]">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <span className="text-slate-500 font-mono w-16 shrink-0">{p.data}</span>
+                          <span className="text-slate-400 uppercase font-bold truncate">{p.motivo}</span>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0 ml-2">
+                          <span className="text-slate-500">{p.turno}</span>
+                          <span className="font-black text-white w-14 text-right">{p.duracao}min</span>
+                        </div>
+                      </div>
+                    ))}
+                    {eq.paradas.length > 8 && (
+                      <p className="text-[8px] text-slate-600 text-center pt-1">+{eq.paradas.length - 8} ocorrências</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
