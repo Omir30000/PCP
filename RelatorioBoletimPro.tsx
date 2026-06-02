@@ -142,9 +142,8 @@ const RelatorioBoletimPro: React.FC = () => {
 
     setIsSending(true);
     try {
-      const API_URL = "https://evolution-evolution-api.lwv8jw.easypanel.host"; 
-      const API_KEY = "B2B08F854A50-40DD-B222-C91ECAA63FF7";
-      const INSTANCE_NAME = "nexusalmox";
+      const API_KEY = import.meta.env.VITE_EVO_API_KEY;
+      const INSTANCE_NAME = import.meta.env.VITE_EVO_INSTANCE;
 
       let number = contato.telefone.replace(/\D/g, '');
       if (number.startsWith('0')) number = number.substring(1);
@@ -169,9 +168,9 @@ const RelatorioBoletimPro: React.FC = () => {
       const analises = partes.slice(1).map(p => '*📍' + p);
 
       const sendWithDelay = async (text: string) => {
-        await fetch(`${API_URL}/message/sendText/${INSTANCE_NAME}`, {
+        await fetch(`/api/evo/message/sendText/${INSTANCE_NAME}`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': API_KEY.trim() },
+          headers: { 'Content-Type': 'application/json', 'apiKey': API_KEY.trim() },
           body: JSON.stringify({ number: number, text: text.trim() })
         });
         await new Promise(resolve => setTimeout(resolve, 1200));
