@@ -89,6 +89,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [isReportsOpen, setIsReportsOpen] = useState(true);
+  const [isAIReportsOpen, setIsAIReportsOpen] = useState(false);
   const [isKnowledgeOpen, setIsKnowledgeOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -272,6 +273,7 @@ const App: React.FC = () => {
           <NavItem id="registro" icon={ClipboardPenLine} label="Apontamento" />
           
           <NavItem id="agenda" icon={Users} label="Agenda" />
+          <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" />
 
           {role === 'admin' && (
             <NavItem id="produtos" icon={Package} label="Catálogo" />
@@ -290,19 +292,32 @@ const App: React.FC = () => {
           )}
 
           {(role === 'admin' || role === 'lider') && (
-            <div className={`space-y-0.5 transition-all duration-500 overflow-hidden ${isReportsOpen || !isSidebarExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+            <div className={`space-y-0.5 transition-all duration-500 overflow-hidden ${isReportsOpen || !isSidebarExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'}`}>
               <NavItem id="analise_disponibilidade" icon={Scale} label="Balanço" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorios" icon={FileText} label="Boletim" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorio_boletim" icon={Calculator} label="Boletim Turno" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorio_boletim_pro" icon={Sparkles} label="Boletim Pro" isSubItem={isSidebarExpanded} />
-              <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" isSubItem={isSidebarExpanded} />
-              <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" isSubItem={isSidebarExpanded} />
               <NavItem id="top5_equipamentos" icon={Gauge} label="Top 5 Equipamentos" isSubItem={isSidebarExpanded} />
-              <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime (Min)" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorio_downtime_tecnico" icon={Activity} label="Downtime Técnico" isSubItem={isSidebarExpanded} />
               <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" isSubItem={isSidebarExpanded} />
+            </div>
+          )}
+
+          {isSidebarExpanded && (role === 'admin' || role === 'lider') && (
+            <button
+              onClick={() => setIsAIReportsOpen(!isAIReportsOpen)}
+              className="w-full flex items-center justify-between px-4 mb-4 mt-2 group ring-0 outline-none"
+            >
+              <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] group-hover:text-slate-400 transition-colors">Relatórios com IA</p>
+              <ChevronDown className={`w-3 h-3 text-slate-600 transition-transform duration-300 ${isAIReportsOpen ? '' : '-rotate-90'}`} />
+            </button>
+          )}
+          {(role === 'admin' || role === 'lider') && (
+            <div className={`space-y-0.5 transition-all duration-500 overflow-hidden ${isAIReportsOpen || !isSidebarExpanded ? 'max-h-[200px] opacity-100' : 'max-h-0 opacity-0'}`}>
+              <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" isSubItem={isSidebarExpanded} />
+              <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" isSubItem={isSidebarExpanded} />
             </div>
           )}
 
@@ -482,14 +497,15 @@ const App: React.FC = () => {
                   <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] px-4 mb-2">Relatórios</p>
                   <NavItem id="analise_disponibilidade" icon={Scale} label="Balanço" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="relatorio_boletim" icon={Calculator} label="Boletim Turno" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="top5_equipamentos" icon={Gauge} label="Top 5 Equipamentos" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros Detalhados" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="relatorio_downtime_tecnico" icon={Activity} label="Downtime Técnico" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" onClick={() => setIsMobileMenuOpen(false)} />
+                  <div className="h-px bg-white/5 my-4" />
+                  <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] px-4 mb-2">Relatórios com IA</p>
+                  <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" onClick={() => setIsMobileMenuOpen(false)} />
+                  <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" onClick={() => setIsMobileMenuOpen(false)} />
                 </>
               )}
             </div>
