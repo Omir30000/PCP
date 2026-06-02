@@ -649,7 +649,11 @@ const RelatorioRegistros: React.FC = () => {
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Turno</label>
                                         <select
                                             value={editingRecord.turno}
-                                            onChange={e => setEditingRecord({ ...editingRecord, turno: e.target.value })}
+                                            onChange={e => {
+                                                const turno = e.target.value;
+                                                const carga = turno === '2º Turno' ? 8 : 9;
+                                                setEditingRecord({ ...editingRecord, turno, carga_horaria: carga });
+                                            }}
                                             className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
                                         >
                                             <option value="1º Turno" className="text-slate-900">1º TURNO</option>
