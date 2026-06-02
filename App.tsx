@@ -286,7 +286,10 @@ const App: React.FC = () => {
               onClick={() => setIsReportsOpen(!isReportsOpen)}
               className="w-full flex items-center justify-between px-4 mb-4 group ring-0 outline-none"
             >
-              <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] group-hover:text-slate-400 transition-colors">Relatórios de Produção</p>
+              <div className="flex items-center gap-2">
+                <FileText className="w-3.5 h-3.5 text-slate-500" />
+                <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Relatórios de Produção</p>
+              </div>
               <ChevronDown className={`w-3 h-3 text-slate-600 transition-transform duration-300 ${isReportsOpen ? '' : '-rotate-90'}`} />
             </button>
           )}
@@ -309,7 +312,10 @@ const App: React.FC = () => {
               onClick={() => setIsAIReportsOpen(!isAIReportsOpen)}
               className="w-full flex items-center justify-between px-4 mb-4 mt-2 group ring-0 outline-none"
             >
-              <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] group-hover:text-slate-400 transition-colors">Relatórios com IA</p>
+              <div className="flex items-center gap-2">
+                <BrainCircuit className="w-3.5 h-3.5 text-slate-500" />
+                <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Relatórios com IA</p>
+              </div>
               <ChevronDown className={`w-3 h-3 text-slate-600 transition-transform duration-300 ${isAIReportsOpen ? '' : '-rotate-90'}`} />
             </button>
           )}
@@ -345,7 +351,10 @@ const App: React.FC = () => {
               onClick={() => setIsKnowledgeOpen(!isKnowledgeOpen)}
               className="w-full flex items-center justify-between px-4 mb-4 group ring-0 outline-none"
             >
-              <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] group-hover:text-slate-400 transition-colors">Base de Conhecimento</p>
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-3.5 h-3.5 text-slate-500" />
+                <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Base de Conhecimento</p>
+              </div>
               <ChevronDown className={`w-3 h-3 text-slate-600 transition-transform duration-300 ${isKnowledgeOpen ? '' : '-rotate-90'}`} />
             </button>
           )}
