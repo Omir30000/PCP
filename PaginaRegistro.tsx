@@ -274,11 +274,11 @@ const PaginaRegistro: React.FC = () => {
 ⏱️ *Tempo Total Parado:* ${totalParado}min
 📝 *Observações:* ${dados.observacoes || 'Nenhuma'}`;
 
-      await fetch(`${EVO_CONFIG.baseURL}/message/sendText/${EVO_CONFIG.instance}`, {
+      const response = await fetch(`${EVO_CONFIG.baseURL}/message/sendText/${EVO_CONFIG.instance}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': EVO_CONFIG.apiKey
+          'apiKey': EVO_CONFIG.apiKey
         },
         body: JSON.stringify({
           number: EVO_CONFIG.destination,
@@ -286,8 +286,15 @@ const PaginaRegistro: React.FC = () => {
           linkPreview: false
         })
       });
+
+      if (!response.ok) {
+        const erroTexto = await response.text();
+        console.error("Evolution API Error:", response.status, erroTexto);
+        toast(`WhatsApp falhou (${response.status}). Verifique console.`, 'error');
+      }
     } catch (err) {
       console.error("Erro ao enviar WhatsApp:", err);
+      toast("Erro de rede ao enviar WhatsApp.", 'error');
     }
   };
 
