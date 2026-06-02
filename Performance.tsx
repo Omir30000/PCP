@@ -55,15 +55,10 @@ const Performance: React.FC = () => {
       const prodsRes = await supabase.from('produtos').select('*');
       let { data: regsData, error: regsError } = await supabase
         .from('registros_producao')
-        .select('*, produto_volume(*)')
+        .select('*')
         .order('data_registro', { ascending: false });
 
-      if (regsError) {
-        console.error('Erro no join, tentando sem join:', regsError);
-        const fb = await supabase.from('registros_producao').select('*').order('data_registro', { ascending: false });
-        if (fb.error) throw fb.error;
-        regsData = fb.data;
-      }
+      if (regsError) throw regsError;
       setRegistros(regsData || []);
       setProdutos(prodsRes.data || []);
     } catch (err) {

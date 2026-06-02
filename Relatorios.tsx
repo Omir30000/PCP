@@ -38,31 +38,33 @@ const Relatorios: React.FC = () => {
     return match ? parseInt(match[0]) : 0;
   };
 
+  const [produtos, setProdutos] = useState<any[]>([]);
+  const produtosMapRef = useRef<Record<string, any>>({});
+
   const fetchRelatorioData = async () => {
     setLoading(true);
     try {
-      const { data: linesData } = await supabase.from('linhas').select('*').order('nome');
-      if (linesData) setLinhas(linesData);
-
-      let { data, error } = await supabase
-        .from('registros_producao')
-        .select('*, produto_volume(*)')
-        .gte('data_registro', dataInicio)
-        .lte('data_registro', dataFim)
-        .order('data_registro', { ascending: false });
-
-      if (error) {
-        console.error('Erro no join produto_volume, tentando sem join:', error);
-        const fallback = await supabase
-          .from('registros_producao')
-          .select('*')
+      const [linesData, produtosData, registrosData] = await Promise.all([
+        supabase.from('linhas').select('*').order('nome'),
+        supabase.from('produtos').select('*'),
+        supabase.from('registros_producao').select('*')
           .gte('data_registro', dataInicio)
           .lte('data_registro', dataFim)
-          .order('data_registro', { ascending: false });
-        if (fallback.error) throw fallback.error;
-        data = fallback.data;
+          .order('data_registro', { ascending: false })
+      ]);
+
+      if (linesData.data) setLinhas(linesData.data);
+      if (produtosData.data) {
+        setProdutos(produtosData.data);
+        const map: Record<string, any> = {};
+        produtosData.data.forEach((p: any) => {
+          map[p.id] = p;
+          map[p.nome] = p;
+        });
+        produtosMapRef.current = map;
       }
-      setRegistros(data || []);
+      if (registrosData.error) throw registrosData.error;
+      setRegistros(registrosData.data || []);
     } catch (err) {
       console.error("Erro na consolidação do relatório:", err);
     } finally {
@@ -166,7 +168,7 @@ const Relatorios: React.FC = () => {
           totalCargaHorariaGlobalMin += (cargaHoras * 60);
 
           // Agrupamento por SKU
-          const prod = r.produtos || r.produto_volume;
+          const prod = produtosMapRef.current[r.produto_id] || produtosMapRef.current[r.produto_volume];
           if (prod) {
             const skuId = prod.id;
             if (!skusMap[skuId]) {

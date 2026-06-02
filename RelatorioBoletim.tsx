@@ -35,35 +35,36 @@ const RelatorioBoletim: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [registros, setRegistros] = useState<any[]>([]);
   const [linhas, setLinhas] = useState<Linha[]>([]);
+  const [produtos, setProdutos] = useState<any[]>([]);
   const [filtroTurno, setFiltroTurno] = useState<'GLOBAL' | '1º Turno' | '2º Turno'>('GLOBAL');
 
   const reportRef = useRef<HTMLDivElement>(null);
+  const produtosMapRef = useRef<Record<string, any>>({});
 
   const fetchRelatorioData = async () => {
     setLoading(true);
     try {
-      const { data: linesData } = await supabase.from('linhas').select('*').order('nome');
-      if (linesData) setLinhas(linesData);
-
-      let { data, error } = await supabase
-        .from('registros_producao')
-        .select('*, produto_volume(*)')
-        .gte('data_registro', dataInicio)
-        .lte('data_registro', dataFim)
-        .order('data_registro', { ascending: true });
-
-      if (error) {
-        console.error('Erro com produto_volume, tentando sem join:', error);
-        const fallback = await supabase
-          .from('registros_producao')
-          .select('*')
+      const [linesData, produtosData, registrosData] = await Promise.all([
+        supabase.from('linhas').select('*').order('nome'),
+        supabase.from('produtos').select('*'),
+        supabase.from('registros_producao').select('*')
           .gte('data_registro', dataInicio)
           .lte('data_registro', dataFim)
-          .order('data_registro', { ascending: true });
-        if (fallback.error) throw fallback.error;
-        data = fallback.data;
+          .order('data_registro', { ascending: true })
+      ]);
+
+      if (linesData.data) setLinhas(linesData.data);
+      if (produtosData.data) {
+        setProdutos(produtosData.data);
+        const map: Record<string, any> = {};
+        produtosData.data.forEach((p: any) => {
+          map[p.id] = p;
+          map[p.nome] = p;
+        });
+        produtosMapRef.current = map;
       }
-      setRegistros(data || []);
+      if (registrosData.error) throw registrosData.error;
+      setRegistros(registrosData.data || []);
     } catch (err) {
       console.error("Erro na consolidação do relatório:", err);
     } finally {
@@ -179,7 +180,7 @@ const RelatorioBoletim: React.FC = () => {
 
         // Processar cada registro para o detalhamento por SKU
         regsDaLinha.forEach(r => {
-          const prod = r.produtos || r.produto_volume;
+          const prod = produtosMapRef.current[r.produto_id] || produtosMapRef.current[r.produto_volume];
           if (!prod) return;
           
           const skuId = prod.id;

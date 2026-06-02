@@ -60,7 +60,7 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
         try {
             let query = supabase
                 .from('registros_producao')
-                .select('*, produto_volume(*)')
+                .select('*')
                 .eq('linha_id', linhaId)
                 .gte('data_registro', dataInicio)
                 .lte('data_registro', dataFim);
@@ -69,17 +69,13 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
                 query = query.eq('turno', turno);
             }
 
-            let { data, error } = await query.order('data_registro', { ascending: false });
+            const [produtosData, registrosData] = await Promise.all([
+                supabase.from('produtos').select('*'),
+                query.order('data_registro', { ascending: false })
+            ]);
 
-            if (error) {
-              console.error('Erro no join, tentando sem join:', error);
-              let fbQuery = supabase.from('registros_producao').select('*').eq('linha_id', linhaId).gte('data_registro', dataInicio).lte('data_registro', dataFim);
-              if (turno) fbQuery = fbQuery.eq('turno', turno);
-              const fb = await fbQuery.order('data_registro', { ascending: false });
-              if (fb.error) throw fb.error;
-              data = fb.data;
-            }
-            setRegistros(data || []);
+            if (registrosData.error) throw registrosData.error;
+            setRegistros(registrosData.data || []);
         } catch (err) {
             console.error("Gargalo Report Sync Error:", err);
         } finally {
