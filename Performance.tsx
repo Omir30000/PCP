@@ -52,11 +52,19 @@ const Performance: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [regsRes, prodsRes] = await Promise.all([
-        supabase.from('registros_producao').select('*, produtos(*)').order('data_registro', { ascending: false }),
-        supabase.from('produtos').select('*')
-      ]);
-      setRegistros(regsRes.data || []);
+      const prodsRes = await supabase.from('produtos').select('*');
+      let { data: regsData, error: regsError } = await supabase
+        .from('registros_producao')
+        .select('*, produto_volume(*)')
+        .order('data_registro', { ascending: false });
+
+      if (regsError) {
+        console.error('Erro no join, tentando sem join:', regsError);
+        const fb = await supabase.from('registros_producao').select('*').order('data_registro', { ascending: false });
+        if (fb.error) throw fb.error;
+        regsData = fb.data;
+      }
+      setRegistros(regsData || []);
       setProdutos(prodsRes.data || []);
     } catch (err) {
       console.error("Erro no dashboard executivo:", err);
@@ -92,7 +100,7 @@ const Performance: React.FC = () => {
       let hasMetaInfo = false;
 
       regsDaLinha.forEach(reg => {
-        const prod = reg.produtos;
+        const prod = reg.produtos || reg.produto_volume;
         const quantidade = Number(reg.quantidade_produzida) || 0;
         const metaNominal = Number(prod?.capacidade_nominal) || 0;
         const horas = Number(reg.carga_horaria) || 8;

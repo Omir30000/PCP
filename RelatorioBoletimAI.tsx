@@ -55,14 +55,19 @@ const RelatorioBoletimAI: React.FC = () => {
       const { data: linesData } = await supabase.from('linhas').select('*').order('nome');
       if (linesData) setLinhas(linesData);
 
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('registros_producao')
-        .select('*, produtos(*)')
+        .select('*, produto_volume(*)')
         .gte('data_registro', dataInicio)
         .lte('data_registro', dataFim)
         .order('data_registro', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro no join, tentando sem join:', error);
+        const fb = await supabase.from('registros_producao').select('*').gte('data_registro', dataInicio).lte('data_registro', dataFim).order('data_registro', { ascending: true });
+        if (fb.error) throw fb.error;
+        data = fb.data;
+      }
       setRegistros(data || []);
       setInsights(''); // Limpa insights ao buscar novos dados
     } catch (err) {
@@ -179,7 +184,7 @@ const RelatorioBoletimAI: React.FC = () => {
         totalCargaHorariaLinha = regsDaLinha.reduce((acc, r) => acc + (Number(r.carga_horaria) || 0), 0);
 
         regsDaLinha.forEach(r => {
-          const prod = r.produtos;
+          const prod = r.produtos || r.produto_volume;
           if (!prod) return;
 
           const skuId = prod.id;

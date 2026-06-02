@@ -53,14 +53,24 @@ const Relatorios: React.FC = () => {
       const { data: linesData } = await supabase.from('linhas').select('*').order('nome');
       if (linesData) setLinhas(linesData);
 
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('registros_producao')
-        .select('*, produtos(*)')
+        .select('*, produto_volume(*)')
         .gte('data_registro', dataInicio)
         .lte('data_registro', dataFim)
         .order('data_registro', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro no join produto_volume, tentando sem join:', error);
+        const fallback = await supabase
+          .from('registros_producao')
+          .select('*')
+          .gte('data_registro', dataInicio)
+          .lte('data_registro', dataFim)
+          .order('data_registro', { ascending: false });
+        if (fallback.error) throw fallback.error;
+        data = fallback.data;
+      }
       setRegistros(data || []);
     } catch (err) {
       console.error("Erro na consolidação do relatório:", err);
@@ -168,7 +178,7 @@ const Relatorios: React.FC = () => {
           totalCargaHorariaGlobalMin += (cargaHoras * 60);
 
           // Agrupamento por SKU
-          const prod = r.produtos;
+          const prod = r.produtos || r.produto_volume;
           if (prod) {
             const skuId = prod.id;
             if (!skusMap[skuId]) {
