@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from './lib/supabase';
-import { Produto, Pedido, ItemPedido } from './types/database';
+import { Produto, Pedido, ItemPedido, AjusteEstoque } from './types/database';
 import {
   ShoppingCart,
   Plus,
@@ -35,6 +35,7 @@ const Vendas: React.FC = () => {
   const [pedidos, setPedidos] = useState<any[]>([]);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [todosRegistrosProducao, setTodosRegistrosProducao] = useState<any[]>([]);
+  const [ajustes, setAjustes] = useState<AjusteEstoque[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,6 +44,7 @@ const Vendas: React.FC = () => {
 
   const [editingStock, setEditingStock] = useState<any | null>(null);
   const [adjustmentValue, setAdjustmentValue] = useState<number>(0);
+  const [adjustmentObs, setAdjustmentObs] = useState('');
 
   // Estados para Novo Pedido
   const [novoCliente, setNovoCliente] = useState('');
@@ -59,14 +61,16 @@ const Vendas: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [prodRes, pedRes, regRes] = await Promise.all([
+      const [prodRes, pedRes, regRes, ajRes] = await Promise.all([
         supabase.from('produtos').select('*').order('nome'),
         supabase.from('pedidos').select('*, itens_pedido(*, produtos(*))').order('data_entrega', { ascending: true }),
-        supabase.from('registros_producao').select('*')
+        supabase.from('registros_producao').select('*'),
+        supabase.from('ajustes_estoque').select('*')
       ]);
 
       if (prodRes.data) setProdutos(prodRes.data);
       if (pedRes.data) setPedidos(pedRes.data);
+      if (ajRes.data) setAjustes(ajRes.data);
 
       if (regRes.data) {
         console.log('NEXUS DEBUG - REGISTROS RECUPERADOS:', regRes.data.length);
@@ -87,6 +91,7 @@ const Vendas: React.FC = () => {
       .channel('nexus-inventory-absolute-v6')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'registros_producao' }, () => fetchData())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ajustes_estoque' }, () => fetchData())
       .subscribe();
 
     return () => {
@@ -123,7 +128,14 @@ const Vendas: React.FC = () => {
           return acc + (item ? Number(item.quantidade) : 0);
         }, 0);
 
-      const currentStock = totalProduced - totalShipped;
+      let currentStock = totalProduced - totalShipped;
+
+      // 🔧 Ajuste manual: se existe estoque físico informado, sobrescreve o cálculo
+      const ajuste = ajustes.find(a => a.produto_id === prod.id);
+      if (ajuste) {
+        currentStock = ajuste.quantidade_real;
+      }
+
       const forecast = currentStock - pendingDemand;
 
       metrics[prod.id] = {
@@ -135,7 +147,7 @@ const Vendas: React.FC = () => {
     });
 
     return metrics;
-  }, [produtos, todosRegistrosProducao, pedidos]);
+  }, [produtos, todosRegistrosProducao, pedidos, ajustes]);
 
   const getProducaoParaPedido = (produtoId: string) => {
     const m = inventoryMetrics[produtoId];
@@ -408,7 +420,12 @@ const Vendas: React.FC = () => {
                     {prod.nome}
                   </span>
                   <button
-                    onClick={() => { setEditingStock(prod); setAdjustmentValue(m.currentStock); }}
+                    onClick={() => {
+                      setEditingStock(prod);
+                      const aj = ajustes.find(a => a.produto_id === prod.id);
+                      setAdjustmentValue(aj ? aj.quantidade_real : m.currentStock);
+                      setAdjustmentObs(aj ? aj.observacao : '');
+                    }}
                     className="opacity-0 group-hover:opacity-100 p-1 text-slate-600 hover:text-[#facc15] transition-all"
                   >
                     <Pencil className="w-3 h-3" />
@@ -740,18 +757,18 @@ const Vendas: React.FC = () => {
         </div>
       )}
 
-      {/* Modal de Ajuste Rápido (Somente Visualização do Saldo Real Nexus) */}
+      {/* Modal de Ajuste de Estoque Físico */}
       {editingStock && (
         <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => !saving && setEditingStock(null)} />
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setEditingStock(null)} />
           <div className="bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md relative z-10 border border-white/10 flex flex-col p-10 animate-in zoom-in-95">
             <header className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-[#facc15] rounded-xl">
-                  <Database className="w-6 h-6 text-black" />
+                <div className="p-3 bg-blue-600 rounded-xl">
+                  <Database className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-white uppercase tracking-tighter">Inventário Nexus</h3>
+                  <h3 className="text-xl font-black text-white uppercase tracking-tighter">Ajuste de Estoque</h3>
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">{editingStock.nome}</p>
                 </div>
               </div>
@@ -760,25 +777,70 @@ const Vendas: React.FC = () => {
               </button>
             </header>
 
-            <div className="space-y-6 text-center">
+            <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Saldo Acumulado Real</label>
-                <div className="py-8 bg-white/5 rounded-2xl border border-white/10">
-                  <span className="text-5xl font-black text-white">{adjustmentValue.toLocaleString('pt-BR')}</span>
-                  <p className="text-[9px] font-bold text-slate-500 uppercase mt-2 tracking-widest">Unidades Disponíveis</p>
-                </div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Estoque Físico Real (unidades)</label>
+                <input
+                  type="number"
+                  value={adjustmentValue}
+                  onChange={e => setAdjustmentValue(Math.max(0, Number(e.target.value)))}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-3xl font-black text-white text-center outline-none focus:border-blue-500 transition-all"
+                />
               </div>
-              <p className="text-[9px] text-slate-600 uppercase tracking-widest leading-relaxed px-4">
-                Sincronizado via Chão de Fábrica. O saldo reflete a soma histórica absoluta da produção subtraída apenas de pedidos finalizados.
-              </p>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Observação (opcional)</label>
+                <input
+                  type="text"
+                  value={adjustmentObs}
+                  onChange={e => setAdjustmentObs(e.target.value)}
+                  placeholder="Ex: Contagem física 01/06"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white outline-none focus:border-blue-500 transition-all placeholder:text-slate-600"
+                />
+              </div>
+
+              <div className="bg-white/5 rounded-xl px-4 py-3 flex items-center justify-between">
+                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Saldo Calculado</span>
+                <span className="text-sm font-black text-slate-400">{(inventoryMetrics[editingStock.id]?.currentStock ?? 0).toLocaleString()} un</span>
+              </div>
             </div>
 
-            <footer className="mt-10 flex gap-4">
+            <footer className="mt-8 flex gap-3">
               <button
                 onClick={() => setEditingStock(null)}
-                className="w-full py-4 bg-[#facc15] text-black rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-95"
+                className="flex-1 py-3.5 bg-white/5 text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
               >
-                <CheckIcon className="w-4 h-4" /> Validado Nexus
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  if (saving) return;
+                  setSaving(true);
+                  try {
+                    const { error } = await supabase
+                      .from('ajustes_estoque')
+                      .upsert({
+                        produto_id: editingStock.id,
+                        quantidade_real: adjustmentValue,
+                        observacao: adjustmentObs || 'Ajuste manual'
+                      }, { onConflict: 'produto_id' });
+
+                    if (error) throw error;
+                    toast('✅ Estoque físico atualizado com sucesso!', 'success');
+                    setEditingStock(null);
+                    await fetchData();
+                  } catch (err) {
+                    console.error(err);
+                    toast('Erro ao salvar ajuste de estoque.', 'error');
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                disabled={saving}
+                className="flex-1 py-3.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckIcon className="w-4 h-4" />}
+                {saving ? 'Salvando...' : 'Salvar Ajuste'}
               </button>
             </footer>
           </div>

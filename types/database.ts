@@ -324,6 +324,41 @@ export type Database = {
           }
         ];
       };
+      ajustes_estoque: {
+        Row: {
+          id: string;
+          produto_id: string;
+          quantidade_real: number;
+          observacao: string;
+          atualizado_em: string;
+          atualizado_por: string | null;
+        };
+        Insert: {
+          id?: string;
+          produto_id: string;
+          quantidade_real: number;
+          observacao?: string;
+          atualizado_em?: string;
+          atualizado_por?: string | null;
+        };
+        Update: {
+          id?: string;
+          produto_id?: string;
+          quantidade_real?: number;
+          observacao?: string;
+          atualizado_em?: string;
+          atualizado_por?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ajustes_estoque_produto_id_fkey";
+            columns: ["produto_id"];
+            isOneToOne: true;
+            referencedRelation: "produtos";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       perfis: {
         Row: {
           id: string;
@@ -398,3 +433,4 @@ export type Pedido = Database['public']['Tables']['pedidos']['Row'];
 export type ItemPedido = Database['public']['Tables']['itens_pedido']['Row'];
 export type EscalaProducao = Database['public']['Tables']['escalas_producao']['Row'];
 export type ProgramacaoSemanal = Database['public']['Tables']['programacao_semanal']['Row'];
+export type AjusteEstoque = Database['public']['Tables']['ajustes_estoque']['Row'];
