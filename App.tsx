@@ -88,7 +88,7 @@ type Tab =
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-  const [isReportsOpen, setIsReportsOpen] = useState(true);
+  const [isReportsOpen, setIsReportsOpen] = useState(false);
   const [isAIReportsOpen, setIsAIReportsOpen] = useState(false);
   const [isKnowledgeOpen, setIsKnowledgeOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -296,7 +296,6 @@ const App: React.FC = () => {
               <NavItem id="analise_disponibilidade" icon={Scale} label="Balanço" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorios" icon={FileText} label="Boletim" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorio_boletim" icon={Calculator} label="Boletim Turno" isSubItem={isSidebarExpanded} />
-              <NavItem id="relatorio_boletim_pro" icon={Sparkles} label="Boletim Pro" isSubItem={isSidebarExpanded} />
               <NavItem id="top5_equipamentos" icon={Gauge} label="Top 5 Equipamentos" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime (Min)" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" isSubItem={isSidebarExpanded} />
@@ -315,7 +314,8 @@ const App: React.FC = () => {
             </button>
           )}
           {(role === 'admin' || role === 'lider') && (
-            <div className={`space-y-0.5 transition-all duration-500 overflow-hidden ${isAIReportsOpen || !isSidebarExpanded ? 'max-h-[200px] opacity-100' : 'max-h-0 opacity-0'}`}>
+            <div className={`space-y-0.5 transition-all duration-500 overflow-hidden ${isAIReportsOpen || !isSidebarExpanded ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'}`}>
+              <NavItem id="relatorio_boletim_pro" icon={Sparkles} label="Boletim Pro" isSubItem={isSidebarExpanded} />
               <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" isSubItem={isSidebarExpanded} />
               <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" isSubItem={isSidebarExpanded} />
             </div>
@@ -504,6 +504,7 @@ const App: React.FC = () => {
                   <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" onClick={() => setIsMobileMenuOpen(false)} />
                   <div className="h-px bg-white/5 my-4" />
                   <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] px-4 mb-2">Relatórios com IA</p>
+                  <NavItem id="relatorio_boletim_pro" icon={Sparkles} label="Boletim Pro" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" onClick={() => setIsMobileMenuOpen(false)} />
                   <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" onClick={() => setIsMobileMenuOpen(false)} />
                 </>
