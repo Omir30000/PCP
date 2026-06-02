@@ -45,14 +45,24 @@ const RelatorioBoletim: React.FC = () => {
       const { data: linesData } = await supabase.from('linhas').select('*').order('nome');
       if (linesData) setLinhas(linesData);
 
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('registros_producao')
-        .select('*, produtos(*)')
+        .select('*, produto_volume(*)')
         .gte('data_registro', dataInicio)
         .lte('data_registro', dataFim)
         .order('data_registro', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro com produto_volume, tentando sem join:', error);
+        const fallback = await supabase
+          .from('registros_producao')
+          .select('*')
+          .gte('data_registro', dataInicio)
+          .lte('data_registro', dataFim)
+          .order('data_registro', { ascending: true });
+        if (fallback.error) throw fallback.error;
+        data = fallback.data;
+      }
       setRegistros(data || []);
     } catch (err) {
       console.error("Erro na consolidação do relatório:", err);
@@ -169,7 +179,7 @@ const RelatorioBoletim: React.FC = () => {
 
         // Processar cada registro para o detalhamento por SKU
         regsDaLinha.forEach(r => {
-          const prod = r.produtos;
+          const prod = r.produtos || r.produto_volume;
           if (!prod) return;
           
           const skuId = prod.id;
