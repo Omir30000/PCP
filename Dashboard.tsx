@@ -371,22 +371,47 @@ const Dashboard: React.FC = () => {
 
       {/* Metas Semanais */}
       <div className="bg-[#141414] border border-white/5 p-6 lg:p-8 rounded-[40px] shadow-2xl overflow-hidden">
-        <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-6 flex items-center gap-4">
-          <ListChecks className="w-6 h-6 text-blue-400" /> Metas Semanais
+        <h3 className="text-xl lg:text-2xl font-black text-white uppercase tracking-tighter mb-6 flex items-center gap-4">
+          <ListChecks className="w-5 h-5 lg:w-6 lg:h-6 text-blue-400" /> Metas Semanais
+          <span className="text-[9px] font-bold text-slate-500 bg-white/5 px-3 py-1 rounded-full tracking-wider ml-auto">
+            {new Date().toLocaleDateString('pt-BR', { weekday: 'long' }).replace('-feira', '')} — {7 - new Date().getDay()} dias restantes
+          </span>
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {metasSemanais.map((meta) => (
+          {metasSemanais.map((meta) => {
+            const faltante = Math.max(0, meta.programado - meta.realizado);
+            return (
             <div key={meta.id} className="bg-black/40 border border-white/5 p-6 rounded-3xl relative overflow-hidden">
-              <div className={`absolute top-0 left-0 w-full h-1 ${meta.status === 'CONCLUÍDO' ? 'bg-[#22c55e]' : 'bg-blue-500'}`} />
+              <div className={`absolute top-0 left-0 w-full h-1 ${meta.status === 'CONCLUÍDO' ? 'bg-[#22c55e]' : meta.status === 'ATRASADO' ? 'bg-red-500' : 'bg-blue-500'}`} />
               <div className="flex justify-between items-start mb-4">
                 <h4 className="text-xs font-black text-white uppercase truncate pr-4">{meta.nome}</h4>
-                <span className="text-lg font-black text-white">{meta.progresso.toFixed(0)}%</span>
+                <div className="text-right">
+                  <span className="text-lg font-black text-white">{meta.progresso.toFixed(0)}%</span>
+                  <span className={`block text-[9px] font-bold uppercase tracking-wider mt-0.5 ${meta.status === 'CONCLUÍDO' ? 'text-[#22c55e]' : meta.status === 'ATRASADO' ? 'text-red-400' : 'text-blue-400'}`}>
+                    {meta.status}
+                  </span>
+                </div>
               </div>
-              <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                <div className={`h-full ${meta.status === 'CONCLUÍDO' ? 'bg-[#22c55e]' : 'bg-blue-500'}`} style={{ width: `${meta.progresso}%` }} />
+              <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-4">
+                <div className={`h-full rounded-full transition-all duration-700 ${meta.status === 'CONCLUÍDO' ? 'bg-[#22c55e]' : meta.status === 'ATRASADO' ? 'bg-red-500' : 'bg-blue-500'}`} style={{ width: `${meta.progresso}%` }} />
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-[9px] font-bold">
+                <div className="bg-white/5 rounded-xl px-3 py-2">
+                  <p className="text-slate-500 uppercase tracking-wider mb-0.5">Programado</p>
+                  <p className="text-white">{meta.programado.toLocaleString()}</p>
+                </div>
+                <div className="bg-white/5 rounded-xl px-3 py-2">
+                  <p className="text-slate-500 uppercase tracking-wider mb-0.5">Realizado</p>
+                  <p className="text-white">{meta.realizado.toLocaleString()}</p>
+                </div>
+                <div className="bg-white/5 rounded-xl px-3 py-2">
+                  <p className="text-slate-500 uppercase tracking-wider mb-0.5">Faltante</p>
+                  <p className={`${faltante > 0 ? 'text-red-400' : 'text-[#22c55e]'}`}>{faltante > 0 ? faltante.toLocaleString() : '—'}</p>
+                </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
