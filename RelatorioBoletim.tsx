@@ -53,7 +53,7 @@ const RelatorioBoletim: React.FC = () => {
           .order('data_registro', { ascending: true })
       ]);
 
-      if (linesData.data) setLinhas(linesData.data);
+      if (linesData.data) setLinhas(linesData.data.filter(l => /^linha\s/i.test(l.nome)));
       if (produtosData.data) {
         setProdutos(produtosData.data);
         const map: Record<string, any> = {};

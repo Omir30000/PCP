@@ -38,7 +38,7 @@ const RelatorioAnaliticoPorLinha: React.FC = () => {
         async function init() {
             const { data } = await supabase.from('linhas').select('*').order('nome');
             if (data) {
-                setLinhas(data);
+                setLinhas(data.filter(l => /^linha\s/i.test(l.nome)));
                 if (data.length > 0 && !linhaId) setLinhaId(data[0].id);
             }
             const { data: machs } = await supabase.from('maquinas').select('*');
