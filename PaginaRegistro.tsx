@@ -656,10 +656,6 @@ const PaginaRegistro: React.FC = () => {
                           {LISTA_EQUIPAMENTOS.map(m => (
                             <option key={m} value={m} className="bg-slate-900">{m}</option>
                           ))}
-                          {maquinasDaLinha.length > 0 && <option disabled className="text-slate-500">--- Máquinas da Linha ---</option>}
-                          {maquinasDaLinha.map(m => (
-                            <option key={m.id} value={m.id} className="bg-slate-900">{m.nome}</option>
-                          ))}
                         </select>
                       </div>
 
@@ -809,10 +805,6 @@ const PaginaRegistro: React.FC = () => {
                     <option value="" className="bg-slate-900">Selecione</option>
                     {LISTA_EQUIPAMENTOS.map(m => (
                       <option key={m} value={m} className="bg-slate-900">{m}</option>
-                    ))}
-                    {maquinasDaLinha.length > 0 && <option disabled className="text-slate-500">--- Máquinas da Linha ---</option>}
-                    {maquinasDaLinha.map(m => (
-                      <option key={m.id} value={m.nome} className="bg-slate-900">{m.nome}</option>
                     ))}
                   </select>
                 </div>
