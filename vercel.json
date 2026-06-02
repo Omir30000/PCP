@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/evo/(.*)",
+      "destination": "https://evolution-evolution-api.585pjj.easypanel.host/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

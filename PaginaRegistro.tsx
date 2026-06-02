@@ -274,9 +274,12 @@ const PaginaRegistro: React.FC = () => {
 ⏱️ *Tempo Total Parado:* ${totalParado}min
 📝 *Observações:* ${dados.observacoes || 'Nenhuma'}`;
 
-      const response = await fetch('/api/send-whatsapp', {
+      const response = await fetch(`/api/evo/message/sendText/${EVO_CONFIG.instance}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'apiKey': EVO_CONFIG.apiKey
+        },
         body: JSON.stringify({
           number: EVO_CONFIG.destination,
           text: mensagem,
