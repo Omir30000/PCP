@@ -146,6 +146,13 @@ const Vendas: React.FC = () => {
     if (!confirm("⚠️ AVISO CRÍTICO: Deseja realmente excluir este pedido? Esta ação é irreversível e removerá todos os itens vinculados.")) return;
 
     try {
+      const { error: itemsError } = await supabase
+        .from('itens_pedido')
+        .delete()
+        .eq('pedido_id', id);
+
+      if (itemsError) throw itemsError;
+
       const { error } = await supabase
         .from('pedidos')
         .delete()
@@ -179,9 +186,13 @@ const Vendas: React.FC = () => {
 
   // 🚜 LÓGICA DE BAIXA DE ESTOQUE (BAIXA LÓGICA)
   const handleFinalizarPedido = async (id: string) => {
-    if (!selectedPedido) return;
+    const pedido = pedidos.find(p => p.id === id);
+    if (!pedido) {
+      toast("Pedido não encontrado.", 'error');
+      return;
+    }
 
-    const todosProntos = selectedPedido.itens_pedido?.every((item: any) =>
+    const todosProntos = pedido.itens_pedido?.every((item: any) =>
       getProducaoParaPedido(item.produto_id) >= item.quantidade
     );
 
@@ -201,7 +212,7 @@ const Vendas: React.FC = () => {
 
       toast("✅ ESTOQUE ATUALIZADO: O pedido foi finalizado e o saldo real dos SKUs foi baixado logicamente.", 'success');
       setSelectedPedido(null);
-      await fetchData(); // Recarrega tudo para garantir sincronia visual
+      await fetchData();
     } catch (err) {
       console.error("Nexus Finalize Error:", err);
       toast("Falha crítica ao finalizar pedido. Tente novamente.", 'error');
