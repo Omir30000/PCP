@@ -45,10 +45,22 @@ const Auth: React.FC = () => {
         if (signUpError) throw signUpError;
 
         if (signUpData.user) {
-          // O perfil agora é criado automaticamente via Database Trigger
-          // Mas podemos dar um feedback positivo para o usuário
+          const { error: profileError } = await supabase.from('perfis').insert({
+            id: signUpData.user.id,
+            nome: nome,
+            email: email,
+            nivel_acesso: 'mecanico',
+            especialidade: 'geral',
+            turno: 1,
+            ativo: true
+          });
+
+          if (profileError) {
+            console.error('Erro ao criar perfil:', profileError);
+          }
+
           setError('Cadastro realizado com sucesso! Você já pode entrar.');
-          setIsLogin(true); // Muda para tela de login após cadastro
+          setIsLogin(true);
         }
       }
     } catch (err: any) {

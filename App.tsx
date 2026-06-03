@@ -187,6 +187,31 @@ const App: React.FC = () => {
         }
         setUserProfile(data);
         fetchScreenPermissions(data.nivel_acesso || 'mecanico');
+        return;
+      }
+
+      // Perfil não encontrado — tenta criar automaticamente
+      const { data: userData } = await supabase.auth.getUser();
+      const email = userData?.user?.email || '';
+      const nome = userData?.user?.user_metadata?.nome || email.split('@')[0] || 'Usuário';
+
+      const { data: newProfile, error: insertError } = await supabase
+        .from('perfis')
+        .insert({
+          id: userId,
+          nome,
+          email,
+          nivel_acesso: 'mecanico',
+          especialidade: 'geral',
+          turno: 1,
+          ativo: true
+        })
+        .select()
+        .single();
+
+      if (!insertError && newProfile) {
+        setUserProfile(newProfile);
+        fetchScreenPermissions('mecanico');
       }
     } catch (err) {
       console.error('Erro ao buscar perfil:', err);
