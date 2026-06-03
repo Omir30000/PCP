@@ -97,6 +97,7 @@ const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [screenPermissions, setScreenPermissions] = useState<Set<string>>(new Set());
 
   // PWA: ler aba da URL (shortcuts)
   React.useEffect(() => {
@@ -136,6 +137,41 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const getDefaultPermissions = (role: string): Set<string> => {
+    const perms = new Set<string>(['dashboard', 'registro', 'agenda', 'relatorio_registros', 'perfil', 'base_conhecimento']);
+    if (role === 'admin') {
+      ['kanban', 'vendas', 'calendario_vendas', 'produtos', 'usuarios',
+       'analise_disponibilidade', 'relatorios', 'relatorio_boletim', 'top5_equipamentos',
+       'relatorios_downtime', 'relatorios_downtime_horas', 'relatorio_downtime_tecnico',
+       'analise_gargalos', 'relatorio_boletim_pro', 'relatorio_boletim_ai',
+       'analitica_downtime_ai'].forEach(t => perms.add(t));
+    } else if (role === 'lider') {
+      ['analise_disponibilidade', 'relatorios', 'relatorio_boletim', 'top5_equipamentos',
+       'relatorios_downtime', 'relatorios_downtime_horas', 'relatorio_downtime_tecnico',
+       'analise_gargalos', 'relatorio_boletim_pro', 'relatorio_boletim_ai',
+       'analitica_downtime_ai'].forEach(t => perms.add(t));
+    }
+    return perms;
+  };
+
+  const fetchScreenPermissions = async (role: string) => {
+    const defaults = getDefaultPermissions(role);
+    try {
+      const { data } = await supabase
+        .from('permissoes_papeis')
+        .select('tela')
+        .eq('papel', role);
+
+      if (data && data.length > 0) {
+        setScreenPermissions(new Set(data.map(d => d.tela)));
+        return;
+      }
+    } catch {
+      // Tabela ainda não existe, usa defaults
+    }
+    setScreenPermissions(defaults);
+  };
+
   const fetchUserProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -150,6 +186,7 @@ const App: React.FC = () => {
           return;
         }
         setUserProfile(data);
+        fetchScreenPermissions(data.nivel_acesso || 'mecanico');
       }
     } catch (err) {
       console.error('Erro ao buscar perfil:', err);
@@ -160,6 +197,9 @@ const App: React.FC = () => {
 
   const handleProfileUpdate = (newProfile: any) => {
     setUserProfile(newProfile);
+    if (newProfile?.nivel_acesso) {
+      fetchScreenPermissions(newProfile.nivel_acesso);
+    }
   };
 
   const handleLogout = async () => {
@@ -177,8 +217,6 @@ const App: React.FC = () => {
   if (!session) {
     return <Auth />;
   }
-
-  const role = userProfile?.nivel_acesso || 'mecanico';
 
   const NavItem = ({ id, icon: Icon, label, isSubItem = false, onClick }: { id: Tab, icon: any, label: string, isSubItem?: boolean, onClick?: () => void }) => {
     const isActive = activeTab === id;
@@ -263,12 +301,14 @@ const App: React.FC = () => {
         <div className="flex-1 px-3 space-y-1 overflow-y-auto no-scrollbar pb-10">
           <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
           
-          {role === 'admin' && (
-            <>
-              <NavItem id="kanban" icon={LayoutGrid} label="Programação" />
-              <NavItem id="vendas" icon={ShoppingCart} label="Pedidos" />
-              <NavItem id="calendario_vendas" icon={CalendarDays} label="Calendário de Pedidos" />
-            </>
+          {screenPermissions.has('kanban') && (
+            <NavItem id="kanban" icon={LayoutGrid} label="Programação" />
+          )}
+          {screenPermissions.has('vendas') && (
+            <NavItem id="vendas" icon={ShoppingCart} label="Pedidos" />
+          )}
+          {screenPermissions.has('calendario_vendas') && (
+            <NavItem id="calendario_vendas" icon={CalendarDays} label="Calendário de Pedidos" />
           )}
 
           <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-5 mx-4" />
@@ -278,67 +318,70 @@ const App: React.FC = () => {
           <NavItem id="agenda" icon={Users} label="Agenda" />
           <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" />
 
-          {role === 'admin' && (
+          {screenPermissions.has('produtos') && (
             <NavItem id="produtos" icon={Package} label="Catálogo" />
           )}
 
           <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-5 mx-4" />
 
-          {isSidebarExpanded && (role === 'admin' || role === 'lider') && (
-            <button
-              onClick={() => setIsReportsOpen(!isReportsOpen)}
-              className="w-full flex items-center justify-between px-4 mb-3 group ring-0 outline-none select-none"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="w-5 h-5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center group-hover:bg-white/[0.06] transition-all">
-                  <FileText className="w-3 h-3 text-slate-500 group-hover:text-slate-300 transition-colors" />
-                </div>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Relatórios de Produção</p>
+          {(screenPermissions.has('relatorios') || screenPermissions.has('analise_disponibilidade')) && (
+            <>
+              {isSidebarExpanded && (
+                <button
+                  onClick={() => setIsReportsOpen(!isReportsOpen)}
+                  className="w-full flex items-center justify-between px-4 mb-3 group ring-0 outline-none select-none"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-5 h-5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center group-hover:bg-white/[0.06] transition-all">
+                      <FileText className="w-3 h-3 text-slate-500 group-hover:text-slate-300 transition-colors" />
+                    </div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Relatórios de Produção</p>
+                  </div>
+                  <ChevronDown className={`w-3 h-3 text-slate-600 transition-all duration-300 ${isReportsOpen ? '' : '-rotate-90'}`} />
+                </button>
+              )}
+              <div className={`space-y-0.5 transition-all duration-500 overflow-hidden ${isReportsOpen || !isSidebarExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                {screenPermissions.has('analise_disponibilidade') && <NavItem id="analise_disponibilidade" icon={Scale} label="Balanço" isSubItem={isSidebarExpanded} />}
+                {screenPermissions.has('relatorios') && <NavItem id="relatorios" icon={FileText} label="Boletim" isSubItem={isSidebarExpanded} />}
+                {screenPermissions.has('relatorio_boletim') && <NavItem id="relatorio_boletim" icon={Calculator} label="Boletim Turno" isSubItem={isSidebarExpanded} />}
+                {screenPermissions.has('top5_equipamentos') && <NavItem id="top5_equipamentos" icon={Gauge} label="Top 5 Equipamentos" isSubItem={isSidebarExpanded} />}
+                {screenPermissions.has('relatorios_downtime') && <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime (Min)" isSubItem={isSidebarExpanded} />}
+                {screenPermissions.has('relatorios_downtime_horas') && <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" isSubItem={isSidebarExpanded} />}
+                {screenPermissions.has('relatorio_downtime_tecnico') && <NavItem id="relatorio_downtime_tecnico" icon={Activity} label="Downtime Técnico" isSubItem={isSidebarExpanded} />}
+                {screenPermissions.has('analise_gargalos') && <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" isSubItem={isSidebarExpanded} />}
               </div>
-              <ChevronDown className={`w-3 h-3 text-slate-600 transition-all duration-300 ${isReportsOpen ? '' : '-rotate-90'}`} />
-            </button>
+            </>
           )}
 
-          {(role === 'admin' || role === 'lider') && (
-            <div className={`space-y-0.5 transition-all duration-500 overflow-hidden ${isReportsOpen || !isSidebarExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'}`}>
-              <NavItem id="analise_disponibilidade" icon={Scale} label="Balanço" isSubItem={isSidebarExpanded} />
-              <NavItem id="relatorios" icon={FileText} label="Boletim" isSubItem={isSidebarExpanded} />
-              <NavItem id="relatorio_boletim" icon={Calculator} label="Boletim Turno" isSubItem={isSidebarExpanded} />
-              <NavItem id="top5_equipamentos" icon={Gauge} label="Top 5 Equipamentos" isSubItem={isSidebarExpanded} />
-              <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime (Min)" isSubItem={isSidebarExpanded} />
-              <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" isSubItem={isSidebarExpanded} />
-              <NavItem id="relatorio_downtime_tecnico" icon={Activity} label="Downtime Técnico" isSubItem={isSidebarExpanded} />
-              <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" isSubItem={isSidebarExpanded} />
-            </div>
-          )}
-
-          {isSidebarExpanded && (role === 'admin' || role === 'lider') && (
-            <button
-              onClick={() => setIsAIReportsOpen(!isAIReportsOpen)}
-              className="w-full flex items-center justify-between px-4 mb-3 mt-3 group ring-0 outline-none select-none"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="w-5 h-5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center group-hover:bg-white/[0.06] transition-all">
-                  <BrainCircuit className="w-3 h-3 text-slate-500 group-hover:text-slate-300 transition-colors" />
-                </div>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Relatórios com IA</p>
+          {(screenPermissions.has('relatorio_boletim_pro') || screenPermissions.has('relatorio_boletim_ai')) && (
+            <>
+              {isSidebarExpanded && (
+                <button
+                  onClick={() => setIsAIReportsOpen(!isAIReportsOpen)}
+                  className="w-full flex items-center justify-between px-4 mb-3 mt-3 group ring-0 outline-none select-none"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-5 h-5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center group-hover:bg-white/[0.06] transition-all">
+                      <BrainCircuit className="w-3 h-3 text-slate-500 group-hover:text-slate-300 transition-colors" />
+                    </div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Relatórios com IA</p>
+                  </div>
+                  <ChevronDown className={`w-3 h-3 text-slate-600 transition-all duration-300 ${isAIReportsOpen ? '' : '-rotate-90'}`} />
+                </button>
+              )}
+              <div className={`space-y-0.5 transition-all duration-500 overflow-hidden ${isAIReportsOpen || !isSidebarExpanded ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                {screenPermissions.has('relatorio_boletim_pro') && <NavItem id="relatorio_boletim_pro" icon={Sparkles} label="Boletim Pro" isSubItem={isSidebarExpanded} />}
+                {screenPermissions.has('relatorio_boletim_ai') && <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" isSubItem={isSidebarExpanded} />}
+                {screenPermissions.has('analitica_downtime_ai') && <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" isSubItem={isSidebarExpanded} />}
               </div>
-              <ChevronDown className={`w-3 h-3 text-slate-600 transition-all duration-300 ${isAIReportsOpen ? '' : '-rotate-90'}`} />
-            </button>
-          )}
-          {(role === 'admin' || role === 'lider') && (
-            <div className={`space-y-0.5 transition-all duration-500 overflow-hidden ${isAIReportsOpen || !isSidebarExpanded ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'}`}>
-              <NavItem id="relatorio_boletim_pro" icon={Sparkles} label="Boletim Pro" isSubItem={isSidebarExpanded} />
-              <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" isSubItem={isSidebarExpanded} />
-              <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" isSubItem={isSidebarExpanded} />
-            </div>
+            </>
           )}
 
           <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-5 mx-4" />
 
           <NavItem id="perfil" icon={User} label="Meu Perfil" />
           
-          {role === 'admin' && (
+          {screenPermissions.has('usuarios') && (
             <NavItem id="usuarios" icon={Settings} label="Gestão de Equipe" />
           )}
 
@@ -427,7 +470,7 @@ const App: React.FC = () => {
           {activeTab === 'analitica_downtime_ai' && <RelatorioAnaliticaDowntimeAI />}
           {activeTab === 'top5_equipamentos' && <RelatorioTop5Equipamentos />}
           {activeTab === 'perfil' && <Perfil userProfile={userProfile} onProfileUpdate={handleProfileUpdate} />}
-          {activeTab === 'usuarios' && userProfile?.nivel_acesso === 'admin' && <Usuarios />}
+          {activeTab === 'usuarios' && screenPermissions.has('usuarios') && <Usuarios />}
           {activeTab === 'agenda' && <AgendaContatos />}
           {activeTab === 'base_conhecimento' && <BaseConhecimento />}
         </div>
@@ -449,7 +492,7 @@ const App: React.FC = () => {
           <ClipboardPenLine className="w-6 h-6" />
           <span className="text-[8px] font-black uppercase tracking-widest">Apontar</span>
         </button>
-        {(role === 'admin' || role === 'lider') && (
+        {screenPermissions.has('relatorios') && (
           <button 
             onClick={() => setActiveTab('relatorios')}
             className={`flex flex-col items-center gap-1 flex-1 transition-colors ${activeTab === 'relatorios' ? 'text-[#facc15]' : 'text-slate-500'}`}
@@ -487,15 +530,11 @@ const App: React.FC = () => {
             </div>
             
             <div className="space-y-1 overflow-y-auto no-scrollbar flex-1">
-              {role === 'admin' && (
-                <>
-                  <NavItem id="kanban" icon={LayoutGrid} label="Programação" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="vendas" icon={ShoppingCart} label="Pedidos" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="calendario_vendas" icon={CalendarDays} label="Calendário" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="produtos" icon={Package} label="Catálogo" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="usuarios" icon={Settings} label="Gestão Equipe" onClick={() => setIsMobileMenuOpen(false)} />
-                </>
-              )}
+              {screenPermissions.has('kanban') && <NavItem id="kanban" icon={LayoutGrid} label="Programação" onClick={() => setIsMobileMenuOpen(false)} />}
+              {screenPermissions.has('vendas') && <NavItem id="vendas" icon={ShoppingCart} label="Pedidos" onClick={() => setIsMobileMenuOpen(false)} />}
+              {screenPermissions.has('calendario_vendas') && <NavItem id="calendario_vendas" icon={CalendarDays} label="Calendário" onClick={() => setIsMobileMenuOpen(false)} />}
+              {screenPermissions.has('produtos') && <NavItem id="produtos" icon={Package} label="Catálogo" onClick={() => setIsMobileMenuOpen(false)} />}
+              {screenPermissions.has('usuarios') && <NavItem id="usuarios" icon={Settings} label="Gestão Equipe" onClick={() => setIsMobileMenuOpen(false)} />}
               
               <div className="h-px bg-white/5 my-4" />
               <ExternalNavItem 
@@ -509,22 +548,22 @@ const App: React.FC = () => {
               <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] px-4 mb-2">Base de Conhecimento</p>
               <NavItem id="base_conhecimento" icon={BookOpen} label="Documentação" onClick={() => setIsMobileMenuOpen(false)} />
               
-              {(role === 'admin' || role === 'lider') && (
+              {(screenPermissions.has('relatorios') || screenPermissions.has('analise_disponibilidade')) && (
                 <>
                   <div className="h-px bg-white/5 my-4" />
                   <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] px-4 mb-2">Relatórios</p>
-                  <NavItem id="analise_disponibilidade" icon={Scale} label="Balanço" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="relatorio_boletim" icon={Calculator} label="Boletim Turno" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="top5_equipamentos" icon={Gauge} label="Top 5 Equipamentos" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="relatorio_downtime_tecnico" icon={Activity} label="Downtime Técnico" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" onClick={() => setIsMobileMenuOpen(false)} />
+                  {screenPermissions.has('analise_disponibilidade') && <NavItem id="analise_disponibilidade" icon={Scale} label="Balanço" onClick={() => setIsMobileMenuOpen(false)} />}
+                  {screenPermissions.has('relatorio_boletim') && <NavItem id="relatorio_boletim" icon={Calculator} label="Boletim Turno" onClick={() => setIsMobileMenuOpen(false)} />}
+                  {screenPermissions.has('top5_equipamentos') && <NavItem id="top5_equipamentos" icon={Gauge} label="Top 5 Equipamentos" onClick={() => setIsMobileMenuOpen(false)} />}
+                  {screenPermissions.has('relatorios_downtime') && <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime" onClick={() => setIsMobileMenuOpen(false)} />}
+                  {screenPermissions.has('relatorios_downtime_horas') && <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" onClick={() => setIsMobileMenuOpen(false)} />}
+                  {screenPermissions.has('relatorio_downtime_tecnico') && <NavItem id="relatorio_downtime_tecnico" icon={Activity} label="Downtime Técnico" onClick={() => setIsMobileMenuOpen(false)} />}
+                  {screenPermissions.has('analise_gargalos') && <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" onClick={() => setIsMobileMenuOpen(false)} />}
                   <div className="h-px bg-white/5 my-4" />
                   <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] px-4 mb-2">Relatórios com IA</p>
-                  <NavItem id="relatorio_boletim_pro" icon={Sparkles} label="Boletim Pro" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" onClick={() => setIsMobileMenuOpen(false)} />
-                  <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" onClick={() => setIsMobileMenuOpen(false)} />
+                  {screenPermissions.has('relatorio_boletim_pro') && <NavItem id="relatorio_boletim_pro" icon={Sparkles} label="Boletim Pro" onClick={() => setIsMobileMenuOpen(false)} />}
+                  {screenPermissions.has('relatorio_boletim_ai') && <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" onClick={() => setIsMobileMenuOpen(false)} />}
+                  {screenPermissions.has('analitica_downtime_ai') && <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" onClick={() => setIsMobileMenuOpen(false)} />}
                 </>
               )}
             </div>

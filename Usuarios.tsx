@@ -17,6 +17,8 @@ import {
   Settings2,
   ChevronDown,
   Activity,
+  Lock,
+  Save,
   User as UserIcon
 } from 'lucide-react';
 
@@ -100,6 +102,129 @@ const Usuarios: React.FC = () => {
     return matchesSearch && matchesRole;
   });
 
+  // ---- Permissões por Papel ----
+  const ALL_SCREENS: { id: string; label: string; group: string }[] = [
+    { id: 'dashboard', label: 'Dashboard', group: 'Geral' },
+    { id: 'registro', label: 'Apontamento', group: 'Produção' },
+    { id: 'agenda', label: 'Agenda de Contatos', group: 'Geral' },
+    { id: 'relatorio_registros', label: 'Registros', group: 'Produção' },
+    { id: 'perfil', label: 'Meu Perfil', group: 'Geral' },
+    { id: 'base_conhecimento', label: 'Base de Conhecimento', group: 'Geral' },
+    { id: 'kanban', label: 'Programação Kanban', group: 'Gestão' },
+    { id: 'vendas', label: 'Pedidos', group: 'Gestão' },
+    { id: 'calendario_vendas', label: 'Calendário de Pedidos', group: 'Gestão' },
+    { id: 'produtos', label: 'Catálogo de Produtos', group: 'Gestão' },
+    { id: 'usuarios', label: 'Gestão de Equipe', group: 'Gestão' },
+    { id: 'analise_disponibilidade', label: 'Balanço', group: 'Relatórios' },
+    { id: 'relatorios', label: 'Boletim', group: 'Relatórios' },
+    { id: 'relatorio_boletim', label: 'Boletim Turno', group: 'Relatórios' },
+    { id: 'top5_equipamentos', label: 'Top 5 Equipamentos', group: 'Relatórios' },
+    { id: 'relatorios_downtime', label: 'Downtime (Min)', group: 'Relatórios' },
+    { id: 'relatorios_downtime_horas', label: 'Downtime (Horas)', group: 'Relatórios' },
+    { id: 'relatorio_downtime_tecnico', label: 'Downtime Técnico', group: 'Relatórios' },
+    { id: 'analise_gargalos', label: 'Gargalos', group: 'Relatórios' },
+    { id: 'relatorio_boletim_pro', label: 'Boletim Pro', group: 'Relatórios IA' },
+    { id: 'relatorio_boletim_ai', label: 'Boletim com IA', group: 'Relatórios IA' },
+    { id: 'analitica_downtime_ai', label: 'Analítica Downtime AI', group: 'Relatórios IA' },
+  ];
+
+  const PAPEIS = [
+    { id: 'admin', label: 'Admin', color: 'text-rose-400 border-rose-500/20' },
+    { id: 'lider', label: 'Líder', color: 'text-blue-400 border-blue-500/20' },
+    { id: 'mecanico', label: 'Mecânico', color: 'text-[#facc15] border-[#facc15]/20' },
+  ];
+
+  const [showPermissionsModal, setShowPermissionsModal] = useState(false);
+  const [selectedPapel, setSelectedPapel] = useState('admin');
+  const [permissoes, setPermissoes] = useState<Record<string, Set<string>>>({});
+  const [permLoad, setPermLoad] = useState(false);
+  const [permSaveLoading, setPermSaveLoading] = useState(false);
+  const [permInitialized, setPermInitialized] = useState(false);
+
+  const fetchPermissoes = async () => {
+    setPermLoad(true);
+    try {
+      const { data, error } = await supabase
+        .from('permissoes_papeis')
+        .select('*');
+
+      if (error) {
+        if (error.code === '42P01') {
+          console.warn('Tabela permissoes_papeis não existe ainda');
+          return;
+        }
+        throw error;
+      }
+
+      const grouped: Record<string, Set<string>> = {};
+      for (const p of PAPEIS) {
+        grouped[p.id] = new Set<string>();
+      }
+      for (const row of data || []) {
+        if (grouped[row.papel]) {
+          grouped[row.papel].add(row.tela);
+        }
+      }
+      setPermissoes(grouped);
+      setPermInitialized(true);
+    } catch (err) {
+      console.error('Erro ao buscar permissões:', err);
+    } finally {
+      setPermLoad(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showPermissionsModal && !permInitialized) {
+      fetchPermissoes();
+    }
+  }, [showPermissionsModal]);
+
+  const togglePermissao = (papel: string, tela: string) => {
+    setPermissoes(prev => {
+      const updated = { ...prev };
+      const set = new Set(updated[papel] || []);
+      if (set.has(tela)) {
+        set.delete(tela);
+      } else {
+        set.add(tela);
+      }
+      updated[papel] = set;
+      return updated;
+    });
+  };
+
+  const handleSavePermissoes = async () => {
+    setPermSaveLoading(true);
+    try {
+      for (const papel of PAPEIS.map(p => p.id)) {
+        const { error: delError } = await supabase
+          .from('permissoes_papeis')
+          .delete()
+          .eq('papel', papel);
+
+        if (delError) throw delError;
+
+        const telas = permissoes[papel] || new Set();
+        if (telas.size > 0) {
+          const inserts = Array.from(telas).map(tela => ({ papel, tela }));
+          const { error: insError } = await supabase
+            .from('permissoes_papeis')
+            .insert(inserts);
+
+          if (insError) throw insError;
+        }
+      }
+      setShowPermissionsModal(false);
+    } catch (err) {
+      console.error('Erro ao salvar permissões:', err);
+    } finally {
+      setPermSaveLoading(false);
+    }
+  };
+
+  const groups = Array.from(new Set(ALL_SCREENS.map(s => s.group)));
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
       
@@ -140,6 +265,13 @@ const Usuarios: React.FC = () => {
               </button>
             ))}
           </div>
+
+          <button
+            onClick={() => { setShowPermissionsModal(true); setSelectedPapel('admin'); }}
+            className="w-full sm:w-auto bg-[#facc15]/10 hover:bg-[#facc15]/20 border border-[#facc15]/30 text-[#facc15] px-4 py-3 rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+          >
+            <Lock className="w-3.5 h-3.5" /> Permissões
+          </button>
         </div>
       </div>
 
@@ -318,6 +450,98 @@ const Usuarios: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Permissions Modal */}
+      {showPermissionsModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setShowPermissionsModal(false)} />
+          <div className="bg-[#1a1a1a] rounded-t-[32px] sm:rounded-[40px] shadow-2xl w-full max-w-2xl relative z-10 border border-white/10 overflow-hidden mt-auto sm:mt-0 max-h-[90vh] flex flex-col">
+            <header className="px-6 py-8 sm:px-10 sm:py-10 border-b border-white/5 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-4 sm:gap-6">
+                <div className="bg-[#facc15] p-2.5 sm:p-3 rounded-xl text-black">
+                  <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tighter">Permissões por Papel</h3>
+                  <p className="text-slate-500 text-[8px] sm:text-[10px] font-black uppercase mt-1">Configure as telas que cada nível de acesso pode visualizar</p>
+                </div>
+              </div>
+              <button onClick={() => setShowPermissionsModal(false)} className="p-2 text-slate-500 hover:text-white"><X className="w-8 h-8" /></button>
+            </header>
+
+            <div className="p-6 sm:p-10 overflow-y-auto no-scrollbar">
+              {/* Role Tabs */}
+              <div className="flex gap-2 mb-8 bg-black/40 p-1.5 rounded-xl border border-white/5">
+                {PAPEIS.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setSelectedPapel(p.id)}
+                    className={`flex-1 py-3 px-4 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
+                      selectedPapel === p.id
+                        ? 'bg-[#1a1a1a] text-white shadow-lg border border-white/10'
+                        : 'text-slate-500 hover:text-white'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+
+              {permLoad ? (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 className="w-8 h-8 text-[#facc15] animate-spin" />
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {groups.map((group) => {
+                    const screensInGroup = ALL_SCREENS.filter(s => s.group === group);
+                    return (
+                      <div key={group}>
+                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">{group}</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {screensInGroup.map((screen) => {
+                            const isAllowed = permissoes[selectedPapel]?.has(screen.id) || false;
+                            return (
+                              <button
+                                key={screen.id}
+                                onClick={() => togglePermissao(selectedPapel, screen.id)}
+                                className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+                                  isAllowed
+                                    ? 'bg-[#facc15]/10 border-[#facc15]/30 text-white'
+                                    : 'bg-black/20 border-white/5 text-slate-500 hover:border-white/10'
+                                }`}
+                              >
+                                <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all shrink-0 ${
+                                  isAllowed
+                                    ? 'bg-[#facc15] border-[#facc15] text-black'
+                                    : 'border-slate-600 bg-transparent'
+                                }`}>
+                                  {isAllowed && <Check className="w-3.5 h-3.5" />}
+                                </div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider">{screen.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 sm:px-10 py-6 border-t border-white/5 shrink-0">
+              <button
+                onClick={handleSavePermissoes}
+                disabled={permSaveLoading || permLoad}
+                className="w-full bg-[#facc15] hover:bg-[#eab308] text-black font-black uppercase tracking-[0.2em] py-4 rounded-xl transition-all flex items-center justify-center gap-2 text-[11px] disabled:opacity-50"
+              >
+                {permSaveLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" /> Salvar Permissões</>}
+              </button>
+            </div>
           </div>
         </div>
       )}

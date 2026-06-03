@@ -409,6 +409,27 @@ export type Database = {
           }
         ];
       };
+      permissoes_papeis: {
+        Row: {
+          id: string;
+          papel: string;
+          tela: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          papel: string;
+          tela: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          papel?: string;
+          tela?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
