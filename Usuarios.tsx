@@ -22,7 +22,24 @@ import {
   User as UserIcon
 } from 'lucide-react';
 
-const Usuarios: React.FC = () => {
+const DEFAULT_PERMISSOES: Record<string, string[]> = {
+  admin: ['dashboard', 'kanban', 'vendas', 'calendario_vendas', 'registro', 'agenda',
+    'relatorio_registros', 'produtos', 'analise_disponibilidade', 'relatorios',
+    'relatorio_boletim', 'top5_equipamentos', 'relatorios_downtime', 'relatorios_downtime_horas',
+    'relatorio_downtime_tecnico', 'analise_gargalos', 'relatorio_boletim_pro',
+    'relatorio_boletim_ai', 'analitica_downtime_ai', 'perfil', 'usuarios', 'base_conhecimento'],
+  lider: ['dashboard', 'registro', 'agenda', 'relatorio_registros', 'analise_disponibilidade',
+    'relatorios', 'relatorio_boletim', 'top5_equipamentos', 'relatorios_downtime',
+    'relatorios_downtime_horas', 'relatorio_downtime_tecnico', 'analise_gargalos',
+    'relatorio_boletim_pro', 'relatorio_boletim_ai', 'analitica_downtime_ai', 'perfil', 'base_conhecimento'],
+  mecanico: ['dashboard', 'registro', 'agenda', 'relatorio_registros', 'perfil', 'base_conhecimento'],
+};
+
+interface UsuariosProps {
+  onPermissionsChange?: () => void;
+}
+
+const Usuarios: React.FC<UsuariosProps> = ({ onPermissionsChange }) => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -148,24 +165,30 @@ const Usuarios: React.FC = () => {
         .from('permissoes_papeis')
         .select('*');
 
-      if (error) {
-        if (error.code === '42P01') {
-          console.warn('Tabela permissoes_papeis não existe ainda');
-          return;
-        }
-        throw error;
-      }
-
       const grouped: Record<string, Set<string>> = {};
       for (const p of PAPEIS) {
-        grouped[p.id] = new Set<string>();
+        grouped[p.id] = new Set(DEFAULT_PERMISSOES[p.id] || []);
       }
-      for (const row of data || []) {
-        if (grouped[row.papel]) {
-          grouped[row.papel].add(row.tela);
+
+      if (error && error.code === '42P01') {
+        console.warn('Tabela permissoes_papeis não existe — usando defaults');
+        setPermissoes(grouped);
+        setPermInitialized(true);
+        return;
+      }
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const fresh: Record<string, Set<string>> = {};
+        for (const p of PAPEIS) fresh[p.id] = new Set<string>();
+        for (const row of data) {
+          if (fresh[row.papel]) fresh[row.papel].add(row.tela);
         }
+        setPermissoes(fresh);
+      } else {
+        setPermissoes(grouped);
       }
-      setPermissoes(grouped);
       setPermInitialized(true);
     } catch (err) {
       console.error('Erro ao buscar permissões:', err);
@@ -184,11 +207,8 @@ const Usuarios: React.FC = () => {
     setPermissoes(prev => {
       const updated = { ...prev };
       const set = new Set(updated[papel] || []);
-      if (set.has(tela)) {
-        set.delete(tela);
-      } else {
-        set.add(tela);
-      }
+      if (set.has(tela)) set.delete(tela);
+      else set.add(tela);
       updated[papel] = set;
       return updated;
     });
@@ -203,7 +223,7 @@ const Usuarios: React.FC = () => {
           .delete()
           .eq('papel', papel);
 
-        if (delError) throw delError;
+        if (delError && delError.code !== '42P01') throw delError;
 
         const telas = permissoes[papel] || new Set();
         if (telas.size > 0) {
@@ -212,12 +232,18 @@ const Usuarios: React.FC = () => {
             .from('permissoes_papeis')
             .insert(inserts);
 
-          if (insError) throw insError;
+          if (insError && insError.code !== '42P01') throw insError;
         }
       }
       setShowPermissionsModal(false);
-    } catch (err) {
-      console.error('Erro ao salvar permissões:', err);
+      if (onPermissionsChange) onPermissionsChange();
+    } catch (err: any) {
+      if (err?.code === '42P01') {
+        alert('A tabela "permissoes_papeis" ainda não existe no Supabase.\n\nExecute o script "supabase_permissoes_papeis.sql" no SQL Editor do Supabase.');
+      } else {
+        console.error('Erro ao salvar permissões:', err);
+        alert('Erro ao salvar permissões: ' + (err?.message || 'desconhecido'));
+      }
     } finally {
       setPermSaveLoading(false);
     }

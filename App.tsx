@@ -495,7 +495,9 @@ const App: React.FC = () => {
           {activeTab === 'analitica_downtime_ai' && <RelatorioAnaliticaDowntimeAI />}
           {activeTab === 'top5_equipamentos' && <RelatorioTop5Equipamentos />}
           {activeTab === 'perfil' && <Perfil userProfile={userProfile} onProfileUpdate={handleProfileUpdate} />}
-          {activeTab === 'usuarios' && screenPermissions.has('usuarios') && <Usuarios />}
+          {activeTab === 'usuarios' && screenPermissions.has('usuarios') && (
+            <Usuarios onPermissionsChange={() => fetchScreenPermissions(userProfile?.nivel_acesso || 'mecanico')} />
+          )}
           {activeTab === 'agenda' && <AgendaContatos />}
           {activeTab === 'base_conhecimento' && <BaseConhecimento />}
         </div>
