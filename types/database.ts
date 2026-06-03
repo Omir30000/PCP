@@ -369,7 +369,7 @@ export type Database = {
           cargo: string | null;
           turno: number | null;
           criado_at: string;
-          nivel_acesso: 'admin' | 'lider' | 'mecanico' | null;
+          nivel_acesso: 'admin' | 'lider' | 'mecanico' | 'vendas' | null;
           especialidade: 'mecanica' | 'eletrica' | 'civil' | 'utilidades' | 'geral' | null;
           ativo: boolean;
         };
@@ -382,7 +382,7 @@ export type Database = {
           cargo?: string | null;
           turno?: number | null;
           criado_at?: string;
-          nivel_acesso?: 'admin' | 'lider' | 'mecanico' | null;
+          nivel_acesso?: 'admin' | 'lider' | 'mecanico' | 'vendas' | null;
           especialidade?: 'mecanica' | 'eletrica' | 'civil' | 'utilidades' | 'geral' | null;
           ativo?: boolean;
         };
@@ -395,7 +395,7 @@ export type Database = {
           cargo?: string | null;
           turno?: number | null;
           criado_at?: string;
-          nivel_acesso?: 'admin' | 'lider' | 'mecanico' | null;
+          nivel_acesso?: 'admin' | 'lider' | 'mecanico' | 'vendas' | null;
           especialidade?: 'mecanica' | 'eletrica' | 'civil' | 'utilidades' | 'geral' | null;
           ativo?: boolean;
         };

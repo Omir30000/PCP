@@ -138,7 +138,8 @@ const App: React.FC = () => {
   }, []);
 
   const getDefaultPermissions = (role: string): Set<string> => {
-    const perms = new Set<string>(['dashboard', 'registro', 'agenda', 'relatorio_registros', 'perfil', 'base_conhecimento']);
+    const base = ['dashboard', 'registro', 'agenda', 'relatorio_registros', 'perfil', 'base_conhecimento'];
+    const perms = new Set<string>(base);
     if (role === 'admin') {
       ['kanban', 'vendas', 'calendario_vendas', 'produtos', 'usuarios',
        'analise_disponibilidade', 'relatorios', 'relatorio_boletim', 'top5_equipamentos',
@@ -150,6 +151,10 @@ const App: React.FC = () => {
        'relatorios_downtime', 'relatorios_downtime_horas', 'relatorio_downtime_tecnico',
        'analise_gargalos', 'relatorio_boletim_pro', 'relatorio_boletim_ai',
        'analitica_downtime_ai'].forEach(t => perms.add(t));
+    } else if (role === 'vendas') {
+      perms.delete('registro');
+      perms.delete('relatorio_registros');
+      ['vendas', 'calendario_vendas'].forEach(t => perms.add(t));
     }
     return perms;
   };
@@ -201,7 +206,7 @@ const App: React.FC = () => {
           id: userId,
           nome,
           email,
-          nivel_acesso: 'mecanico',
+          nivel_acesso: 'vendas',
           especialidade: 'geral',
           turno: 1,
           ativo: true
@@ -211,7 +216,7 @@ const App: React.FC = () => {
 
       if (!insertError && newProfile) {
         setUserProfile(newProfile);
-        fetchScreenPermissions('mecanico');
+        fetchScreenPermissions('vendas');
       }
     } catch (err) {
       console.error('Erro ao buscar perfil:', err);

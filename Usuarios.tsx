@@ -33,6 +33,7 @@ const DEFAULT_PERMISSOES: Record<string, string[]> = {
     'relatorios_downtime_horas', 'relatorio_downtime_tecnico', 'analise_gargalos',
     'relatorio_boletim_pro', 'relatorio_boletim_ai', 'analitica_downtime_ai', 'perfil', 'base_conhecimento'],
   mecanico: ['dashboard', 'registro', 'agenda', 'relatorio_registros', 'perfil', 'base_conhecimento'],
+  vendas: ['dashboard', 'vendas', 'calendario_vendas', 'agenda', 'perfil', 'base_conhecimento'],
 };
 
 interface UsuariosProps {
@@ -149,6 +150,7 @@ const Usuarios: React.FC<UsuariosProps> = ({ onPermissionsChange }) => {
     { id: 'admin', label: 'Admin', color: 'text-rose-400 border-rose-500/20' },
     { id: 'lider', label: 'Líder', color: 'text-blue-400 border-blue-500/20' },
     { id: 'mecanico', label: 'Mecânico', color: 'text-[#facc15] border-[#facc15]/20' },
+    { id: 'vendas', label: 'Vendas', color: 'text-emerald-400 border-emerald-500/20' },
   ];
 
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
@@ -281,7 +283,7 @@ const Usuarios: React.FC<UsuariosProps> = ({ onPermissionsChange }) => {
           </div>
           
           <div className="flex w-full sm:w-auto bg-white/5 p-1 rounded-xl border border-white/10 overflow-x-auto no-scrollbar">
-            {['all', 'admin', 'lider', 'mecanico'].map((role) => (
+            {['all', 'admin', 'lider', 'mecanico', 'vendas'].map((role) => (
               <button
                 key={role}
                 onClick={() => setFilterRole(role)}
@@ -319,7 +321,8 @@ const Usuarios: React.FC<UsuariosProps> = ({ onPermissionsChange }) => {
               <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex flex-col items-end gap-2">
                 <span className={`text-[8px] font-black uppercase px-2 py-1 rounded bg-black/40 border tracking-widest
                   ${user.nivel_acesso === 'admin' ? 'text-rose-400 border-rose-500/20' : 
-                    user.nivel_acesso === 'lider' ? 'text-blue-400 border-blue-500/20' : 'text-[#facc15] border-[#facc15]/20'}
+                    user.nivel_acesso === 'lider' ? 'text-blue-400 border-blue-500/20' : 
+                    user.nivel_acesso === 'vendas' ? 'text-emerald-400 border-emerald-500/20' : 'text-[#facc15] border-[#facc15]/20'}
                 `}>
                   {user.nivel_acesso}
                 </span>
@@ -431,6 +434,7 @@ const Usuarios: React.FC<UsuariosProps> = ({ onPermissionsChange }) => {
                     onChange={e => setEditingUser({...editingUser, nivel_acesso: e.target.value})}
                     className="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 px-4 text-white text-xs font-bold focus:border-[#facc15]/50 outline-none transition-all"
                   >
+                    <option value="vendas">VENDAS</option>
                     <option value="mecanico">MECÂNICO</option>
                     <option value="lider">LÍDER</option>
                     <option value="admin">ADMIN</option>

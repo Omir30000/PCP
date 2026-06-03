@@ -65,3 +65,13 @@ INSERT INTO permissoes_papeis (papel, tela) VALUES
 ('mecanico', 'perfil'),
 ('mecanico', 'base_conhecimento')
 ON CONFLICT (papel, tela) DO NOTHING;
+
+-- Vendas: pedidos, calendário, agenda
+INSERT INTO permissoes_papeis (papel, tela) VALUES
+('vendas', 'dashboard'),
+('vendas', 'vendas'),
+('vendas', 'calendario_vendas'),
+('vendas', 'agenda'),
+('vendas', 'perfil'),
+('vendas', 'base_conhecimento')
+ON CONFLICT (papel, tela) DO NOTHING;

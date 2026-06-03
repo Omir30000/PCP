@@ -49,7 +49,7 @@ const Auth: React.FC = () => {
             id: signUpData.user.id,
             nome: nome,
             email: email,
-            nivel_acesso: 'mecanico',
+            nivel_acesso: 'vendas',
             especialidade: 'geral',
             turno: 1,
             ativo: true
