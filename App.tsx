@@ -324,7 +324,7 @@ const App: React.FC = () => {
         </div>
 
         <div className="flex-1 px-3 space-y-1 overflow-y-auto no-scrollbar pb-10">
-          <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
+          {screenPermissions.has('dashboard') && <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />}
           
           {screenPermissions.has('kanban') && (
             <NavItem id="kanban" icon={LayoutGrid} label="Programação" />
@@ -338,10 +338,10 @@ const App: React.FC = () => {
 
           <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-5 mx-4" />
 
-          <NavItem id="registro" icon={ClipboardPenLine} label="Apontamento" />
+          {screenPermissions.has('registro') && <NavItem id="registro" icon={ClipboardPenLine} label="Apontamento" />}
           
-          <NavItem id="agenda" icon={Users} label="Agenda" />
-          <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" />
+          {screenPermissions.has('agenda') && <NavItem id="agenda" icon={Users} label="Agenda" />}
+          {screenPermissions.has('relatorio_registros') && <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" />}
 
           {screenPermissions.has('produtos') && (
             <NavItem id="produtos" icon={Package} label="Catálogo" />
@@ -404,7 +404,7 @@ const App: React.FC = () => {
 
           <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-5 mx-4" />
 
-          <NavItem id="perfil" icon={User} label="Meu Perfil" />
+          {screenPermissions.has('perfil') && <NavItem id="perfil" icon={User} label="Meu Perfil" />}
           
           {screenPermissions.has('usuarios') && (
             <NavItem id="usuarios" icon={Settings} label="Gestão de Equipe" />
@@ -421,24 +421,27 @@ const App: React.FC = () => {
 
           <div className="h-px bg-white/5 my-6 mx-4" />
 
-          {isSidebarExpanded && (
-            <button
-              onClick={() => setIsKnowledgeOpen(!isKnowledgeOpen)}
-              className="w-full flex items-center justify-between px-4 mb-3 mt-2 group ring-0 outline-none select-none"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="w-5 h-5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center group-hover:bg-white/[0.06] transition-all">
-                  <BookOpen className="w-3 h-3 text-slate-500 group-hover:text-slate-300 transition-colors" />
-                </div>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Base de Conhecimento</p>
+          {screenPermissions.has('base_conhecimento') && (
+            <>
+              {isSidebarExpanded && (
+                <button
+                  onClick={() => setIsKnowledgeOpen(!isKnowledgeOpen)}
+                  className="w-full flex items-center justify-between px-4 mb-3 mt-2 group ring-0 outline-none select-none"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-5 h-5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center group-hover:bg-white/[0.06] transition-all">
+                      <BookOpen className="w-3 h-3 text-slate-500 group-hover:text-slate-300 transition-colors" />
+                    </div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] group-hover:text-slate-300 transition-colors">Base de Conhecimento</p>
+                  </div>
+                  <ChevronDown className={`w-3 h-3 text-slate-600 transition-all duration-300 ${isKnowledgeOpen ? '' : '-rotate-90'}`} />
+                </button>
+              )}
+              <div className={`space-y-0.5 transition-all duration-500 overflow-hidden ${isKnowledgeOpen || !isSidebarExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <NavItem id="base_conhecimento" icon={FileText} label="Descrição Geral" isSubItem={isSidebarExpanded} />
               </div>
-              <ChevronDown className={`w-3 h-3 text-slate-600 transition-all duration-300 ${isKnowledgeOpen ? '' : '-rotate-90'}`} />
-            </button>
+            </>
           )}
-
-          <div className={`space-y-0.5 transition-all duration-500 overflow-hidden ${isKnowledgeOpen || !isSidebarExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
-            <NavItem id="base_conhecimento" icon={FileText} label="Descrição Geral" isSubItem={isSidebarExpanded} />
-          </div>
         </div>
 
         <div className={`p-3 mt-auto border-t border-white/[0.04] bg-black/20`}>
@@ -505,20 +508,24 @@ const App: React.FC = () => {
 
       {/* Bottom Nav for Mobile */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0d0d0d]/90 backdrop-blur-xl border-t border-white/5 z-50 flex items-center justify-around px-2 py-3 shadow-[0_-10px_20px_rgba(0,0,0,0.5)]">
-        <button 
-          onClick={() => setActiveTab('dashboard')}
-          className={`flex flex-col items-center gap-1 flex-1 transition-colors ${activeTab === 'dashboard' ? 'text-[#facc15]' : 'text-slate-500'}`}
-        >
-          <LayoutDashboard className="w-6 h-6" />
-          <span className="text-[8px] font-black uppercase tracking-widest">Dash</span>
-        </button>
-        <button 
-          onClick={() => setActiveTab('registro')}
-          className={`flex flex-col items-center gap-1 flex-1 transition-colors ${activeTab === 'registro' ? 'text-[#facc15]' : 'text-slate-500'}`}
-        >
-          <ClipboardPenLine className="w-6 h-6" />
-          <span className="text-[8px] font-black uppercase tracking-widest">Apontar</span>
-        </button>
+        {screenPermissions.has('dashboard') && (
+          <button 
+            onClick={() => setActiveTab('dashboard')}
+            className={`flex flex-col items-center gap-1 flex-1 transition-colors ${activeTab === 'dashboard' ? 'text-[#facc15]' : 'text-slate-500'}`}
+          >
+            <LayoutDashboard className="w-6 h-6" />
+            <span className="text-[8px] font-black uppercase tracking-widest">Dash</span>
+          </button>
+        )}
+        {screenPermissions.has('registro') && (
+          <button 
+            onClick={() => setActiveTab('registro')}
+            className={`flex flex-col items-center gap-1 flex-1 transition-colors ${activeTab === 'registro' ? 'text-[#facc15]' : 'text-slate-500'}`}
+          >
+            <ClipboardPenLine className="w-6 h-6" />
+            <span className="text-[8px] font-black uppercase tracking-widest">Apontar</span>
+          </button>
+        )}
         {screenPermissions.has('relatorios') && (
           <button 
             onClick={() => setActiveTab('relatorios')}
@@ -573,7 +580,7 @@ const App: React.FC = () => {
 
               <div className="h-px bg-white/5 my-4" />
               <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] px-4 mb-2">Base de Conhecimento</p>
-              <NavItem id="base_conhecimento" icon={BookOpen} label="Documentação" onClick={() => setIsMobileMenuOpen(false)} />
+              {screenPermissions.has('base_conhecimento') && <NavItem id="base_conhecimento" icon={BookOpen} label="Documentação" onClick={() => setIsMobileMenuOpen(false)} />}
               
               {(screenPermissions.has('relatorios') || screenPermissions.has('analise_disponibilidade')) && (
                 <>
