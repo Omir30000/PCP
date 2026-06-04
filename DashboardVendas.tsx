@@ -118,7 +118,10 @@ const DashboardVendas: React.FC = () => {
   const totalClientes = clientesList.length;
   const totalEstoque = produtosComEstoque.reduce((acc, p) => acc + p.estoque, 0);
 
-  const maisVendidos = itens.reduce((acc: any[], item) => {
+  const pedidosSemanaIds = new Set(pedidos.map(p => p.id));
+  const itensSemana = itens.filter(item => pedidosSemanaIds.has(item.pedido_id));
+
+  const maisVendidos = itensSemana.reduce((acc: any[], item) => {
     const existing = acc.find(i => i.produto_id === item.produto_id);
     if (existing) {
       existing.qtd += Number(item.quantidade) || 0;
