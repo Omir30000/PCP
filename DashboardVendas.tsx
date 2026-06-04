@@ -17,7 +17,7 @@ import {
 const DashboardVendas: React.FC = () => {
   const [produtos, setProdutos] = useState<any[]>([]);
   const [estoques, setEstoques] = useState<any[]>([]);
-  const [programacao, setProgramacao] = useState<any[]>([]);
+  const [registrosSemana, setRegistrosSemana] = useState<any[]>([]);
   const [pedidos, setPedidos] = useState<any[]>([]);
   const [itens, setItens] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,23 +57,23 @@ const DashboardVendas: React.FC = () => {
     try {
       const { inicio, fim } = getSemana(semanaOffset);
 
-      const [prodRes, estRes, progRes, pedRes, itRes] = await Promise.all([
+      const [prodRes, estRes, regRes, pedRes, itRes] = await Promise.all([
         supabase.from('produtos').select('*').order('nome'),
         supabase.from('ajustes_estoque').select('*'),
-        supabase.from('programacao_semanal' as any).select('*').gte('dia_semana', inicio).lte('dia_semana', fim),
+        supabase.from('registros_producao').select('*').gte('data_registro', inicio).lte('data_registro', fim),
         supabase.from('pedidos').select('*').order('data_pedido', { ascending: false }),
         supabase.from('itens_pedido').select('*'),
       ]);
 
       setProdutos(prodRes.data || []);
       setEstoques(estRes.data || []);
-      setProgramacao(progRes.data || []);
+      setRegistrosSemana(regRes.data || []);
       setPedidos(pedRes.data || []);
       setItens(itRes.data || []);
 
       if (prodRes.error) console.warn('produtos:', prodRes.error);
       if (estRes.error) console.warn('ajustes_estoque:', estRes.error);
-      if (progRes.error) console.warn('programacao_semanal:', progRes.error);
+      if (regRes.error) console.warn('registros_producao:', regRes.error);
       if (pedRes.error) console.warn('pedidos:', pedRes.error);
       if (itRes.error) console.warn('itens_pedido:', itRes.error);
     } catch (err) {
@@ -91,14 +91,14 @@ const DashboardVendas: React.FC = () => {
   }));
 
   const producaoSemanaMap: Record<string, { produto_id: string; nome: string; total: number }> = {};
-  programacao.forEach((prog: any) => {
-    const pid = prog.produto_id;
+  registrosSemana.forEach((reg: any) => {
+    const pid = reg.produto_id || reg.produto_volume;
     if (!pid) return;
     if (!producaoSemanaMap[pid]) {
-      const prod = produtos.find(p => p.id === pid);
-      producaoSemanaMap[pid] = { produto_id: pid, nome: prod?.nome || 'Desconhecido', total: 0 };
+      const prod = produtos.find(p => p.id === pid || p.nome === pid);
+      producaoSemanaMap[pid] = { produto_id: pid, nome: prod?.nome || pid, total: 0 };
     }
-    producaoSemanaMap[pid].total += Number(prog.quantidade_planejada) || 0;
+    producaoSemanaMap[pid].total += Number(reg.quantidade_produzida) || 0;
   });
   const producaoSemanaList = Object.values(producaoSemanaMap).sort((a, b) => b.total - a.total);
 
@@ -187,7 +187,7 @@ const DashboardVendas: React.FC = () => {
         <div className="bg-slate-900/90 backdrop-blur-md p-5 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/10">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2.5 bg-[#facc15]/10 rounded-xl"><Factory className="w-4 h-4 text-[#facc15]" /></div>
-            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Produzir na Semana</span>
+            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Produzido na Semana</span>
           </div>
           <p className="text-3xl sm:text-4xl font-black text-white">{producaoSemanaList.length}</p>
         </div>
@@ -239,11 +239,11 @@ const DashboardVendas: React.FC = () => {
         <div className="bg-slate-900/90 backdrop-blur-md p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] border border-white/10">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2.5 bg-[#facc15]/10 rounded-xl"><Calendar className="w-4 h-4 text-[#facc15]" /></div>
-            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Produção da Semana</h3>
+            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Produzido na Semana</h3>
           </div>
           <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
             {producaoSemanaList.length === 0 ? (
-              <p className="text-slate-500 text-[10px] font-bold uppercase text-center py-8">Nenhuma produção programada</p>
+              <p className="text-slate-500 text-[10px] font-bold uppercase text-center py-8">Nenhum registro de produção</p>
             ) : (
               producaoSemanaList.map(item => (
                 <div key={item.produto_id} className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5 hover:border-white/10 transition-all">
