@@ -36,11 +36,13 @@ const Dashboard: React.FC = () => {
 
   const [filtroData, setFiltroData] = useState(getHoje());
   const [filtroTurno, setFiltroTurno] = useState<'GLOBAL' | 'MANHÃ' | 'TARDE'>('GLOBAL');
+  const [semanaOffset, setSemanaOffset] = useState(0);
 
   const [modalLinha, setModalLinha] = useState<any | null>(null);
 
-  const getPeriodoSemana = () => {
+  const getPeriodoSemana = (offset = 0) => {
     const now = new Date();
+    now.setDate(now.getDate() + offset * 7);
     const day = now.getDay();
     const diffToMonday = day === 0 ? -6 : 1 - day;
     const monday = new Date(now);
@@ -71,7 +73,7 @@ const Dashboard: React.FC = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const periodo = getPeriodoSemana();
+    const periodo = getPeriodoSemana(semanaOffset);
     try {
       const [linRes, prodRes, regRes, progRes, regSemanaRes] = await Promise.all([
         supabase.from('linhas').select('*').order('nome'),
@@ -94,10 +96,10 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [filtroData]);
+  }, [filtroData, semanaOffset]);
 
   const metasSemanais = useMemo(() => {
-    const periodo = getPeriodoSemana();
+    const periodo = getPeriodoSemana(semanaOffset);
     const diasRestantes = 7 - periodo.hoje;
     const metaPorSKU: Record<string, { programado: number, realizado: number, nome: string }> = {};
     programacaoSemanal.forEach(prog => {
@@ -269,6 +271,21 @@ const Dashboard: React.FC = () => {
           }} className="p-2 hover:bg-[#facc15] hover:text-black rounded-xl text-slate-400 transition-all bg-white/5 border border-white/5">
             <ChevronRight className="w-5 h-5" />
           </button>
+
+          <div className="h-8 w-px bg-white/10 mx-2 hidden md:block" />
+
+          <button onClick={() => setSemanaOffset(semanaOffset - 1)} className="p-2 hover:bg-[#facc15] hover:text-black rounded-xl text-slate-400 transition-all bg-white/5 border border-white/5">
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-xl border border-white/5">
+            <Calendar className="w-4 h-4 text-blue-400" />
+            <span className="text-[9px] font-black text-white uppercase tracking-wider whitespace-nowrap">
+              {getPeriodoSemana(semanaOffset).inicio} — {getPeriodoSemana(semanaOffset).fim}
+            </span>
+          </div>
+          <button onClick={() => setSemanaOffset(semanaOffset + 1)} className="p-2 hover:bg-[#facc15] hover:text-black rounded-xl text-slate-400 transition-all bg-white/5 border border-white/5">
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
         <div className="flex w-full md:w-auto bg-white/10 p-1 rounded-xl border border-white/10 backdrop-blur-sm">
           {['GLOBAL', 'MANHÃ', 'TARDE'].map((t) => (
@@ -373,9 +390,9 @@ const Dashboard: React.FC = () => {
       <div className="bg-[#141414] border border-white/5 p-6 lg:p-8 rounded-[40px] shadow-2xl overflow-hidden">
         <h3 className="text-xl lg:text-2xl font-black text-white uppercase tracking-tighter mb-6 flex items-center gap-4">
           <ListChecks className="w-5 h-5 lg:w-6 lg:h-6 text-blue-400" /> Metas Semanais
-          <span className="text-[9px] font-bold text-slate-500 bg-white/5 px-3 py-1 rounded-full tracking-wider ml-auto">
-            {new Date().toLocaleDateString('pt-BR', { weekday: 'long' }).replace('-feira', '')} — {7 - new Date().getDay()} dias restantes
-          </span>
+            <span className="text-[9px] font-bold text-slate-500 bg-white/5 px-3 py-1 rounded-full tracking-wider ml-auto">
+              {getPeriodoSemana(semanaOffset).inicio} — {getPeriodoSemana(semanaOffset).fim}
+            </span>
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {metasSemanais.map((meta) => {
