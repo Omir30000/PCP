@@ -65,19 +65,19 @@ const DashboardVendas: React.FC = () => {
         supabase.from('itens_pedido').select('*'),
       ]);
 
-      if (prodRes.error) throw prodRes.error;
-      if (estRes.error) throw estRes.error;
-      if (progRes.error) throw progRes.error;
-      if (pedRes.error) throw pedRes.error;
-      if (itRes.error) throw itRes.error;
-
       setProdutos(prodRes.data || []);
       setEstoques(estRes.data || []);
       setProgramacao(progRes.data || []);
       setPedidos(pedRes.data || []);
       setItens(itRes.data || []);
+
+      if (prodRes.error) console.warn('produtos:', prodRes.error);
+      if (estRes.error) console.warn('ajustes_estoque:', estRes.error);
+      if (progRes.error) console.warn('programacao_semanal:', progRes.error);
+      if (pedRes.error) console.warn('pedidos:', pedRes.error);
+      if (itRes.error) console.warn('itens_pedido:', itRes.error);
     } catch (err) {
-      console.error('Erro ao carregar dashboard vendas:', err);
+      console.error('Erro inesperado:', err);
     } finally {
       setLoading(false);
     }
