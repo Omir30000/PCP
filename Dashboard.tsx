@@ -73,8 +73,8 @@ const Dashboard: React.FC = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const periodo = getPeriodoSemana(semanaOffset);
     try {
+      const periodo = getPeriodoSemana();
       const [linRes, prodRes, regRes, progRes, regSemanaRes] = await Promise.all([
         supabase.from('linhas').select('*').order('nome'),
         supabase.from('produtos').select('*'),
@@ -94,9 +94,27 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const fetchSemanaData = async (offset: number) => {
+    const periodo = getPeriodoSemana(offset);
+    try {
+      const [progRes, regSemanaRes] = await Promise.all([
+        supabase.from('programacao_semanal' as any).select('*').gte('dia_semana', periodo.inicio).lte('dia_semana', periodo.fim),
+        supabase.from('registros_producao').select('*').gte('data_registro', periodo.inicio).lte('data_registro', periodo.fim)
+      ]);
+      setProgramacaoSemanal(progRes.data || []);
+      setTodosRegistrosSemana(regSemanaRes.data || []);
+    } catch (err) {
+      console.error("Erro ao buscar dados da semana:", err);
+    }
+  };
+
   useEffect(() => {
     fetchData();
-  }, [filtroData, semanaOffset]);
+  }, [filtroData]);
+
+  useEffect(() => {
+    fetchSemanaData(semanaOffset);
+  }, [semanaOffset]);
 
   const metasSemanais = useMemo(() => {
     const periodo = getPeriodoSemana(semanaOffset);
