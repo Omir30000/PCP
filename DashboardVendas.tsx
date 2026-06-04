@@ -83,6 +83,9 @@ const DashboardVendas: React.FC = () => {
     }
   };
 
+  const unidadesPorFardo = (p: any) => Number(p.unidades_por_fardo) || 1;
+  const fardos = (total: number, prod: any) => Math.floor(total / unidadesPorFardo(prod));
+
   const estoqueMap = new Map(estoques.map(e => [e.produto_id, e.quantidade_real]));
 
   const produtosComEstoque = produtos.map(p => ({
@@ -226,9 +229,12 @@ const DashboardVendas: React.FC = () => {
                     <p className="text-[10px] font-black text-white uppercase truncate">{prod.nome}</p>
                     <p className="text-[8px] text-slate-500 font-bold uppercase mt-0.5">{prod.tipo || 'Sem tipo'}</p>
                   </div>
-                  <span className={`text-[10px] font-black ml-3 ${prod.estoque > 0 ? 'text-[#10b981]' : 'text-[#f43f5e]'}`}>
-                    {prod.estoque.toLocaleString()} un
-                  </span>
+                  <div className="text-right ml-3">
+                    <span className={`text-[10px] font-black ${prod.estoque > 0 ? 'text-[#10b981]' : 'text-[#f43f5e]'}`}>
+                      {prod.estoque.toLocaleString()} un
+                    </span>
+                    <span className="block text-[8px] font-bold text-slate-500 uppercase">{fardos(prod.estoque, prod)} fardos</span>
+                  </div>
                 </div>
               ))
             )}
@@ -250,7 +256,10 @@ const DashboardVendas: React.FC = () => {
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] font-black text-white uppercase truncate">{item.nome}</p>
                   </div>
-                  <span className="text-[10px] font-black text-[#facc15] ml-3">{item.total.toLocaleString()} un</span>
+                  <div className="text-right ml-3">
+                    <span className="text-[10px] font-black text-[#facc15]">{item.total.toLocaleString()} un</span>
+                    <span className="block text-[8px] font-bold text-slate-500 uppercase">{fardos(item.total, produtos.find(p => p.id === item.produto_id || p.nome === item.produto_id))} fardos</span>
+                  </div>
                 </div>
               ))
             )}
@@ -275,7 +284,10 @@ const DashboardVendas: React.FC = () => {
                       <p className="text-[10px] font-black text-white uppercase truncate">{prod.nome}</p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-black text-[#10b981] ml-3">{prod.qtd} un</span>
+                  <div className="text-right ml-3">
+                    <span className="text-[10px] font-black text-[#10b981]">{prod.qtd.toLocaleString()} un</span>
+                    <span className="block text-[8px] font-bold text-slate-500 uppercase">{fardos(prod.qtd, produtos.find(p => p.id === prod.produto_id))} fardos</span>
+                  </div>
                 </div>
               ))
             )}
