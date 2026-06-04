@@ -39,7 +39,6 @@ const Dashboard: React.FC = () => {
   const [semanaOffset, setSemanaOffset] = useState(0);
 
   const [modalLinha, setModalLinha] = useState<any | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string>('');
 
   const getPeriodoSemana = (offset = 0) => {
     const now = new Date();
@@ -105,11 +104,12 @@ const Dashboard: React.FC = () => {
       setProgramacaoSemanal(progData);
       setTodosRegistrosSemana(regSemanaRes.data || []);
       if (progData.length > 0) {
-        const chaves = Object.keys(progData[0]).join(', ');
-        const valores = JSON.stringify(progData[0]).slice(0, 200);
-        setDebugInfo(`Período: ${periodo.inicio} — ${periodo.fim} | Total prog: ${progData.length} | Campos: ${chaves} | Ex: ${valores}`);
-      } else {
-        setDebugInfo(`Período: ${periodo.inicio} — ${periodo.fim} | Total prog: 0`);
+        console.log('=== DEBUG METAS ===');
+        console.log('Período:', periodo.inicio, '—', periodo.fim);
+        console.log('Total prog:', progData.length);
+        console.log('Campos:', Object.keys(progData[0]));
+        console.log('1o registro:', JSON.stringify(progData[0], null, 2));
+        console.log('Todos registros:', JSON.stringify(progData, null, 2));
       }
     } catch (err) {
       console.error("Erro ao buscar dados da semana:", err);
@@ -406,7 +406,6 @@ const Dashboard: React.FC = () => {
         <h3 className="text-xl lg:text-2xl font-black text-white uppercase tracking-tighter mb-6 flex items-center gap-4">
           <ListChecks className="w-5 h-5 lg:w-6 lg:h-6 text-blue-400" /> Metas Semanais
           <div className="flex items-center gap-2 ml-auto">
-            {debugInfo && <span className="text-[7px] font-mono text-slate-500 max-w-[300px] truncate" title={debugInfo}>{debugInfo.slice(0, 200)}</span>}
             <button onClick={() => setSemanaOffset(semanaOffset - 1)} className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-all">
               <ChevronLeft className="w-4 h-4" />
             </button>
