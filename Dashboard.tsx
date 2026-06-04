@@ -78,19 +78,14 @@ const Dashboard: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const periodo = getPeriodoSemana();
-      const [linRes, prodRes, regRes, progRes, regSemanaRes] = await Promise.all([
+      const [linRes, prodRes, regRes] = await Promise.all([
         supabase.from('linhas').select('*').order('nome'),
         supabase.from('produtos').select('*'),
         supabase.from('registros_producao').select('*').eq('data_registro', filtroData).order('created_at', { ascending: false }),
-        supabase.from('programacao_semanal' as any).select('*').gte('dia_semana', periodo.inicio).lte('dia_semana', periodo.fim),
-        supabase.from('registros_producao').select('*').gte('data_registro', periodo.inicio).lte('data_registro', periodo.fim)
       ]);
       setLinhas(linRes.data || []);
       setProdutos(prodRes.data || []);
       setRegistros(regRes.data || []);
-      setProgramacaoSemanal(progRes.data || []);
-      setTodosRegistrosSemana(regSemanaRes.data || []);
     } catch (err) {
       console.error("Nexus Sync Error:", err);
     } finally {
@@ -114,6 +109,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+    fetchSemanaData(semanaOffset);
   }, [filtroData]);
 
   useEffect(() => {
