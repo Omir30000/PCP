@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { ToastProvider } from './lib/toast';
 import Dashboard from './Dashboard';
+import DashboardVendas from './DashboardVendas';
 import Vendas from './Vendas';
 import ProgramacaoKanban from './ProgramacaoKanban';
 import PaginaRegistro from './PaginaRegistro';
@@ -57,11 +58,13 @@ import {
   Users,
   Sparkles,
   BookOpen,
-  Gauge
+  Gauge,
+  BarChart3
 } from 'lucide-react';
 
 type Tab =
   | 'dashboard'
+  | 'dashboard_vendas'
   | 'kanban'
   | 'vendas'
   | 'registro'
@@ -141,7 +144,7 @@ const App: React.FC = () => {
     const base = ['dashboard', 'registro', 'agenda', 'relatorio_registros', 'perfil', 'base_conhecimento'];
     const perms = new Set<string>(base);
     if (role === 'admin') {
-      ['kanban', 'vendas', 'calendario_vendas', 'produtos', 'usuarios',
+      ['kanban', 'vendas', 'dashboard_vendas', 'calendario_vendas', 'produtos', 'usuarios',
        'analise_disponibilidade', 'relatorios', 'relatorio_boletim', 'top5_equipamentos',
        'relatorios_downtime', 'relatorios_downtime_horas', 'relatorio_downtime_tecnico',
        'analise_gargalos', 'relatorio_boletim_pro', 'relatorio_boletim_ai',
@@ -154,7 +157,7 @@ const App: React.FC = () => {
     } else if (role === 'vendas') {
       perms.delete('registro');
       perms.delete('relatorio_registros');
-      ['vendas', 'calendario_vendas'].forEach(t => perms.add(t));
+      ['vendas', 'dashboard_vendas', 'calendario_vendas'].forEach(t => perms.add(t));
     }
     return perms;
   };
@@ -337,6 +340,9 @@ const App: React.FC = () => {
           {screenPermissions.has('vendas') && (
             <NavItem id="vendas" icon={ShoppingCart} label="Pedidos" />
           )}
+          {screenPermissions.has('dashboard_vendas') && (
+            <NavItem id="dashboard_vendas" icon={BarChart3} label="Dash Vendas" />
+          )}
           {screenPermissions.has('calendario_vendas') && (
             <NavItem id="calendario_vendas" icon={CalendarDays} label="Calendário de Pedidos" />
           )}
@@ -484,6 +490,7 @@ const App: React.FC = () => {
       <main className={`flex-1 min-w-0 relative overflow-y-auto h-screen scroll-smooth transition-colors duration-500 bg-[#0a0a0a]`}>
         <div className="relative z-10 px-4 py-6 md:px-6 md:py-8 lg:px-10 lg:py-10 max-w-[1800px] mx-auto pb-24 lg:pb-10 animate-in fade-in duration-500">
           {activeTab === 'dashboard' && <Dashboard />}
+          {activeTab === 'dashboard_vendas' && <DashboardVendas />}
           {activeTab === 'kanban' && <ProgramacaoKanban />}
           {activeTab === 'vendas' && <Vendas />}
           {activeTab === 'registro' && <PaginaRegistro />}
@@ -571,6 +578,7 @@ const App: React.FC = () => {
             <div className="space-y-1 overflow-y-auto no-scrollbar flex-1">
               {screenPermissions.has('kanban') && <NavItem id="kanban" icon={LayoutGrid} label="Programação" onClick={() => setIsMobileMenuOpen(false)} />}
               {screenPermissions.has('vendas') && <NavItem id="vendas" icon={ShoppingCart} label="Pedidos" onClick={() => setIsMobileMenuOpen(false)} />}
+              {screenPermissions.has('dashboard_vendas') && <NavItem id="dashboard_vendas" icon={BarChart3} label="Dash Vendas" onClick={() => setIsMobileMenuOpen(false)} />}
               {screenPermissions.has('calendario_vendas') && <NavItem id="calendario_vendas" icon={CalendarDays} label="Calendário" onClick={() => setIsMobileMenuOpen(false)} />}
               {screenPermissions.has('produtos') && <NavItem id="produtos" icon={Package} label="Catálogo" onClick={() => setIsMobileMenuOpen(false)} />}
               {screenPermissions.has('usuarios') && <NavItem id="usuarios" icon={Settings} label="Gestão Equipe" onClick={() => setIsMobileMenuOpen(false)} />}

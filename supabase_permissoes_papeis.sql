@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS permissoes_papeis (
 -- Admin: acesso a todas as telas do sistema
 INSERT INTO permissoes_papeis (papel, tela) VALUES
 ('admin', 'dashboard'),
+('admin', 'dashboard_vendas'),
 ('admin', 'kanban'),
 ('admin', 'vendas'),
 ('admin', 'calendario_vendas'),
@@ -69,6 +70,7 @@ ON CONFLICT (papel, tela) DO NOTHING;
 -- Vendas: pedidos, calendário, agenda
 INSERT INTO permissoes_papeis (papel, tela) VALUES
 ('vendas', 'dashboard'),
+('vendas', 'dashboard_vendas'),
 ('vendas', 'vendas'),
 ('vendas', 'calendario_vendas'),
 ('vendas', 'agenda'),

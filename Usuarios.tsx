@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 
 const DEFAULT_PERMISSOES: Record<string, string[]> = {
-  admin: ['dashboard', 'kanban', 'vendas', 'calendario_vendas', 'registro', 'agenda',
+  admin: ['dashboard', 'dashboard_vendas', 'kanban', 'vendas', 'calendario_vendas', 'registro', 'agenda',
     'relatorio_registros', 'produtos', 'analise_disponibilidade', 'relatorios',
     'relatorio_boletim', 'top5_equipamentos', 'relatorios_downtime', 'relatorios_downtime_horas',
     'relatorio_downtime_tecnico', 'analise_gargalos', 'relatorio_boletim_pro',
@@ -33,7 +33,7 @@ const DEFAULT_PERMISSOES: Record<string, string[]> = {
     'relatorios_downtime_horas', 'relatorio_downtime_tecnico', 'analise_gargalos',
     'relatorio_boletim_pro', 'relatorio_boletim_ai', 'analitica_downtime_ai', 'perfil', 'base_conhecimento'],
   mecanico: ['dashboard', 'registro', 'agenda', 'relatorio_registros', 'perfil', 'base_conhecimento'],
-  vendas: ['dashboard', 'vendas', 'calendario_vendas', 'agenda', 'perfil', 'base_conhecimento'],
+  vendas: ['dashboard', 'dashboard_vendas', 'vendas', 'calendario_vendas', 'agenda', 'perfil', 'base_conhecimento'],
 };
 
 interface UsuariosProps {
@@ -122,7 +122,8 @@ const Usuarios: React.FC<UsuariosProps> = ({ onPermissionsChange }) => {
 
   // ---- Permissões por Papel ----
   const ALL_SCREENS: { id: string; label: string; group: string }[] = [
-    { id: 'dashboard', label: 'Dashboard', group: 'Geral' },
+    { id: 'dashboard', label: 'Dashboard PCP', group: 'Geral' },
+    { id: 'dashboard_vendas', label: 'Dashboard Vendas', group: 'Gestão' },
     { id: 'registro', label: 'Apontamento', group: 'Produção' },
     { id: 'agenda', label: 'Agenda de Contatos', group: 'Geral' },
     { id: 'relatorio_registros', label: 'Registros', group: 'Produção' },
