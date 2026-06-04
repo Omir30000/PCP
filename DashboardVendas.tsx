@@ -13,7 +13,8 @@ import {
   ChevronLeft,
   Loader2,
   AlertCircle,
-  ListChecks
+  ListChecks,
+  BarChart3
 } from 'lucide-react';
 
 const COLORS = ['#facc15', '#10b981', '#3b82f6', '#f43f5e', '#a78bfa'];
@@ -32,14 +33,19 @@ const DashboardVendas: React.FC = () => {
     const diff = day === 0 ? -6 : 1 - day;
     const monday = new Date(now);
     monday.setDate(now.getDate() + diff);
-    monday.setHours(0, 0, 0, 0);
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
+    const fmt = (d: Date) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${dd}`;
+    };
+    const fmtBR = (d: Date) => d.toLocaleDateString('pt-BR');
     return {
-      inicio: monday.toISOString().split('T')[0],
-      fim: sunday.toISOString().split('T')[0],
-      label: `${monday.toLocaleDateString('pt-BR')} — ${sunday.toLocaleDateString('pt-BR')}`
+      inicio: fmt(monday),
+      fim: fmt(sunday),
+      label: `${fmtBR(monday)} — ${fmtBR(sunday)}`
     };
   };
 
@@ -55,7 +61,7 @@ const DashboardVendas: React.FC = () => {
       const { inicio, fim } = getSemana(semanaOffset);
 
       const [pedidosRes, itensRes, produtosRes] = await Promise.all([
-        supabase.from('pedidos').select('*').order('data_pedido', { ascending: false }),
+        supabase.from('pedidos').select('*').gte('data_pedido', inicio).lte('data_pedido', fim).order('data_pedido', { ascending: false }),
         supabase.from('itens_pedido').select('*'),
         supabase.from('produtos').select('*').order('nome'),
       ]);
@@ -74,16 +80,6 @@ const DashboardVendas: React.FC = () => {
     }
   };
 
-  const pedidosSemana = pedidos.filter(p => {
-    const data = p.data_pedido?.split('T')[0] || p.data_pedido;
-    return data >= semana.inicio && data <= semana.fim;
-  });
-
-  const pedidosEntregaSemana = pedidos.filter(p => {
-    const data = p.data_entrega?.split('T')[0] || p.data_entrega;
-    return data >= semana.inicio && data <= semana.fim;
-  });
-
   const totalPedidos = pedidos.length;
   const pendentes = pedidos.filter(p => p.status === 'Pendente').length;
   const finalizados = pedidos.filter(p => p.status === 'Finalizado').length;
@@ -99,13 +95,13 @@ const DashboardVendas: React.FC = () => {
 
   const diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
   const chartData = diasSemana.map((dia, i) => {
-    const data = new Date(semana.inicio);
+    const data = new Date(semana.inicio + 'T00:00:00');
     data.setDate(data.getDate() + i);
     const dataStr = data.toISOString().split('T')[0];
     return {
       dia,
-      Pedidos: pedidosSemana.filter(p => (p.data_pedido?.split('T')[0] || p.data_pedido) === dataStr).length,
-      Entregas: pedidosEntregaSemana.filter(p => (p.data_entrega?.split('T')[0] || p.data_entrega) === dataStr).length,
+      Pedidos: pedidos.filter(p => p.data_pedido === dataStr).length,
+      Entregas: pedidos.filter(p => p.data_entrega === dataStr).length,
     };
   });
 
