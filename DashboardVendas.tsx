@@ -1,28 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import {
-  ShoppingCart,
-  Clock,
-  CheckCircle2,
-  Users,
   Package,
   TrendingUp,
   Calendar,
   ChevronRight,
   ChevronLeft,
   Loader2,
+  Users,
+  ShoppingCart,
   AlertCircle,
   ListChecks,
-  BarChart3
+  Factory
 } from 'lucide-react';
 
-const COLORS = ['#facc15', '#10b981', '#3b82f6', '#f43f5e', '#a78bfa'];
-
 const DashboardVendas: React.FC = () => {
+  const [produtos, setProdutos] = useState<any[]>([]);
+  const [estoques, setEstoques] = useState<any[]>([]);
+  const [programacao, setProgramacao] = useState<any[]>([]);
   const [pedidos, setPedidos] = useState<any[]>([]);
   const [itens, setItens] = useState<any[]>([]);
-  const [produtos, setProdutos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [semanaOffset, setSemanaOffset] = useState(0);
 
@@ -60,19 +57,25 @@ const DashboardVendas: React.FC = () => {
     try {
       const { inicio, fim } = getSemana(semanaOffset);
 
-      const [pedidosRes, itensRes, produtosRes] = await Promise.all([
-        supabase.from('pedidos').select('*').gte('data_pedido', inicio).lte('data_pedido', fim).order('data_pedido', { ascending: false }),
-        supabase.from('itens_pedido').select('*'),
+      const [prodRes, estRes, progRes, pedRes, itRes] = await Promise.all([
         supabase.from('produtos').select('*').order('nome'),
+        supabase.from('ajustes_estoque').select('*'),
+        supabase.from('programacao_semanal' as any).select('*').gte('data', inicio).lte('data', fim),
+        supabase.from('pedidos').select('*').order('data_pedido', { ascending: false }),
+        supabase.from('itens_pedido').select('*'),
       ]);
 
-      if (pedidosRes.error) throw pedidosRes.error;
-      if (itensRes.error) throw itensRes.error;
-      if (produtosRes.error) throw produtosRes.error;
+      if (prodRes.error) throw prodRes.error;
+      if (estRes.error) throw estRes.error;
+      if (progRes.error) throw progRes.error;
+      if (pedRes.error) throw pedRes.error;
+      if (itRes.error) throw itRes.error;
 
-      setPedidos(pedidosRes.data || []);
-      setItens(itensRes.data || []);
-      setProdutos(produtosRes.data || []);
+      setProdutos(prodRes.data || []);
+      setEstoques(estRes.data || []);
+      setProgramacao(progRes.data || []);
+      setPedidos(pedRes.data || []);
+      setItens(itRes.data || []);
     } catch (err) {
       console.error('Erro ao carregar dashboard vendas:', err);
     } finally {
@@ -80,47 +83,40 @@ const DashboardVendas: React.FC = () => {
     }
   };
 
-  const totalPedidos = pedidos.length;
-  const pendentes = pedidos.filter(p => p.status === 'Pendente').length;
-  const finalizados = pedidos.filter(p => p.status === 'Finalizado').length;
-  const entregues = pedidos.filter(p => p.status === 'Entregue').length;
-  const totalClientes = new Set(pedidos.map(p => p.cliente_nome)).size;
+  const estoqueMap = new Map(estoques.map(e => [e.produto_id, e.quantidade_real]));
 
-  const statusData = [
-    { name: 'Pendentes', value: pendentes, color: '#facc15' },
-    { name: 'Finalizados', value: finalizados, color: '#10b981' },
-    { name: 'Entregues', value: entregues, color: '#3b82f6' },
-    { name: 'Cancelados', value: pedidos.filter(p => p.status === 'Cancelado').length, color: '#f43f5e' },
-  ].filter(d => d.value > 0);
+  const produtosComEstoque = produtos.map(p => ({
+    ...p,
+    estoque: estoqueMap.get(p.id) ?? 0,
+  }));
 
-  const diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-  const chartData = diasSemana.map((dia, i) => {
-    const data = new Date(semana.inicio + 'T00:00:00');
-    data.setDate(data.getDate() + i);
-    const dataStr = data.toISOString().split('T')[0];
-    return {
-      dia,
-      Pedidos: pedidos.filter(p => p.data_pedido === dataStr).length,
-      Entregas: pedidos.filter(p => p.data_entrega === dataStr).length,
-    };
-  });
-
-  const topProdutos = itens.reduce((acc: any[], item) => {
-    const existing = acc.find(i => i.produto_id === item.produto_id);
-    if (existing) {
-      existing.qtd += Number(item.quantidade) || 0;
-    } else {
-      const prod = produtos.find(p => p.id === item.produto_id);
-      acc.push({
-        produto_id: item.produto_id,
-        nome: prod?.nome || 'Desconhecido',
-        qtd: Number(item.quantidade) || 0,
-      });
+  const producaoSemanaMap: Record<string, { produto_id: string; nome: string; total: number }> = {};
+  programacao.forEach((prog: any) => {
+    const pid = prog.produto_id;
+    if (!pid) return;
+    if (!producaoSemanaMap[pid]) {
+      const prod = produtos.find(p => p.id === pid);
+      producaoSemanaMap[pid] = { produto_id: pid, nome: prod?.nome || 'Desconhecido', total: 0 };
     }
-    return acc;
-  }, []).sort((a: any, b: any) => b.qtd - a.qtd).slice(0, 5);
+    producaoSemanaMap[pid].total += Number(prog.quantidade_planejada) || 0;
+  });
+  const producaoSemanaList = Object.values(producaoSemanaMap).sort((a, b) => b.total - a.total);
 
-  const recentes = pedidos.slice(0, 10);
+  const clienteMap: Record<string, { cliente: string; totalPedidos: number; pendentes: number }> = {};
+  pedidos.forEach(p => {
+    const nome = p.cliente_nome || 'SEM NOME';
+    if (!clienteMap[nome]) {
+      clienteMap[nome] = { cliente: nome, totalPedidos: 0, pendentes: 0 };
+    }
+    clienteMap[nome].totalPedidos++;
+    if (p.status === 'Pendente') clienteMap[nome].pendentes++;
+  });
+  const clientesList = Object.values(clienteMap).sort((a, b) => b.totalPedidos - a.totalPedidos);
+
+  const pedidosPendentes = pedidos.filter(p => p.status === 'Pendente');
+  const totalPedidosSemana = pedidos.length;
+  const totalClientes = clientesList.length;
+  const totalEstoque = produtosComEstoque.reduce((acc, p) => acc + p.estoque, 0);
 
   if (loading) {
     return (
@@ -141,9 +137,9 @@ const DashboardVendas: React.FC = () => {
               <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7" />
             </div>
             <div>
-              <h2 className="text-xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-none">Dashboard Vendas</h2>
+              <h2 className="text-xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-none">Vendas</h2>
               <p className="text-slate-400 text-[8px] sm:text-[10px] font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#facc15] animate-pulse" /> {totalPedidos} Pedidos · {totalClientes} Clientes
+                <span className="w-1.5 h-1.5 rounded-full bg-[#facc15] animate-pulse" /> {totalPedidosSemana} Pedidos · {totalClientes} Clientes
               </p>
             </div>
           </div>
@@ -161,154 +157,142 @@ const DashboardVendas: React.FC = () => {
         </div>
       </div>
 
-      {/* Metric Cards */}
+      {/* Mini KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-slate-900/90 backdrop-blur-md p-5 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/10">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 bg-[#facc15]/10 rounded-xl"><ShoppingCart className="w-4 h-4 text-[#facc15]" /></div>
-            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Total Pedidos</span>
+            <div className="p-2.5 bg-blue-500/10 rounded-xl"><Package className="w-4 h-4 text-blue-400" /></div>
+            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Estoque Total</span>
           </div>
-          <p className="text-3xl sm:text-4xl font-black text-white">{totalPedidos}</p>
+          <p className="text-3xl sm:text-4xl font-black text-white">{totalEstoque.toLocaleString()}</p>
         </div>
         <div className="bg-slate-900/90 backdrop-blur-md p-5 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/10">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 bg-[#facc15]/10 rounded-xl"><Clock className="w-4 h-4 text-[#facc15]" /></div>
+            <div className="p-2.5 bg-[#facc15]/10 rounded-xl"><Factory className="w-4 h-4 text-[#facc15]" /></div>
+            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Produzir na Semana</span>
+          </div>
+          <p className="text-3xl sm:text-4xl font-black text-white">{producaoSemanaList.length}</p>
+        </div>
+        <div className="bg-slate-900/90 backdrop-blur-md p-5 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2.5 bg-[#10b981]/10 rounded-xl"><ShoppingCart className="w-4 h-4 text-[#10b981]" /></div>
+            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Pedidos</span>
+          </div>
+          <p className="text-3xl sm:text-4xl font-black text-white">{totalPedidosSemana}</p>
+        </div>
+        <div className="bg-slate-900/90 backdrop-blur-md p-5 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2.5 bg-[#f43f5e]/10 rounded-xl"><AlertCircle className="w-4 h-4 text-[#f43f5e]" /></div>
             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Pendentes</span>
           </div>
-          <p className="text-3xl sm:text-4xl font-black text-white">{pendentes}</p>
-        </div>
-        <div className="bg-slate-900/90 backdrop-blur-md p-5 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 bg-[#10b981]/10 rounded-xl"><CheckCircle2 className="w-4 h-4 text-[#10b981]" /></div>
-            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Finalizados</span>
-          </div>
-          <p className="text-3xl sm:text-4xl font-black text-white">{finalizados}</p>
-        </div>
-        <div className="bg-slate-900/90 backdrop-blur-md p-5 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 bg-[#3b82f6]/10 rounded-xl"><Users className="w-4 h-4 text-[#3b82f6]" /></div>
-            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Clientes</span>
-          </div>
-          <p className="text-3xl sm:text-4xl font-black text-white">{totalClientes}</p>
+          <p className="text-3xl sm:text-4xl font-black text-white">{pedidosPendentes.length}</p>
         </div>
       </div>
 
-      {/* Charts Row */}
+      {/* Estoque + Programação */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        {/* Bar Chart */}
+        {/* Estoque */}
         <div className="bg-slate-900/90 backdrop-blur-md p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] border border-white/10">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2.5 bg-[#facc15]/10 rounded-xl"><BarChart3 className="w-4 h-4 text-[#facc15]" /></div>
-            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Pedidos por Dia</h3>
+            <div className="p-2.5 bg-blue-500/10 rounded-xl"><Package className="w-4 h-4 text-blue-400" /></div>
+            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Estoque de Produtos</h3>
           </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
-                <XAxis dataKey="dia" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 'bold' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false} />
-                <RechartsTooltip
-                  contentStyle={{ background: '#1a1a1a', border: '1px solid #ffffff20', borderRadius: 12, fontSize: 12 }}
-                  labelStyle={{ color: '#facc15', fontWeight: 'bold' }}
-                />
-                <Bar dataKey="Pedidos" fill="#facc15" radius={[6, 6, 0, 0]} maxBarSize={32} />
-                <Bar dataKey="Entregas" fill="#10b981" radius={[6, 6, 0, 0]} maxBarSize={32} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex items-center gap-6 mt-4 pt-4 border-t border-white/5">
-            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-[#facc15]" /><span className="text-[9px] font-bold text-slate-400 uppercase">Pedidos</span></div>
-            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-[#10b981]" /><span className="text-[9px] font-bold text-slate-400 uppercase">Entregas</span></div>
-          </div>
-        </div>
-
-        {/* Pie Chart */}
-        <div className="bg-slate-900/90 backdrop-blur-md p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] border border-white/10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2.5 bg-[#facc15]/10 rounded-xl"><ListChecks className="w-4 h-4 text-[#facc15]" /></div>
-            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Status dos Pedidos</h3>
-          </div>
-          <div className="h-64 flex items-center justify-center">
-            {statusData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={statusData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="value" paddingAngle={4}>
-                    {statusData.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip
-                    contentStyle={{ background: '#1a1a1a', border: '1px solid #ffffff20', borderRadius: 12, fontSize: 12 }}
-                    labelStyle={{ color: '#facc15', fontWeight: 'bold' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+          <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
+            {produtosComEstoque.length === 0 ? (
+              <p className="text-slate-500 text-[10px] font-bold uppercase text-center py-8">Nenhum produto cadastrado</p>
             ) : (
-              <p className="text-slate-500 text-[10px] font-bold uppercase">Nenhum pedido encontrado</p>
+              produtosComEstoque.map(prod => (
+                <div key={prod.id} className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5 hover:border-white/10 transition-all">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-black text-white uppercase truncate">{prod.nome}</p>
+                    <p className="text-[8px] text-slate-500 font-bold uppercase mt-0.5">{prod.tipo || 'Sem tipo'}</p>
+                  </div>
+                  <span className={`text-[10px] font-black ml-3 ${prod.estoque > 0 ? 'text-[#10b981]' : 'text-[#f43f5e]'}`}>
+                    {prod.estoque.toLocaleString()} un
+                  </span>
+                </div>
+              ))
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-white/5">
-            {statusData.map((d, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-sm" style={{ background: d.color }} />
-                <span className="text-[9px] font-bold text-slate-400 uppercase">{d.name}: {d.value}</span>
-              </div>
-            ))}
+        </div>
+
+        {/* Programação Semanal */}
+        <div className="bg-slate-900/90 backdrop-blur-md p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] border border-white/10">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2.5 bg-[#facc15]/10 rounded-xl"><Calendar className="w-4 h-4 text-[#facc15]" /></div>
+            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Produção da Semana</h3>
+          </div>
+          <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
+            {producaoSemanaList.length === 0 ? (
+              <p className="text-slate-500 text-[10px] font-bold uppercase text-center py-8">Nenhuma produção programada</p>
+            ) : (
+              producaoSemanaList.map(item => (
+                <div key={item.produto_id} className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5 hover:border-white/10 transition-all">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-black text-white uppercase truncate">{item.nome}</p>
+                  </div>
+                  <span className="text-[10px] font-black text-[#facc15] ml-3">{item.total.toLocaleString()} un</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
 
-      {/* Bottom Row */}
+      {/* Clientes + Pedidos Pendentes */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        {/* Top Products */}
+        {/* Clientes */}
         <div className="bg-slate-900/90 backdrop-blur-md p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] border border-white/10">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2.5 bg-[#facc15]/10 rounded-xl"><Package className="w-4 h-4 text-[#facc15]" /></div>
-            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Produtos Mais Vendidos</h3>
+            <div className="p-2.5 bg-[#10b981]/10 rounded-xl"><Users className="w-4 h-4 text-[#10b981]" /></div>
+            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Clientes</h3>
           </div>
-          <div className="space-y-3">
-            {topProdutos.map((prod, i) => (
-              <div key={prod.produto_id} className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5">
-                <div className="flex items-center gap-3">
-                  <span className="text-[#facc15] text-[10px] font-black">{String(i + 1).padStart(2, '0')}</span>
-                  <div>
-                    <p className="text-xs font-bold text-white uppercase">{prod.nome}</p>
+          <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
+            {clientesList.length === 0 ? (
+              <p className="text-slate-500 text-[10px] font-bold uppercase text-center py-8">Nenhum cliente</p>
+            ) : (
+              clientesList.map(cli => (
+                <div key={cli.cliente} className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5 hover:border-white/10 transition-all">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-black text-white uppercase truncate">{cli.cliente}</p>
+                  </div>
+                  <div className="flex items-center gap-4 ml-3">
+                    <span className="text-[10px] font-black text-white">{cli.totalPedidos} pedidos</span>
+                    {cli.pendentes > 0 && (
+                      <span className="text-[9px] font-black text-[#facc15] bg-[#facc15]/10 px-2 py-0.5 rounded">{cli.pendentes} pendentes</span>
+                    )}
                   </div>
                 </div>
-                <span className="text-[#facc15] text-[10px] font-black">{prod.qtd} un</span>
-              </div>
-            ))}
-            {topProdutos.length === 0 && (
-              <p className="text-slate-500 text-[10px] font-bold uppercase text-center py-8">Nenhum produto vendido</p>
+              ))
             )}
           </div>
         </div>
 
-        {/* Recent Orders */}
+        {/* Pedidos Pendentes */}
         <div className="bg-slate-900/90 backdrop-blur-md p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] border border-white/10">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2.5 bg-[#facc15]/10 rounded-xl"><ShoppingCart className="w-4 h-4 text-[#facc15]" /></div>
-            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Últimos Pedidos</h3>
+            <div className="p-2.5 bg-[#f43f5e]/10 rounded-xl"><ListChecks className="w-4 h-4 text-[#f43f5e]" /></div>
+            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Pedidos Pendentes</h3>
           </div>
-          <div className="space-y-2 max-h-[320px] overflow-y-auto no-scrollbar">
-            {recentes.map(ped => (
-              <div key={ped.id} className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5 hover:border-white/10 transition-all">
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-black text-white uppercase truncate">{ped.cliente_nome}</p>
-                  <p className="text-[8px] text-slate-500 font-bold uppercase mt-0.5">{ped.data_entrega ? new Date(ped.data_entrega + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem data'}</p>
+          <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
+            {pedidosPendentes.length === 0 ? (
+              <p className="text-slate-500 text-[10px] font-bold uppercase text-center py-8">Nenhum pedido pendente</p>
+            ) : (
+              pedidosPendentes.map(ped => (
+                <div key={ped.id} className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5 hover:border-white/10 transition-all">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-black text-white uppercase truncate">{ped.cliente_nome}</p>
+                    <p className="text-[8px] text-slate-500 font-bold uppercase mt-0.5">
+                      {ped.data_entrega ? new Date(ped.data_entrega + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem data de entrega'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 ml-3">
+                    <span className="text-[9px] font-black text-[#facc15] bg-[#facc15]/10 px-2 py-0.5 rounded">Pendente</span>
+                  </div>
                 </div>
-                <span className={`text-[8px] font-black uppercase px-2 py-1 rounded border ml-3 ${
-                  ped.status === 'Finalizado' ? 'text-[#10b981] border-[#10b981]/30 bg-[#10b981]/10' :
-                  ped.status === 'Entregue' ? 'text-[#3b82f6] border-[#3b82f6]/30 bg-[#3b82f6]/10' :
-                  ped.status === 'Cancelado' ? 'text-[#f43f5e] border-[#f43f5e]/30 bg-[#f43f5e]/10' :
-                  'text-[#facc15] border-[#facc15]/30 bg-[#facc15]/10'
-                }`}>{ped.status}</span>
-              </div>
-            ))}
-            {recentes.length === 0 && (
-              <p className="text-slate-500 text-[10px] font-bold uppercase text-center py-8">Nenhum pedido ainda</p>
+              ))
             )}
           </div>
         </div>
