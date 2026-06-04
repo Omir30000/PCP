@@ -60,7 +60,7 @@ const DashboardVendas: React.FC = () => {
       const [prodRes, estRes, progRes, pedRes, itRes] = await Promise.all([
         supabase.from('produtos').select('*').order('nome'),
         supabase.from('ajustes_estoque').select('*'),
-        supabase.from('programacao_semanal' as any).select('*').gte('data', inicio).lte('data', fim),
+        supabase.from('programacao_semanal' as any).select('*').gte('dia_semana', inicio).lte('dia_semana', fim),
         supabase.from('pedidos').select('*').order('data_pedido', { ascending: false }),
         supabase.from('itens_pedido').select('*'),
       ]);
