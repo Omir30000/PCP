@@ -97,7 +97,7 @@ const Dashboard: React.FC = () => {
     const periodo = getPeriodoSemana(offset);
     try {
       const [progRes, regSemanaRes] = await Promise.all([
-        supabase.from('programacao_semanal' as any).select('*').gte('dia_semana', periodo.inicio).lte('dia_semana', periodo.fim),
+        supabase.from('programacao_semanal' as any).select('*'),
         supabase.from('registros_producao').select('*').gte('data_registro', periodo.inicio).lte('data_registro', periodo.fim)
       ]);
       setProgramacaoSemanal(progRes.data || []);
@@ -119,8 +119,11 @@ const Dashboard: React.FC = () => {
   const metasSemanais = useMemo(() => {
     const periodo = getPeriodoSemana(semanaOffset);
     const diasRestantes = 7 - periodo.hoje;
+    const dataProg = (prog: any) => (prog.dia_semana || prog.data || '').split('T')[0];
+    const progSemana = programacaoSemanal.filter(p => dataProg(p) >= periodo.inicio && dataProg(p) <= periodo.fim);
+    const regSemana = todosRegistrosSemana.filter(r => r.data_registro >= periodo.inicio && r.data_registro <= periodo.fim);
     const metaPorSKU: Record<string, { programado: number, realizado: number, nome: string }> = {};
-    programacaoSemanal.forEach(prog => {
+    progSemana.forEach(prog => {
       const prod = produtos.find(p => p.id === prog.produto_id);
       const pid = prog.produto_id;
       if (!metaPorSKU[pid]) {
@@ -128,7 +131,7 @@ const Dashboard: React.FC = () => {
       }
       metaPorSKU[pid].programado += (Number(prog.quantidade_planejada) || 0);
     });
-    todosRegistrosSemana.forEach(reg => {
+    regSemana.forEach(reg => {
       const pid = reg.produto_volume;
       const prod = produtos.find(p => p.id === pid || p.nome === pid);
       if (prod && metaPorSKU[prod.id]) {
