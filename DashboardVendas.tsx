@@ -118,6 +118,21 @@ const DashboardVendas: React.FC = () => {
   const totalClientes = clientesList.length;
   const totalEstoque = produtosComEstoque.reduce((acc, p) => acc + p.estoque, 0);
 
+  const maisVendidos = itens.reduce((acc: any[], item) => {
+    const existing = acc.find(i => i.produto_id === item.produto_id);
+    if (existing) {
+      existing.qtd += Number(item.quantidade) || 0;
+    } else {
+      const prod = produtos.find(p => p.id === item.produto_id);
+      acc.push({
+        produto_id: item.produto_id,
+        nome: prod?.nome || 'Desconhecido',
+        qtd: Number(item.quantidade) || 0,
+      });
+    }
+    return acc;
+  }, []).sort((a: any, b: any) => b.qtd - a.qtd).slice(0, 10);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -189,8 +204,8 @@ const DashboardVendas: React.FC = () => {
         </div>
       </div>
 
-      {/* Estoque + Programação */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Estoque + Programação + Mais Vendidos */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Estoque */}
         <div className="bg-slate-900/90 backdrop-blur-md p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] border border-white/10">
@@ -233,6 +248,31 @@ const DashboardVendas: React.FC = () => {
                     <p className="text-[10px] font-black text-white uppercase truncate">{item.nome}</p>
                   </div>
                   <span className="text-[10px] font-black text-[#facc15] ml-3">{item.total.toLocaleString()} un</span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Mais Vendidos */}
+        <div className="bg-slate-900/90 backdrop-blur-md p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] border border-white/10">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2.5 bg-[#10b981]/10 rounded-xl"><TrendingUp className="w-4 h-4 text-[#10b981]" /></div>
+            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Mais Vendidos</h3>
+          </div>
+          <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
+            {maisVendidos.length === 0 ? (
+              <p className="text-slate-500 text-[10px] font-bold uppercase text-center py-8">Nenhum produto vendido</p>
+            ) : (
+              maisVendidos.map((prod, i) => (
+                <div key={prod.produto_id} className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5 hover:border-white/10 transition-all">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[#facc15] text-[10px] font-black">{String(i + 1).padStart(2, '0')}</span>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black text-white uppercase truncate">{prod.nome}</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-black text-[#10b981] ml-3">{prod.qtd} un</span>
                 </div>
               ))
             )}
