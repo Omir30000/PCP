@@ -47,13 +47,17 @@ const Dashboard: React.FC = () => {
     const diffToMonday = day === 0 ? -6 : 1 - day;
     const monday = new Date(now);
     monday.setDate(now.getDate() + diffToMonday);
-    monday.setHours(0, 0, 0, 0);
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
+    const fmt = (d: Date) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${dd}`;
+    };
     return {
-      inicio: monday.toISOString().split('T')[0],
-      fim: sunday.toISOString().split('T')[0],
+      inicio: fmt(monday),
+      fim: fmt(sunday),
       hoje: day === 0 ? 7 : day
     };
   };
@@ -289,21 +293,6 @@ const Dashboard: React.FC = () => {
           }} className="p-2 hover:bg-[#facc15] hover:text-black rounded-xl text-slate-400 transition-all bg-white/5 border border-white/5">
             <ChevronRight className="w-5 h-5" />
           </button>
-
-          <div className="h-8 w-px bg-white/10 mx-2 hidden md:block" />
-
-          <button onClick={() => setSemanaOffset(semanaOffset - 1)} className="p-2 hover:bg-[#facc15] hover:text-black rounded-xl text-slate-400 transition-all bg-white/5 border border-white/5">
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-xl border border-white/5">
-            <Calendar className="w-4 h-4 text-blue-400" />
-            <span className="text-[9px] font-black text-white uppercase tracking-wider whitespace-nowrap">
-              {getPeriodoSemana(semanaOffset).inicio} — {getPeriodoSemana(semanaOffset).fim}
-            </span>
-          </div>
-          <button onClick={() => setSemanaOffset(semanaOffset + 1)} className="p-2 hover:bg-[#facc15] hover:text-black rounded-xl text-slate-400 transition-all bg-white/5 border border-white/5">
-            <ChevronRight className="w-5 h-5" />
-          </button>
         </div>
         <div className="flex w-full md:w-auto bg-white/10 p-1 rounded-xl border border-white/10 backdrop-blur-sm">
           {['GLOBAL', 'MANHÃ', 'TARDE'].map((t) => (
@@ -408,9 +397,17 @@ const Dashboard: React.FC = () => {
       <div className="bg-[#141414] border border-white/5 p-6 lg:p-8 rounded-[40px] shadow-2xl overflow-hidden">
         <h3 className="text-xl lg:text-2xl font-black text-white uppercase tracking-tighter mb-6 flex items-center gap-4">
           <ListChecks className="w-5 h-5 lg:w-6 lg:h-6 text-blue-400" /> Metas Semanais
-            <span className="text-[9px] font-bold text-slate-500 bg-white/5 px-3 py-1 rounded-full tracking-wider ml-auto">
+          <div className="flex items-center gap-2 ml-auto">
+            <button onClick={() => setSemanaOffset(semanaOffset - 1)} className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-all">
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="text-[10px] font-bold text-slate-400 bg-white/10 px-3 py-1.5 rounded-lg tracking-wider whitespace-nowrap">
               {getPeriodoSemana(semanaOffset).inicio} — {getPeriodoSemana(semanaOffset).fim}
             </span>
+            <button onClick={() => setSemanaOffset(semanaOffset + 1)} className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-all">
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {metasSemanais.map((meta) => {
