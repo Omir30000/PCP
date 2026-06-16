@@ -13,7 +13,10 @@ import {
     Clock,
     Plus,
     AlertOctagon,
-    History
+    Upload,
+    CheckCircle2,
+    List,
+    Edit3
 } from 'lucide-react';
 import { RegistroProducao, Linha, Produto } from './types/database';
 import { useToast } from './lib/toast';
@@ -464,98 +467,120 @@ const EnvioDeRegistros: React.FC = () => {
         <div className="space-y-6 animate-in fade-in duration-500">
 
             {/* Header */}
-            <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-2xl mb-8">
-                <div className="flex items-center gap-4 w-full xl:w-auto">
-                    <div className="p-3 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-500/20">
-                        <History className="w-6 h-6" />
+            <div className="relative overflow-hidden bg-gradient-to-br from-emerald-900/40 via-slate-900/80 to-slate-900 backdrop-blur-xl p-8 rounded-3xl border border-emerald-500/10 shadow-2xl mb-8 group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-teal-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                <div className="flex flex-col xl:flex-row items-center justify-between gap-6 relative z-10">
+                    <div className="flex items-center gap-5 w-full xl:w-auto">
+                        <div className="p-3.5 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl text-white shadow-lg shadow-emerald-500/25 ring-1 ring-white/10">
+                            <Upload className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-black uppercase tracking-tight text-white leading-tight">Envio de Registros</h2>
+                            <p className="text-[10px] font-bold text-emerald-400/80 uppercase tracking-[0.2em] leading-none mt-1.5">Submissão e Gerenciamento de Dados de Produção</p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 className="text-xl font-bold uppercase tracking-tight text-white leading-tight">Registros de Produção</h2>
-                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest leading-none mt-1">Auditoria e Rastreabilidade Industrial</p>
-                    </div>
+                    {registros.length > 0 && (
+                        <div className="flex items-center gap-3 text-xs">
+                            <div className="flex items-center gap-2 bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
+                                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                <span className="font-bold text-emerald-300">{registros.length} registro{registros.length !== 1 ? 's' : ''}</span>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Filtros Premium */}
-            <form onSubmit={handleSearch} className="bg-slate-900/50 backdrop-blur-md p-6 rounded-2xl border border-white/10 grid grid-cols-1 md:grid-cols-4 gap-6 items-end shadow-xl">
-                <div className="flex flex-col sm:flex-row items-center gap-3 md:col-span-2">
-                    <div className="flex-1 flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border-2 border-white/5 focus-within:border-blue-500 transition-all shadow-sm w-full">
-                        <Calendar className="w-5 h-5 text-blue-400" />
-                        <div className="flex flex-col">
-                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Início</span>
-                            <input
-                                type="date"
-                                value={dataInicio}
-                                onChange={(e) => setDataInicio(e.target.value)}
-                                className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-blue-400 transition-colors"
-                            />
+            {/* Filtros */}
+            <form onSubmit={handleSearch} className="relative overflow-hidden bg-gradient-to-br from-slate-900/80 to-slate-900/60 backdrop-blur-xl p-6 rounded-3xl border border-white/5 shadow-xl">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-5 items-end relative z-10">
+                    <div className="flex flex-col sm:flex-row items-center gap-3 md:col-span-2">
+                        <div className="flex-1 flex items-center gap-3 bg-black/40 px-4 py-2.5 rounded-2xl border border-white/5 focus-within:border-emerald-500/50 transition-all shadow-sm w-full group/date">
+                            <Calendar className="w-5 h-5 text-emerald-400/70 group-focus-within/date:text-emerald-400 transition-colors" />
+                            <div className="flex flex-col">
+                                <span className="text-[7px] font-black text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">Período Início</span>
+                                <input
+                                    type="date"
+                                    value={dataInicio}
+                                    onChange={(e) => setDataInicio(e.target.value)}
+                                    className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-emerald-400 transition-colors"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex-1 flex items-center gap-3 bg-black/40 px-4 py-2.5 rounded-2xl border border-white/5 focus-within:border-emerald-500/50 transition-all shadow-sm w-full group/date">
+                            <Calendar className="w-5 h-5 text-emerald-400/70 group-focus-within/date:text-emerald-400 transition-colors" />
+                            <div className="flex flex-col">
+                                <span className="text-[7px] font-black text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">Período Fim</span>
+                                <input
+                                    type="date"
+                                    value={dataFim}
+                                    onChange={(e) => setDataFim(e.target.value)}
+                                    className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-emerald-400 transition-colors"
+                                />
+                            </div>
                         </div>
                     </div>
-
-                    <div className="flex-1 flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border-2 border-white/5 focus-within:border-blue-500 transition-all shadow-sm w-full">
-                        <Calendar className="w-5 h-5 text-blue-400" />
-                        <div className="flex flex-col">
-                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Fim</span>
-                            <input
-                                type="date"
-                                value={dataFim}
-                                onChange={(e) => setDataFim(e.target.value)}
-                                className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-blue-400 transition-colors"
-                            />
-                        </div>
+                    <div className="space-y-1.5">
+                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] flex items-center gap-1.5">
+                            <Filter className="w-3 h-3 text-emerald-400/70" /> Linha
+                        </label>
+                        <select
+                            value={linhaFiltro}
+                            onChange={(e) => setLinhaFiltro(e.target.value)}
+                            className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all uppercase font-bold appearance-none"
+                        >
+                            <option value="" className="bg-slate-900">Todas as Linhas</option>
+                            {linhasOpcoes.map(l => (
+                                <option key={l.id} value={l.id} className="bg-slate-900">{l.nome}</option>
+                            ))}
+                        </select>
                     </div>
-                </div>
-
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Filter className="w-3 h-3 text-blue-400" /> Linha (Opcional)
-                    </label>
-                    <select
-                        value={linhaFiltro}
-                        onChange={(e) => setLinhaFiltro(e.target.value)}
-                        className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-black py-3 rounded-2xl flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] shadow-lg shadow-emerald-500/20 disabled:opacity-50 text-sm tracking-wider"
                     >
-                        <option value="" className="bg-slate-900">Todas as Linhas</option>
-                        {linhasOpcoes.map(l => (
-                            <option key={l.id} value={l.id} className="bg-slate-900">{l.nome}</option>
-                        ))}
-                    </select>
+                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                        {loading ? 'BUSCANDO...' : 'PESQUISAR'}
+                    </button>
                 </div>
-
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-blue-500/20 disabled:opacity-50"
-                >
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
-                    {loading ? 'BUSCANDO...' : 'PESQUISAR'}
-                </button>
             </form>
 
             {/* Tabela */}
-            <div className="bg-white/5 backdrop-blur-md rounded-3xl border border-white/5 overflow-hidden">
+            <div className="relative overflow-hidden bg-gradient-to-br from-slate-900/60 to-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/5 shadow-xl">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-slate-900/80 border-b border-white/10">
-                                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Data</th>
-                                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Turno</th>
-                                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Linha</th>
-                                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Produto</th>
-                                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Lote</th>
-                                <th className="px-3 py-3 text-[10px] font-black text-blue-400 uppercase tracking-widest text-right whitespace-nowrap">Produzido</th>
-                                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right whitespace-nowrap">Eficiência</th>
+                            <tr className="bg-black/40 border-b border-white/5">
+                                <th className="px-4 py-4 text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] whitespace-nowrap">Data</th>
+                                <th className="px-4 py-4 text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] whitespace-nowrap">Turno</th>
+                                <th className="px-4 py-4 text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] whitespace-nowrap">Linha</th>
+                                <th className="px-4 py-4 text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] whitespace-nowrap">Produto</th>
+                                <th className="px-4 py-4 text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] whitespace-nowrap">Lote</th>
+                                <th className="px-4 py-4 text-[9px] font-black text-emerald-400 uppercase tracking-[0.15em] text-right whitespace-nowrap">Produzido</th>
+                                <th className="px-4 py-4 text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] text-right whitespace-nowrap">Eficiência</th>
+                                <th className="px-4 py-4 text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] text-right whitespace-nowrap">Ação</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-white/[0.03]">
                             {registros.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="px-3 py-3 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">
-                                        {loading ? 'Carregando registros...' : 'Nenhum registro encontrado para o período.'}
+                                    <td colSpan={8}>
+                                        <div className="flex flex-col items-center justify-center py-16 px-4">
+                                            <Upload className="w-12 h-12 text-slate-700 mb-4" />
+                                            <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">
+                                                {loading ? 'Carregando registros...' : 'Nenhum registro encontrado para o período.'}
+                                            </p>
+                                            {!loading && (
+                                                <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest mt-2">
+                                                    Ajuste os filtros e tente novamente
+                                                </p>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             ) : (
-                                registros.map((reg) => {
+                                registros.map((reg, index) => {
                                     const eficiencia = reg.capacidade_producao && reg.capacidade_producao > 0
                                         ? ((reg.quantidade_produzida || 0) / reg.capacidade_producao) * 100
                                         : 0;
@@ -564,34 +589,49 @@ const EnvioDeRegistros: React.FC = () => {
                                         <tr
                                             key={reg.id}
                                             onClick={() => handleEditClick(reg)}
-                                            className="hover:bg-white/5 transition-colors cursor-pointer group"
-                                            title="Clique para editar"
+                                            className="group cursor-pointer transition-all duration-300 hover:bg-emerald-500/[0.03] relative"
                                         >
-                                            <td className="px-3 py-3 text-xs font-bold text-slate-300 whitespace-nowrap group-hover:text-white">
-                                                {(reg as any).data_exibicao || '-'}
+                                            <td className="px-4 py-3.5 text-xs font-bold text-slate-300 whitespace-nowrap group-hover:text-white transition-colors">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-1 h-1 rounded-full bg-emerald-500/0 group-hover:bg-emerald-500/70 transition-all" />
+                                                    {(reg as any).data_exibicao || '-'}
+                                                </div>
                                             </td>
-                                            <td className="px-3 py-3 text-xs font-bold text-slate-300 whitespace-nowrap uppercase">
+                                            <td className="px-4 py-3.5 text-xs font-bold text-slate-400 whitespace-nowrap uppercase group-hover:text-slate-300 transition-colors">
                                                 {reg.turno}
                                             </td>
-                                            <td className="px-3 py-3 text-xs font-bold text-white whitespace-nowrap uppercase">
+                                            <td className="px-4 py-3.5 text-xs font-bold text-white whitespace-nowrap uppercase">
                                                 {reg.nome_linha}
                                             </td>
-                                            <td className="px-3 py-3 text-xs font-bold text-slate-300 whitespace-nowrap uppercase">
+                                            <td className="px-4 py-3.5 text-xs font-bold text-slate-300 whitespace-nowrap uppercase group-hover:text-white transition-colors max-w-[160px] truncate">
                                                 {reg.nome_produto}
                                             </td>
-                                            <td className="px-3 py-3 text-xs font-mono font-bold text-slate-400 whitespace-nowrap uppercase">
+                                            <td className="px-4 py-3.5 text-xs font-mono font-bold text-slate-500 whitespace-nowrap uppercase">
                                                 {reg.lote || '-'}
                                             </td>
-                                            <td className="px-3 py-3 text-sm font-black text-blue-400 text-right whitespace-nowrap group-hover:text-blue-300">
+                                            <td className="px-4 py-3.5 text-sm font-black text-emerald-400 text-right whitespace-nowrap group-hover:text-emerald-300 transition-colors">
                                                 {reg.quantidade_produzida?.toLocaleString()}
                                             </td>
-                                            <td className="px-3 py-3 text-xs font-bold text-right whitespace-nowrap">
-                                                <span className={`px-2 py-1 rounded-full text-[10px] ${eficiencia >= 90 ? 'bg-emerald-500/20 text-emerald-400' :
-                                                    eficiencia >= 70 ? 'bg-yellow-500/20 text-yellow-400' :
-                                                        'bg-red-500/20 text-red-400'
-                                                    }`}>
+                                            <td className="px-4 py-3.5 text-xs font-bold text-right whitespace-nowrap">
+                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                                                    eficiencia >= 90 ? 'bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/20' :
+                                                    eficiencia >= 70 ? 'bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/20' :
+                                                        'bg-red-500/15 text-red-400 ring-1 ring-red-500/20'
+                                                }`}>
+                                                    {eficiencia >= 90 ? <CheckCircle2 className="w-2.5 h-2.5" /> :
+                                                     eficiencia >= 70 ? <AlertTriangle className="w-2.5 h-2.5" /> :
+                                                         <AlertOctagon className="w-2.5 h-2.5" />}
                                                     {eficiencia.toFixed(1)}%
                                                 </span>
+                                            </td>
+                                            <td className="px-4 py-3.5 text-right">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleEditClick(reg); }}
+                                                    className="opacity-0 group-hover:opacity-100 transition-all duration-300 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-[9px] font-black uppercase tracking-wider border border-emerald-500/10"
+                                                >
+                                                    <Edit3 className="w-3 h-3 inline-block mr-1" />
+                                                    Editar
+                                                </button>
                                             </td>
                                         </tr>
                                     )
@@ -604,50 +644,50 @@ const EnvioDeRegistros: React.FC = () => {
 
             {/* MODAL DE EDIÇÃO */}
             {editingRecord && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-                    <div className="bg-[#1a1a1a] border border-white/10 rounded-[32px] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-gradient-to-b from-[#1a1a1a] to-[#141414] border border-white/5 rounded-[32px] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-emerald-900/10 relative">
 
                         {/* Modal Header */}
-                        <div className="p-4 md:p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#1a1a1a] z-10">
+                        <div className="p-5 md:p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#1a1a1a]/95 backdrop-blur-xl z-10">
                             <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
-                                    <FileText className="w-5 h-5" />
+                                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center text-emerald-400 ring-1 ring-emerald-500/20">
+                                    <Upload className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-black text-white uppercase tracking-wider">Editar Registro</h2>
-                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{editingRecord.id}</p>
+                                    <h2 className="text-base font-black text-white uppercase tracking-wider">Editar Registro</h2>
+                                    <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest font-mono">{editingRecord.id?.substring(0, 8)}...</p>
                                 </div>
                             </div>
                             <button
                                 onClick={handleCloseModal}
-                                className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+                                className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-500 hover:text-white transition-all"
                             >
-                                <X className="w-5 h-5" />
+                                <X className="w-4 h-4" />
                             </button>
                         </div>
 
                         {/* Modal Body */}
                         <form onSubmit={handleSaveRecord} className="flex flex-col max-h-full">
-                            <div className="p-4 md:p-6 space-y-8 overflow-y-auto">
+                            <div className="p-5 md:p-6 space-y-6 overflow-y-auto">
 
                                 {/* Seção Principal */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="flex items-center gap-3 bg-black/40 px-4 py-2 rounded-xl border-2 border-white/10 focus-within:border-blue-500 transition-all shadow-sm">
-                                        <Calendar className="w-5 h-5 text-blue-500" />
+                                    <div className="flex items-center gap-3 bg-black/40 px-4 py-2.5 rounded-2xl border border-white/5 focus-within:border-emerald-500/50 transition-all shadow-sm group/modal">
+                                        <Calendar className="w-5 h-5 text-emerald-500/60 group-focus-within/modal:text-emerald-400 transition-colors" />
                                         <div className="flex flex-col">
-                                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Data do Registro</span>
+                                            <span className="text-[7px] font-black text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">Data do Registro</span>
                                             <input
                                                 type="date"
                                                 required
                                                 value={editingRecord.data_registro}
                                                 onChange={e => setEditingRecord({ ...editingRecord, data_registro: e.target.value })}
-                                                className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-blue-400 transition-colors"
+                                                className="bg-transparent text-[11px] font-black uppercase outline-none text-white cursor-pointer hover:text-emerald-400 transition-colors"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Turno</label>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">Turno</label>
                                         <select
                                             value={editingRecord.turno}
                                             onChange={e => {
@@ -655,84 +695,84 @@ const EnvioDeRegistros: React.FC = () => {
                                                 const carga = turno === '2º Turno' ? 8 : 9;
                                                 setEditingRecord({ ...editingRecord, turno, carga_horaria: carga });
                                             }}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                            className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all uppercase font-bold appearance-none"
                                         >
-                                            <option value="1º Turno" className="text-slate-900">1º TURNO</option>
-                                            <option value="2º Turno" className="text-slate-900">2º TURNO</option>
+                                            <option value="1º Turno" className="bg-slate-900">1º TURNO</option>
+                                            <option value="2º Turno" className="bg-slate-900">2º TURNO</option>
                                         </select>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Linha</label>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">Linha</label>
                                         <select
                                             value={editingRecord.linha_producao}
                                             onChange={e => setEditingRecord({ ...editingRecord, linha_producao: e.target.value })}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                            className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all uppercase font-bold appearance-none"
                                         >
-                                            <option value="" className="text-slate-900">Selecione...</option>
+                                            <option value="" className="bg-slate-900">Selecione...</option>
                                             {linhasOpcoes.map(l => (
-                                                <option key={l.id} value={l.id} className="text-slate-900">{l.nome}</option>
+                                                <option key={l.id} value={l.id} className="bg-slate-900">{l.nome}</option>
                                             ))}
                                         </select>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Produto</label>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">Produto</label>
                                         <select
                                             value={editingRecord.produto_volume}
                                             onChange={e => setEditingRecord({ ...editingRecord, produto_volume: e.target.value })}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                            className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all uppercase font-bold appearance-none"
                                         >
-                                            <option value="" className="text-slate-900">Selecione...</option>
+                                            <option value="" className="bg-slate-900">Selecione...</option>
                                             {produtosOpcoes.map(p => (
-                                                <option key={p.id} value={p.id} className="text-slate-900">{p.nome}</option>
+                                                <option key={p.id} value={p.id} className="bg-slate-900">{p.nome}</option>
                                             ))}
                                         </select>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lote</label>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">Lote</label>
                                         <input
                                             type="text"
                                             value={editingRecord.lote || ''}
                                             onChange={e => setEditingRecord({ ...editingRecord, lote: e.target.value })}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold font-mono"
+                                            className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all uppercase font-bold font-mono"
                                         />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Carga Horária (h)</label>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">Carga Horária (h)</label>
                                         <input
                                             type="number"
                                             step="0.1"
                                             value={editingRecord.carga_horaria || 0}
                                             onChange={e => setEditingRecord({ ...editingRecord, carga_horaria: Number(e.target.value) })}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                            className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all uppercase font-bold"
                                         />
                                     </div>
 
                                     {modalIsLinhaCopos && (
-                                        <div className="space-y-2 animate-in fade-in duration-300">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Máquinas Ativas</label>
+                                        <div className="space-y-1.5 animate-in fade-in duration-300">
+                                            <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">Máquinas Ativas</label>
                                             <select
                                                 value={maquinasAtivas}
                                                 onChange={e => setMaquinasAtivas(Number(e.target.value))}
-                                                className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:border-blue-500 outline-none transition-all uppercase font-bold"
+                                                className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all uppercase font-bold appearance-none"
                                             >
-                                                <option value={1} className="text-slate-900">1 Máquina</option>
-                                                <option value={2} className="text-slate-900">2 Máquinas</option>
-                                                <option value={3} className="text-slate-900">3 Máquinas</option>
-                                                <option value={4} className="text-slate-900">4 Máquinas</option>
-                                                <option value={5} className="text-slate-900">5 Máquinas</option>
+                                                {[1, 2, 3, 4, 5].map(n => (
+                                                    <option key={n} value={n} className="bg-slate-900">{n} Máquina{n > 1 ? 's' : ''}</option>
+                                                ))}
                                             </select>
                                         </div>
                                     )}
                                 </div>
 
-                                {/* Seção Produção e Perdas */}
-                                <div className="grid grid-cols-1 gap-6 pt-4 border-t border-white/5">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Produzido (UN)</label>
+                                {/* Seção Produção */}
+                                <div className="pt-4 border-t border-white/5">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.15em] flex items-center gap-2">
+                                            <CheckCircle2 className="w-3 h-3" /> Produzido (UN)
+                                        </label>
                                         <input
                                             type="text"
                                             inputMode="numeric"
@@ -742,44 +782,44 @@ const EnvioDeRegistros: React.FC = () => {
                                                 setEditingRecord({ ...editingRecord, quantidade_produzida: val === '' ? 0 : parseInt(val) });
                                             }}
                                             placeholder="0"
-                                            className="w-full bg-blue-500/10 border border-blue-500/30 rounded-xl px-4 py-4 text-xl font-black text-blue-400 focus:border-blue-500 outline-none transition-all text-center cursor-text"
+                                            className="w-full bg-emerald-500/5 border border-emerald-500/20 rounded-2xl px-5 py-4 text-xl font-black text-emerald-400 focus:border-emerald-500/50 outline-none transition-all text-center cursor-text placeholder-emerald-900/30"
                                         />
                                     </div>
                                 </div>
 
-                                {/* Seção de Paradas (Downtime) */}
-                                <div className="space-y-6 pt-4 border-t border-white/5">
+                                {/* Seção de Paradas */}
+                                <div className="space-y-4 pt-4 border-t border-white/5">
                                     <div className="flex items-center justify-between">
                                         <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                                            <AlertOctagon className="w-4 h-4 text-amber-500" />
+                                            <AlertOctagon className="w-4 h-4 text-amber-500/80" />
                                             Paradas / Downtime
                                         </h3>
                                     </div>
 
                                     {/* Formulário de Nova Parada */}
-                                    <div className="bg-white/5 p-3 rounded-xl border border-white/5 space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                                    <div className="bg-black/40 p-4 rounded-2xl border border-white/5 space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
                                             <div className="space-y-1">
-                                                <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Máquina</label>
+                                                <label className="text-[7px] font-black text-slate-500 uppercase tracking-[0.2em]">Máquina</label>
                                                 <select
                                                     value={novaParada.maquina_id}
                                                     onChange={e => setNovaParada(p => ({ ...p, maquina_id: e.target.value }))}
-                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold outline-none"
+                                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-3 py-2 text-xs text-white uppercase font-bold outline-none appearance-none"
                                                 >
-                                                    <option value="" className="text-slate-900">Selecione</option>
+                                                    <option value="" className="bg-slate-900">Selecione</option>
                                                     {LISTA_EQUIPAMENTOS.map(m => (
-                                                        <option key={m} value={m} className="text-slate-900">{m}</option>
+                                                        <option key={m} value={m} className="bg-slate-900">{m}</option>
                                                     ))}
                                                 </select>
                                             </div>
                                             <div className="space-y-1">
-                                                <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Tipo</label>
+                                                <label className="text-[7px] font-black text-slate-500 uppercase tracking-[0.2em]">Tipo</label>
                                                 <select
                                                     value={novaParada.tipo}
                                                     onChange={e => setNovaParada(p => ({ ...p, tipo: e.target.value }))}
-                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold outline-none"
+                                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-3 py-2 text-xs text-white uppercase font-bold outline-none appearance-none"
                                                 >
-                                                    <option value="" className="text-slate-900">Selecione...</option>
+                                                    <option value="" className="bg-slate-900">Selecione...</option>
                                                     {[
                                                         'FALHA DE ENERGIA',
                                                         'FALTA DE COLABORADOR',
@@ -792,12 +832,12 @@ const EnvioDeRegistros: React.FC = () => {
                                                         'OPERACIONAL',
                                                         'ASSISTENCIA TÉCNICA'
                                                     ].map(t => (
-                                                        <option key={t} value={t} className="text-slate-900">{t}</option>
+                                                        <option key={t} value={t} className="bg-slate-900">{t}</option>
                                                     ))}
                                                 </select>
                                             </div>
                                             <div className="space-y-1">
-                                                <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Início</label>
+                                                <label className="text-[7px] font-black text-slate-500 uppercase tracking-[0.2em]">Início</label>
                                                 <input
                                                     type="time"
                                                     value={novaParada.hora_inicio}
@@ -806,29 +846,29 @@ const EnvioDeRegistros: React.FC = () => {
                                                         setNovaParada(p => ({ ...p, hora_inicio: val }));
                                                     }}
                                                     onKeyDown={e => e.key === 'Enter' && horaFimRef.current?.focus()}
-                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
+                                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-3 py-2 text-xs text-white uppercase font-bold"
                                                 />
                                             </div>
                                             <div className="space-y-1">
-                                                <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Fim</label>
+                                                <label className="text-[7px] font-black text-slate-500 uppercase tracking-[0.2em]">Fim</label>
                                                 <input
                                                     type="time"
                                                     ref={horaFimRef}
                                                     value={novaParada.hora_fim}
                                                     onChange={e => setNovaParada(p => ({ ...p, hora_fim: e.target.value }))}
                                                     onKeyDown={e => e.key === 'Enter' && motivoRef.current?.focus()}
-                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white uppercase font-bold"
+                                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-3 py-2 text-xs text-white uppercase font-bold"
                                                 />
                                             </div>
                                             <div className="space-y-1">
-                                                <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Duração</label>
-                                                <div className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400 uppercase font-bold flex items-center gap-2">
-                                                    <Clock className="w-3 h-3" />
+                                                <label className="text-[7px] font-black text-slate-500 uppercase tracking-[0.2em]">Duração</label>
+                                                <div className="w-full bg-black/40 border border-white/5 rounded-xl px-3 py-2 text-xs text-slate-400 uppercase font-bold flex items-center gap-2">
+                                                    <Clock className="w-3 h-3 text-emerald-400/60" />
                                                     {calculateDuration(novaParada.hora_inicio || '', novaParada.hora_fim || '')} min
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="flex gap-4">
+                                        <div className="flex gap-3">
                                             <input
                                                 type="text"
                                                 ref={motivoRef}
@@ -836,18 +876,19 @@ const EnvioDeRegistros: React.FC = () => {
                                                 value={novaParada.motivo}
                                                 onChange={e => setNovaParada(p => ({ ...p, motivo: e.target.value }))}
                                                 onKeyDown={e => e.key === 'Enter' && handleSaveParada()}
-                                                className="flex-1 bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 uppercase font-bold"
+                                                className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-700 uppercase font-bold"
                                             />
                                             <button
                                                 type="button"
                                                 onClick={handleSaveParada}
-                                                className={`px-4 py-2 font-black uppercase text-[10px] tracking-wider rounded-lg flex items-center gap-2 ${editingParadaIndex !== null
-                                                    ? 'bg-emerald-500 hover:bg-emerald-400 text-white'
-                                                    : 'bg-amber-500 hover:bg-amber-400 text-black'
-                                                    }`}
+                                                className={`px-5 py-2.5 font-black uppercase text-[9px] tracking-wider rounded-xl flex items-center gap-2 transition-all ${
+                                                    editingParadaIndex !== null
+                                                        ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-500/20'
+                                                        : 'bg-amber-500/90 hover:bg-amber-400 text-black shadow-lg shadow-amber-500/20'
+                                                }`}
                                             >
                                                 {editingParadaIndex !== null ? (
-                                                    <><Save className="w-3 h-3" /> Confirmar Edição</>
+                                                    <><Save className="w-3 h-3" /> Confirmar</>
                                                 ) : (
                                                     <><Plus className="w-3 h-3" /> Adicionar</>
                                                 )}
@@ -856,39 +897,40 @@ const EnvioDeRegistros: React.FC = () => {
                                     </div>
 
                                     {/* Lista de Paradas */}
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         {editingRecord.paradas_detalhadas && editingRecord.paradas_detalhadas.length > 0 ? (
                                             editingRecord.paradas_detalhadas.map((parada, idx) => (
-                                                <div key={idx} className={`flex items-center justify-between p-3 rounded-lg border hover:bg-white/10 group transition-all ${editingParadaIndex === idx ? 'bg-white/10 border-blue-500/50' : 'bg-white/5 border-white/5'
-                                                    }`}>
-                                                    <div className="flex items-center gap-4">
-                                                        <span className="text-amber-500 font-mono font-bold text-xs">{getHorariosFormatados(parada)}</span>
-                                                        <div className="flex flex-col">
-                                                            <span className="text-white font-bold text-xs uppercase">{parada.motivo}</span>
+                                                <div key={idx} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                                                    editingParadaIndex === idx
+                                                        ? 'bg-emerald-500/5 border-emerald-500/30'
+                                                        : 'bg-black/30 border-white/5 hover:bg-black/40'
+                                                }`}>
+                                                    <div className="flex items-center gap-4 min-w-0">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500/60 shrink-0" />
+                                                        <span className="text-amber-400/80 font-mono font-bold text-xs whitespace-nowrap">{getHorariosFormatados(parada)}</span>
+                                                        <div className="flex flex-col min-w-0">
+                                                            <span className="text-white font-bold text-xs uppercase truncate">{parada.motivo}</span>
                                                             {(parada.maquina || parada.maquina_id) && (
-                                                                <span className="text-[8px] text-slate-500 font-black uppercase tracking-widest">
-                                                                    Máquina: {parada.maquina || maquinasOpcoes.find(m => m.id === parada.maquina_id)?.nome || 'Não Identificada'}
+                                                                <span className="text-[7px] text-slate-600 font-black uppercase tracking-widest">
+                                                                    {parada.maquina || maquinasOpcoes.find(m => m.id === parada.maquina_id)?.nome || 'N/I'}
                                                                 </span>
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-4">
-                                                        <span className="text-slate-500 font-bold text-[10px] uppercase tracking-widest">{parada.duracao} min</span>
-
-                                                        <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-3 shrink-0">
+                                                        <span className="text-slate-500 font-bold text-[10px] uppercase tracking-wider">{parada.duracao} min</span>
+                                                        <div className="flex items-center gap-1">
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleEditParada(idx)}
-                                                                className="text-slate-600 hover:text-blue-500 transition-colors"
-                                                                title="Editar Parada"
+                                                                className="p-1.5 text-slate-600 hover:text-emerald-400 transition-colors rounded-lg hover:bg-emerald-500/10"
                                                             >
                                                                 <FileText className="w-3 h-3" />
                                                             </button>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleRemoveParada(idx)}
-                                                                className="text-slate-600 hover:text-red-500 transition-colors"
-                                                                title="Remover Parada"
+                                                                className="p-1.5 text-slate-600 hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/10"
                                                             >
                                                                 <Trash2 className="w-3 h-3" />
                                                             </button>
@@ -897,64 +939,63 @@ const EnvioDeRegistros: React.FC = () => {
                                                 </div>
                                             ))
                                         ) : (
-                                            <p className="text-center text-slate-600 text-[10px] font-bold uppercase tracking-widest py-4 bg-white/5 rounded-lg border-2 border-dashed border-white/5">
+                                            <div className="text-center text-slate-600 text-[10px] font-bold uppercase tracking-widest py-6 bg-black/30 rounded-2xl border-2 border-dashed border-white/5">
+                                                <Clock className="w-6 h-6 mx-auto mb-2 text-slate-700" />
                                                 Nenhuma parada registrada
-                                            </p>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Seção de Observações */}
-                                <div className="space-y-4 pt-4 border-t border-white/5">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                        <FileText className="w-3 h-3 text-blue-500" /> Observações / Ocorrências
+                                <div className="space-y-3 pt-4 border-t border-white/5">
+                                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] flex items-center gap-2">
+                                        <FileText className="w-3 h-3 text-emerald-400/70" /> Observações / Ocorrências
                                     </label>
                                     <textarea
                                         value={editingRecord.observacoes || ''}
                                         onChange={e => setEditingRecord({ ...editingRecord, observacoes: e.target.value })}
                                         placeholder="Registre aqui observações relevantes..."
-                                        className="w-full p-4 bg-black/20 border border-white/10 rounded-xl text-xs font-bold text-slate-300 transition-all outline-none min-h-[100px] focus:border-blue-500"
+                                        className="w-full p-4 bg-black/40 border border-white/5 rounded-2xl text-xs font-bold text-slate-300 transition-all outline-none min-h-[100px] focus:border-emerald-500/50 placeholder-slate-700 resize-none"
                                     />
                                 </div>
 
                                 {/* Modal Footer */}
-                                <div className="flex items-center justify-between gap-4 pt-4 mt-4 border-t border-white/5 sticky bottom-0 bg-[#1a1a1a] z-50">
+                                <div className="flex items-center justify-between gap-4 pt-4 mt-2 border-t border-white/5 sticky bottom-0 bg-[#1a1a1a] z-50">
                                     <button
                                         type="button"
                                         onClick={handleDeleteRecord}
                                         disabled={isSaving}
-                                        className="px-6 py-3 rounded-xl bg-red-500/10 text-red-500 font-bold uppercase tracking-widest text-xs hover:bg-red-500 hover:text-white transition-all flex items-center gap-2"
+                                        className="px-5 py-2.5 rounded-xl bg-red-500/10 text-red-400 font-bold uppercase tracking-widest text-[10px] hover:bg-red-500 hover:text-white transition-all flex items-center gap-2 border border-red-500/10 hover:border-red-500/30"
                                     >
-                                        <Trash2 className="w-4 h-4" /> Excluir
+                                        <Trash2 className="w-3.5 h-3.5" /> Excluir
                                     </button>
-
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2.5">
                                         <button
                                             type="button"
                                             onClick={handleCloseModal}
                                             disabled={isSaving}
-                                            className="px-6 py-3 rounded-xl bg-white/5 text-slate-400 font-bold uppercase tracking-widest text-xs hover:bg-white/10 hover:text-white transition-all"
+                                            className="px-5 py-2.5 rounded-xl bg-white/5 text-slate-400 font-bold uppercase tracking-widest text-[10px] hover:bg-white/10 hover:text-white transition-all"
                                         >
                                             Cancelar
                                         </button>
                                         <button
                                             type="submit"
                                             disabled={isSaving}
-                                            className="px-8 py-3 rounded-xl bg-blue-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-blue-500 transition-all flex items-center gap-2 shadow-lg shadow-blue-900/20"
+                                            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold uppercase tracking-widest text-[10px] hover:from-emerald-500 hover:to-emerald-400 transition-all flex items-center gap-2 shadow-lg shadow-emerald-900/30"
                                         >
-                                            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                                            Salvar Alterações
+                                            {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                                            {isSaving ? 'Salvando...' : 'Salvar Alterações'}
                                         </button>
                                     </div>
                                 </div>
                             </div>
-
                         </form>
                     </div>
                 </div>
             )}
 
-        </div >
+        </div>
     );
 };
 
