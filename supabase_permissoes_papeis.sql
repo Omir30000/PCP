@@ -33,7 +33,8 @@ INSERT INTO permissoes_papeis (papel, tela) VALUES
 ('admin', 'analitica_downtime_ai'),
 ('admin', 'perfil'),
 ('admin', 'usuarios'),
-('admin', 'base_conhecimento')
+('admin', 'base_conhecimento'),
+('admin', 'envio_registros')
 ON CONFLICT (papel, tela) DO NOTHING;
 
 -- Lider: relatórios, produção, agenda
@@ -54,7 +55,8 @@ INSERT INTO permissoes_papeis (papel, tela) VALUES
 ('lider', 'relatorio_boletim_ai'),
 ('lider', 'analitica_downtime_ai'),
 ('lider', 'perfil'),
-('lider', 'base_conhecimento')
+('lider', 'base_conhecimento'),
+('lider', 'envio_registros')
 ON CONFLICT (papel, tela) DO NOTHING;
 
 -- Mecanico: acesso básico (apontamento, dashboard, agenda)
@@ -64,7 +66,8 @@ INSERT INTO permissoes_papeis (papel, tela) VALUES
 ('mecanico', 'agenda'),
 ('mecanico', 'relatorio_registros'),
 ('mecanico', 'perfil'),
-('mecanico', 'base_conhecimento')
+('mecanico', 'base_conhecimento'),
+('mecanico', 'envio_registros')
 ON CONFLICT (papel, tela) DO NOTHING;
 
 -- Vendas: pedidos, calendário, agenda

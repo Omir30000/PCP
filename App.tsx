@@ -12,6 +12,7 @@ import Relatorios from './Relatorios';
 import RelatoriosProdutos from './RelatoriosProdutos';
 import RelatoriosDowntime from './RelatoriosDowntime';
 import RelatorioRegistros from './RelatorioRegistros';
+import EnvioDeRegistros from './Envio de Registros';
 import RelatorioAnaliticoPorLinha from './RelatorioAnaliticoPorLinha';
 import CalendarioVendas from './CalendarioVendas';
 import RelatorioBoletim from './RelatorioBoletim';
@@ -59,7 +60,8 @@ import {
   Sparkles,
   BookOpen,
   Gauge,
-  BarChart3
+  BarChart3,
+  Send
 } from 'lucide-react';
 
 type Tab =
@@ -86,7 +88,8 @@ type Tab =
   | 'agenda'
   | 'perfil'
   | 'usuarios'
-  | 'base_conhecimento';
+  | 'base_conhecimento'
+  | 'envio_registros';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -141,7 +144,7 @@ const App: React.FC = () => {
   }, []);
 
   const getDefaultPermissions = (role: string): Set<string> => {
-    const base = ['dashboard', 'registro', 'agenda', 'relatorio_registros', 'perfil', 'base_conhecimento'];
+    const base = ['dashboard', 'registro', 'agenda', 'relatorio_registros', 'envio_registros', 'perfil', 'base_conhecimento'];
     const perms = new Set<string>(base);
     if (role === 'admin') {
       ['kanban', 'vendas', 'dashboard_vendas', 'calendario_vendas', 'produtos', 'usuarios',
@@ -353,6 +356,7 @@ const App: React.FC = () => {
           
           {screenPermissions.has('agenda') && <NavItem id="agenda" icon={Users} label="Agenda" />}
           {screenPermissions.has('relatorio_registros') && <NavItem id="relatorio_registros" icon={ClipboardPenLine} label="Registros" />}
+          {screenPermissions.has('envio_registros') && <NavItem id="envio_registros" icon={Send} label="Envio de Registros" />}
 
           {screenPermissions.has('produtos') && (
             <NavItem id="produtos" icon={Package} label="Catálogo" />
@@ -514,6 +518,7 @@ const App: React.FC = () => {
             <Usuarios onPermissionsChange={() => fetchScreenPermissions(userProfile?.nivel_acesso || 'mecanico')} />
           )}
           {activeTab === 'agenda' && <AgendaContatos />}
+          {activeTab === 'envio_registros' && <EnvioDeRegistros />}
           {activeTab === 'base_conhecimento' && <BaseConhecimento />}
         </div>
       </main>
@@ -594,6 +599,7 @@ const App: React.FC = () => {
               <div className="h-px bg-white/5 my-4" />
               <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] px-4 mb-2">Base de Conhecimento</p>
               {screenPermissions.has('base_conhecimento') && <NavItem id="base_conhecimento" icon={BookOpen} label="Documentação" onClick={() => setIsMobileMenuOpen(false)} />}
+              {screenPermissions.has('envio_registros') && <NavItem id="envio_registros" icon={Send} label="Envio de Registros" onClick={() => setIsMobileMenuOpen(false)} />}
               
               {(screenPermissions.has('relatorios') || screenPermissions.has('analise_disponibilidade')) && (
                 <>
