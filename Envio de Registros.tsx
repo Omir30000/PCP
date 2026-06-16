@@ -16,10 +16,34 @@ import {
     Upload,
     CheckCircle2,
     List,
-    Edit3
+    Edit3,
+    Send,
+    Sparkles,
+    MessageSquare,
+    User,
+    Phone,
+    BrainCircuit
 } from 'lucide-react';
 import { RegistroProducao, Linha, Produto } from './types/database';
 import { useToast } from './lib/toast';
+
+const EVO_CONFIG = {
+    baseURL: import.meta.env.VITE_EVO_BASE_URL,
+    apiKey: import.meta.env.VITE_EVO_API_KEY,
+    instance: import.meta.env.VITE_EVO_INSTANCE,
+    destination: import.meta.env.VITE_EVO_DESTINATION
+};
+
+const MISTRAL_API_KEY = "VUM0jYdoE3DFV4txchjU70t0QiCir6sx";
+
+interface Contato {
+    id: string;
+    nome: string;
+    apelido: string | null;
+    telefone: string;
+    email: string | null;
+    categoria: string;
+}
 
 const LISTA_EQUIPAMENTOS = [
     'GERAL',
@@ -89,6 +113,15 @@ const EnvioDeRegistros: React.FC = () => {
     const [editingParadaIndex, setEditingParadaIndex] = useState<number | null>(null);
     const horaFimRef = useRef<HTMLInputElement>(null);
     const motivoRef = useRef<HTMLInputElement>(null);
+
+    // Estado do Modal de Envio
+    const [isSendModalOpen, setIsSendModalOpen] = useState(false);
+    const [sendMode, setSendMode] = useState<'normal' | 'ai'>('normal');
+    const [contatos, setContatos] = useState<Contato[]>([]);
+    const [selectedContact, setSelectedContact] = useState('');
+    const [messageText, setMessageText] = useState('');
+    const [isSendingMessage, setIsSendingMessage] = useState(false);
+    const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
     const modalSelectedLinha = editingRecord ? linhasOpcoes.find(l => l.id === editingRecord.linha_producao) : null;
     const modalIsLinhaCopos = modalSelectedLinha ? (modalSelectedLinha.nome?.toLowerCase().includes('linha 4') || modalSelectedLinha.nome?.toLowerCase().includes('linha 04') || modalSelectedLinha.nome?.toLowerCase().includes('copo')) : false;
@@ -440,6 +473,139 @@ const EnvioDeRegistros: React.FC = () => {
         }
     };
 
+    const formatarDadosParaMensagem = () => {
+        if (registros.length === 0) return 'Nenhum registro encontrado.';
+        const total = registros.reduce((acc, r) => acc + (r.quantidade_produzida || 0), 0);
+        const mediaEficiencia = registros.reduce((acc, r) => {
+            const eff = r.capacidade_producao && r.capacidade_producao > 0 ? ((r.quantidade_produzida || 0) / r.capacidade_producao) * 100 : 0;
+            return acc + eff;
+        }, 0) / registros.length;
+
+        let msg = `*📊 RELATÓRIO DE PRODUÇÃO*\n`;
+        msg += `📅 *Período:* ${dataInicio} a ${dataFim}\n`;
+        msg += `📦 *Total de Registros:* ${registros.length}\n`;
+        msg += `🏭 *Total Produzido:* ${total.toLocaleString()} UN\n`;
+        msg += `🎯 *Eficiência Média:* ${mediaEficiencia.toFixed(1)}%\n\n`;
+        msg += `*── DETALHAMENTO ──*\n\n`;
+        registros.slice(0, 20).forEach((reg, i) => {
+            const eff = reg.capacidade_producao && reg.capacidade_producao > 0 ? ((reg.quantidade_produzida || 0) / reg.capacidade_producao) * 100 : 0;
+            msg += `${i + 1}. ${(reg as any).data_exibicao || reg.data_registro} | ${reg.turno} | ${reg.nome_linha}\n`;
+            msg += `   📦 ${reg.nome_produto} | Lote: ${reg.lote || '-'}\n`;
+            msg += `   ✅ Produzido: ${reg.quantidade_produzida?.toLocaleString()} UN | Eficiência: ${eff.toFixed(1)}%\n\n`;
+        });
+        if (registros.length > 20) msg += `... e mais ${registros.length - 20} registro(s)\n\n`;
+        msg += `_Enviado via Nexus Intelligence Terminal_`;
+        return msg;
+    };
+
+    const abrirModalEnvio = async (modo: 'normal' | 'ai') => {
+        setSendMode(modo);
+        setSelectedContact('');
+        const msg = formatarDadosParaMensagem();
+        setMessageText(msg);
+        setIsSendModalOpen(true);
+        try {
+            const { data } = await supabase.from('contatos').select('*').order('nome');
+            if (data) setContatos(data as Contato[]);
+        } catch { }
+        if (modo === 'ai') {
+            gerarMensagemIA(msg);
+        }
+    };
+
+    const gerarMensagemIA = async (baseMsg: string) => {
+        setIsGeneratingAI(true);
+        try {
+            const prompt = `Você é um consultor sênior de produção industrial. Crie uma mensagem profissional e bem estruturada para ser enviada aos diretores/gestores da empresa.
+
+A mensagem deve conter:
+1. Um título formal e elegante
+2. Resumo executivo dos dados de produção
+3. Análise crítica com pontos de atenção
+4. Recomendações práticas
+5. Um tom inspirador e profissional
+
+Use emojis com moderação e mantenha um tom corporativo de alto nível.
+
+Dados de produção:
+${baseMsg}
+
+Formate a mensagem de forma limpa e organizada, usando markdown compatível com WhatsApp (*negrito*, _itálico_, quebras de linha).`;
+
+            const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${MISTRAL_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "open-mistral-7b",
+                    messages: [{ role: "user", content: prompt }],
+                    temperature: 0.7
+                })
+            });
+
+            const data = await response.json();
+            const generatedText = data.choices?.[0]?.message?.content;
+            if (generatedText) {
+                setMessageText(generatedText);
+            }
+        } catch (err) {
+            toast("Erro ao gerar mensagem com IA", 'error');
+        } finally {
+            setIsGeneratingAI(false);
+        }
+    };
+
+    const enviarMensagemWhatsApp = async () => {
+        if (!selectedContact) {
+            toast("Selecione um contato", 'error');
+            return;
+        }
+        if (!messageText.trim()) {
+            toast("A mensagem está vazia", 'error');
+            return;
+        }
+        setIsSendingMessage(true);
+        try {
+            const contato = contatos.find(c => c.id === selectedContact);
+            if (!contato) {
+                toast("Contato não encontrado", 'error');
+                return;
+            }
+            let number = contato.telefone.replace(/\D/g, '');
+            if (number.startsWith('0')) number = number.substring(1);
+            if (!number.startsWith('55') && (number.length === 10 || number.length === 11)) {
+                number = '55' + number;
+            }
+
+            const response = await fetch(`/api/evo/message/sendText/${EVO_CONFIG.instance}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apiKey': EVO_CONFIG.apiKey
+                },
+                body: JSON.stringify({
+                    number,
+                    text: messageText.trim(),
+                    linkPreview: false
+                })
+            });
+
+            if (!response.ok) {
+                const erroTexto = await response.text();
+                toast(`Falha ao enviar (${response.status})`, 'error');
+                return;
+            }
+            toast(`Mensagem enviada para ${contato.nome}!`, 'success');
+            setIsSendModalOpen(false);
+        } catch (err) {
+            toast("Erro de rede ao enviar mensagem", 'error');
+        } finally {
+            setIsSendingMessage(false);
+        }
+    };
+
     const handleDeleteRecord = async () => {
         if (!editingRecord) return;
         if (!window.confirm('Tem certeza que deseja EXCLUIR este registro? Esta ação não pode ser desfeita.')) return;
@@ -545,6 +711,32 @@ const EnvioDeRegistros: React.FC = () => {
                     </button>
                 </div>
             </form>
+
+            {/* Barra de Ações */}
+            {registros.length > 0 && (
+                <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-br from-emerald-900/20 via-slate-900/60 to-slate-900/40 backdrop-blur-xl p-4 rounded-3xl border border-emerald-500/10 shadow-xl">
+                    <div className="flex items-center gap-2 text-xs text-slate-400 font-bold uppercase tracking-wider">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <span>{registros.length} registro{registros.length !== 1 ? 's' : ''} encontrado{registros.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => abrirModalEnvio('normal')}
+                            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-black text-[10px] uppercase tracking-wider transition-all active:scale-[0.97] shadow-lg shadow-emerald-500/15 flex items-center gap-2.5"
+                        >
+                            <Send className="w-4 h-4" />
+                            Enviar via WhatsApp
+                        </button>
+                        <button
+                            onClick={() => abrirModalEnvio('ai')}
+                            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-black text-[10px] uppercase tracking-wider transition-all active:scale-[0.97] shadow-lg shadow-violet-500/15 flex items-center gap-2.5"
+                        >
+                            <Sparkles className="w-4 h-4" />
+                            Enviar com IA
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Tabela */}
             <div className="relative overflow-hidden bg-gradient-to-br from-slate-900/60 to-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/5 shadow-xl">
@@ -991,6 +1183,125 @@ const EnvioDeRegistros: React.FC = () => {
                                 </div>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL DE ENVIO */}
+            {isSendModalOpen && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-gradient-to-b from-[#1a1a1a] to-[#141414] border border-white/5 rounded-[32px] w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl shadow-emerald-900/10 relative">
+                        {/* Header */}
+                        <div className="p-5 md:p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#1a1a1a]/95 backdrop-blur-xl z-10">
+                            <div className="flex items-center gap-4">
+                                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ring-1 ${
+                                    sendMode === 'ai'
+                                        ? 'bg-violet-500/20 text-violet-400 ring-violet-500/20'
+                                        : 'bg-emerald-500/20 text-emerald-400 ring-emerald-500/20'
+                                }`}>
+                                    {sendMode === 'ai' ? <BrainCircuit className="w-5 h-5" /> : <MessageSquare className="w-5 h-5" />}
+                                </div>
+                                <div>
+                                    <h2 className="text-base font-black text-white uppercase tracking-wider">
+                                        {sendMode === 'ai' ? 'Envio com IA Mistral' : 'Envio de Mensagem'}
+                                    </h2>
+                                    <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">
+                                        {sendMode === 'ai' ? 'Mensagem gerada por inteligência artificial' : 'Disparo via Evolution API'}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setIsSendModalOpen(false)}
+                                className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-500 hover:text-white transition-all"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        <div className="p-5 md:p-6 space-y-5">
+                            {/* Selecionar Contato */}
+                            <div className="space-y-1.5">
+                                <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] flex items-center gap-2">
+                                    <User className="w-3 h-3 text-emerald-400/70" /> Contato
+                                </label>
+                                <div className="relative">
+                                    <select
+                                        value={selectedContact}
+                                        onChange={(e) => setSelectedContact(e.target.value)}
+                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-3 text-sm text-white focus:border-emerald-500/50 outline-none transition-all uppercase font-bold appearance-none pl-10"
+                                    >
+                                        <option value="" className="bg-slate-900">Selecione um contato...</option>
+                                        {contatos.map(c => (
+                                            <option key={c.id} value={c.id} className="bg-slate-900">
+                                                {c.nome}{c.categoria ? ` (${c.categoria})` : ''}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <Phone className="w-4 h-4 text-slate-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                </div>
+                                {selectedContact && (
+                                    <p className="text-[10px] text-emerald-400/60 font-bold font-mono">
+                                        → {contatos.find(c => c.id === selectedContact)?.telefone}
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Mensagem */}
+                            <div className="space-y-1.5">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] flex items-center gap-2">
+                                        <FileText className="w-3 h-3 text-emerald-400/70" /> Mensagem
+                                    </label>
+                                    {sendMode === 'ai' && (
+                                        <button
+                                            onClick={() => gerarMensagemIA(formatarDadosParaMensagem())}
+                                            disabled={isGeneratingAI}
+                                            className="text-[9px] font-black text-violet-400 hover:text-violet-300 uppercase tracking-wider transition-colors flex items-center gap-1.5"
+                                        >
+                                            <Sparkles className="w-3 h-3" />
+                                            Regenerar
+                                        </button>
+                                    )}
+                                </div>
+                                <textarea
+                                    value={messageText}
+                                    onChange={(e) => setMessageText(e.target.value)}
+                                    className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-xs font-bold text-slate-200 transition-all outline-none min-h-[200px] focus:border-emerald-500/50 placeholder-slate-700 resize-none leading-relaxed"
+                                    placeholder="A mensagem será exibida aqui..."
+                                />
+                                {isGeneratingAI && (
+                                    <div className="flex items-center gap-2 text-violet-400 text-[10px] font-bold">
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                        Gerando mensagem com IA Mistral...
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Ações */}
+                            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-white/5">
+                                <button
+                                    onClick={() => setIsSendModalOpen(false)}
+                                    className="px-5 py-2.5 rounded-xl bg-white/5 text-slate-400 font-bold uppercase tracking-widest text-[10px] hover:bg-white/10 hover:text-white transition-all"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={enviarMensagemWhatsApp}
+                                    disabled={isSendingMessage || !selectedContact || !messageText.trim()}
+                                    className={`px-6 py-2.5 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all flex items-center gap-2 shadow-lg ${
+                                        sendMode === 'ai'
+                                            ? 'bg-gradient-to-r from-violet-600 to-purple-500 text-white hover:from-violet-500 hover:to-purple-400 shadow-violet-900/30'
+                                            : 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white hover:from-emerald-500 hover:to-emerald-400 shadow-emerald-900/30'
+                                    } disabled:opacity-40 disabled:cursor-not-allowed`}
+                                >
+                                    {isSendingMessage ? (
+                                        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Enviando...</>
+                                    ) : (
+                                        <><Send className="w-3.5 h-3.5" /> Enviar Agora</>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
