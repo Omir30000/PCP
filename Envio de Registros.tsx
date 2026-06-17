@@ -528,6 +528,7 @@ REGRAS:
 - No final, um resumo simples do que precisa de atenção
 - Use emojis básicos 👍 🔧 🚨 ✅ ⚠️ mas sem exagerar
 - Máximo de 20 linhas, mensagem rápida de ler
+- IMPORTANTE: use *apenas um asterisco* para negrito (ex: *texto em negrito*), NUNCA use dois asteriscos (**) porque o WhatsApp só entende com um
 
 Dados de produção:
 ${baseMsg}
