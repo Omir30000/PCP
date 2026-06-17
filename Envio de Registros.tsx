@@ -537,6 +537,7 @@ REGRAS:
 - Use linguagem profissional mas enxuta, como um gerente relatando resultados
 - Abra com o período: se for um dia, mencione a data; se for vários dias, "de X a Y"
 - Em seguida o resumo executivo com total produzido e eficiência geral
+- Inclua as quantidades produzidas por linha no detalhamento
 - Destaque os pontos positivos primeiro: linhas que foram bem
 - Depois aponte as linhas críticas com análise do problema
 - Analise as PARADAS (downtime) mencionadas nos dados - relacione os motivos com a baixa eficiência
