@@ -541,6 +541,7 @@ REGRAS:
 - Se houver muitas paradas por um motivo específico, aponte como causa provável
 - Para cada linha com problema, mencione os principais motivos de parada e os minutos perdidos
 - Encerre com recomendações práticas baseadas nos dados de paradas
+- Paradas do tipo *REFEIÇÃO* ou *INTERVALO* são normais e programadas — NÃO aponte como problema
 - Use emojis com moderação 📊 ✅ ⚠️ 🔧 🚨
 - No máximo 25 linhas
 - IMPORTANTE: use *apenas um asterisco* para negrito (ex: *texto em negrito*), NUNCA dois asteriscos
@@ -564,8 +565,9 @@ Escreva como um gestor de produção apresentando um briefing gerencial para a d
             });
 
             const data = await response.json();
-            const generatedText = data.choices?.[0]?.message?.content;
+            let generatedText = data.choices?.[0]?.message?.content;
             if (generatedText) {
+                generatedText = generatedText.replace(/\*\*/g, '*');
                 setMessageText(generatedText);
             }
         } catch (err) {
