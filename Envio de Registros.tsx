@@ -535,7 +535,8 @@ REGRAS:
 - Nada de "Fala chefe", "Bom dia", "Tudo bem?" - vá direto ao ponto
 - Nada de "Assunto:", "Para:", "De:", "Consultor" - nada de estrutura de documento
 - Use linguagem profissional mas enxuta, como um gerente relatando resultados
-- Abra com um resumo executivo: dados do período e eficiência geral
+- Abra com o período: se for um dia, mencione a data; se for vários dias, "de X a Y"
+- Em seguida o resumo executivo com total produzido e eficiência geral
 - Destaque os pontos positivos primeiro: linhas que foram bem
 - Depois aponte as linhas críticas com análise do problema
 - Analise as PARADAS (downtime) mencionadas nos dados - relacione os motivos com a baixa eficiência
