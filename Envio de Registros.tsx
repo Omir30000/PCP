@@ -516,21 +516,23 @@ const EnvioDeRegistros: React.FC = () => {
     const gerarMensagemIA = async (baseMsg: string) => {
         setIsGeneratingAI(true);
         try {
-            const prompt = `Você é um consultor sênior de produção industrial. Crie uma mensagem profissional e bem estruturada para ser enviada aos diretores/gestores da empresa.
+            const prompt = `Você é o encarregado da produção passando um resumo direto pro dono da empresa. Escreva uma mensagem NATURAL, como se fosse um áudio do WhatsApp transcrito, sem firulas.
 
-A mensagem deve conter:
-1. Um título formal e elegante
-2. Resumo executivo dos dados de produção
-3. Análise crítica com pontos de atenção
-4. Recomendações práticas
-5. Um tom inspirador e profissional
-
-Use emojis com moderação e mantenha um tom corporativo de alto nível.
+REGRAS:
+- Nada de "Assunto:", "Para:", "De:", "Consultor Sênior" — isso é documento, não mensagem
+- Use linguagem natural e direta, como alguém da fábrica falando com o chefe
+- Comece com algo como "Fala chefe, tudo bem?" ou "Bom dia, passando o resumo da produção aqui"
+- Seja objetivo: dados principais, o que foi bem, o que preocupou
+- Se algo foi mal, fale na lata: "A linha 2 deu uma caída, produção veio fraca"
+- Se algo foi bem, reconheça: "A linha 3 mandou bem, bateu a meta de novo"
+- No final, um resumo simples do que precisa de atenção
+- Use emojis básicos 👍 🔧 🚨 ✅ ⚠️ mas sem exagerar
+- Máximo de 20 linhas, mensagem rápida de ler
 
 Dados de produção:
 ${baseMsg}
 
-Formate a mensagem de forma limpa e organizada, usando markdown compatível com WhatsApp (*negrito*, _itálico_, quebras de linha).`;
+Escreva como se fosse um encarregado de chão de fábrica falando diretamente com o dono da empresa — nada de firulas corporativas.`;
 
             const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
                 method: "POST",
