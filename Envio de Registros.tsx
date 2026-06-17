@@ -513,15 +513,16 @@ const EnvioDeRegistros: React.FC = () => {
     const abrirModalEnvio = async (modo: 'normal' | 'ai') => {
         setSendMode(modo);
         setSelectedContact('');
-        const msg = formatarDadosParaMensagem();
-        setMessageText(msg);
         setIsSendModalOpen(true);
         try {
             const { data } = await supabase.from('contatos').select('*').order('nome');
             if (data) setContatos(data as Contato[]);
         } catch { }
         if (modo === 'ai') {
-            gerarMensagemIA(msg);
+            setMessageText('');
+            gerarMensagemIA(formatarDadosParaMensagem());
+        } else {
+            setMessageText(formatarDadosParaMensagem());
         }
     };
 
@@ -1272,7 +1273,7 @@ Escreva como um gestor de produção apresentando um briefing gerencial para a d
                                     <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] flex items-center gap-2">
                                         <FileText className="w-3 h-3 text-emerald-400/70" /> Mensagem
                                     </label>
-                                    {sendMode === 'ai' && (
+                                    {sendMode === 'ai' && !isGeneratingAI && messageText && (
                                         <button
                                             onClick={() => gerarMensagemIA(formatarDadosParaMensagem())}
                                             disabled={isGeneratingAI}
@@ -1283,16 +1284,42 @@ Escreva como um gestor de produção apresentando um briefing gerencial para a d
                                         </button>
                                     )}
                                 </div>
-                                <textarea
-                                    value={messageText}
-                                    onChange={(e) => setMessageText(e.target.value)}
-                                    className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-xs font-bold text-slate-200 transition-all outline-none min-h-[200px] focus:border-emerald-500/50 placeholder-slate-700 resize-none leading-relaxed"
-                                    placeholder="A mensagem será exibida aqui..."
-                                />
-                                {isGeneratingAI && (
+
+                                {isGeneratingAI && !messageText ? (
+                                    <div className="w-full bg-black/40 border border-violet-500/20 rounded-2xl p-8 min-h-[200px] flex flex-col items-center justify-center gap-4">
+                                        <div className="relative">
+                                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/10 flex items-center justify-center ring-1 ring-violet-500/30">
+                                                <BrainCircuit className="w-7 h-7 text-violet-400 animate-pulse" />
+                                            </div>
+                                            <div className="absolute -top-1 -right-1">
+                                                <div className="w-4 h-4 rounded-full bg-violet-500 flex items-center justify-center">
+                                                    <Sparkles className="w-2.5 h-2.5 text-white animate-pulse" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-violet-400 font-black text-xs uppercase tracking-wider">Gerando mensagem com IA</p>
+                                            <p className="text-slate-600 text-[9px] font-bold uppercase tracking-widest mt-1.5">Mistral AI está analisando os dados...</p>
+                                        </div>
+                                        <div className="flex gap-1.5">
+                                            <div className="w-2 h-2 rounded-full bg-violet-500/60 animate-bounce" style={{ animationDelay: '0ms' }} />
+                                            <div className="w-2 h-2 rounded-full bg-violet-500/60 animate-bounce" style={{ animationDelay: '150ms' }} />
+                                            <div className="w-2 h-2 rounded-full bg-violet-500/60 animate-bounce" style={{ animationDelay: '300ms' }} />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <textarea
+                                        value={messageText}
+                                        onChange={(e) => setMessageText(e.target.value)}
+                                        className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-xs font-bold text-slate-200 transition-all outline-none min-h-[200px] focus:border-emerald-500/50 placeholder-slate-700 resize-none leading-relaxed"
+                                        placeholder="A mensagem será exibida aqui..."
+                                    />
+                                )}
+
+                                {isGeneratingAI && messageText && (
                                     <div className="flex items-center gap-2 text-violet-400 text-[10px] font-bold">
                                         <Loader2 className="w-3 h-3 animate-spin" />
-                                        Gerando mensagem com IA Mistral...
+                                        Regenerando mensagem...
                                     </div>
                                 )}
                             </div>
