@@ -491,7 +491,19 @@ const EnvioDeRegistros: React.FC = () => {
             const eff = reg.capacidade_producao && reg.capacidade_producao > 0 ? ((reg.quantidade_produzida || 0) / reg.capacidade_producao) * 100 : 0;
             msg += `${i + 1}. ${(reg as any).data_exibicao || reg.data_registro} | ${reg.turno} | ${reg.nome_linha}\n`;
             msg += `   📦 ${reg.nome_produto} | Lote: ${reg.lote || '-'}\n`;
-            msg += `   ✅ Produzido: ${reg.quantidade_produzida?.toLocaleString()} UN | Eficiência: ${eff.toFixed(1)}%\n\n`;
+            msg += `   ✅ Produzido: ${reg.quantidade_produzida?.toLocaleString()} UN | Eficiência: ${eff.toFixed(1)}%\n`;
+            const paradas = (reg.paradas as any) || [];
+            if (paradas.length > 0) {
+                const totalMin = paradas.reduce((s: number, p: any) => s + (typeof p.duracao === 'number' ? p.duracao : (parseInt(String(p.duracao)) || 0)), 0);
+                msg += `   🔧 Paradas: ${paradas.length} ocorrência(s) | Total: ${totalMin} min\n`;
+                paradas.slice(0, 3).forEach((p: any) => {
+                    const motivo = (p.motivo || p.motivo_parada || 'N/I').substring(0, 40);
+                    const min = typeof p.duracao === 'number' ? p.duracao : (parseInt(String(p.duracao)) || 0);
+                    msg += `     • ${motivo} (${min}min)\n`;
+                });
+                if (paradas.length > 3) msg += `     ... +${paradas.length - 3} outra(s)\n`;
+            }
+            msg += `\n`;
         });
         if (registros.length > 20) msg += `... e mais ${registros.length - 20} registro(s)\n\n`;
         msg += `_Enviado via Nexus Intelligence Terminal_`;
@@ -516,24 +528,27 @@ const EnvioDeRegistros: React.FC = () => {
     const gerarMensagemIA = async (baseMsg: string) => {
         setIsGeneratingAI(true);
         try {
-            const prompt = `Você é o encarregado da produção passando um resumo direto pro dono da empresa. Escreva uma mensagem NATURAL, como se fosse um áudio do WhatsApp transcrito, sem firulas.
+            const prompt = `Você é um gestor de produção passando um briefing profissional para a diretoria. Escreva uma mensagem direta, objetiva e com tom de análise gerencial.
 
 REGRAS:
-- Nada de "Assunto:", "Para:", "De:", "Consultor Sênior" — isso é documento, não mensagem
-- Use linguagem natural e direta, como alguém da fábrica falando com o chefe
-- Comece com algo como "Fala chefe, tudo bem?" ou "Bom dia, passando o resumo da produção aqui"
-- Seja objetivo: dados principais, o que foi bem, o que preocupou
-- Se algo foi mal, fale na lata: "A linha 2 deu uma caída, produção veio fraca"
-- Se algo foi bem, reconheça: "A linha 3 mandou bem, bateu a meta de novo"
-- No final, um resumo simples do que precisa de atenção
-- Use emojis básicos 👍 🔧 🚨 ✅ ⚠️ mas sem exagerar
-- Máximo de 20 linhas, mensagem rápida de ler
-- IMPORTANTE: use *apenas um asterisco* para negrito (ex: *texto em negrito*), NUNCA use dois asteriscos (**) porque o WhatsApp só entende com um
+- Nada de "Fala chefe", "Bom dia", "Tudo bem?" - vá direto ao ponto
+- Nada de "Assunto:", "Para:", "De:", "Consultor" - nada de estrutura de documento
+- Use linguagem profissional mas enxuta, como um gerente relatando resultados
+- Abra com um resumo executivo: dados do período e eficiência geral
+- Destaque os pontos positivos primeiro: linhas que foram bem
+- Depois aponte as linhas críticas com análise do problema
+- Analise as PARADAS (downtime) mencionadas nos dados - relacione os motivos com a baixa eficiência
+- Se houver muitas paradas por um motivo específico, aponte como causa provável
+- Para cada linha com problema, mencione os principais motivos de parada e os minutos perdidos
+- Encerre com recomendações práticas baseadas nos dados de paradas
+- Use emojis com moderação 📊 ✅ ⚠️ 🔧 🚨
+- No máximo 25 linhas
+- IMPORTANTE: use *apenas um asterisco* para negrito (ex: *texto em negrito*), NUNCA dois asteriscos
 
-Dados de produção:
+Dados de produção (inclui paradas/downtime):
 ${baseMsg}
 
-Escreva como se fosse um encarregado de chão de fábrica falando diretamente com o dono da empresa — nada de firulas corporativas.`;
+Escreva como um gestor de produção apresentando um briefing gerencial para a diretoria — profissional, direto e baseado nos dados.`;
 
             const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
                 method: "POST",
