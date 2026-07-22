@@ -145,6 +145,7 @@ const Usuarios: React.FC<UsuariosProps> = ({ onPermissionsChange }) => {
     { id: 'relatorio_boletim_pro', label: 'Boletim Pro', group: 'Relatórios IA' },
     { id: 'relatorio_boletim_ai', label: 'Boletim com IA', group: 'Relatórios IA' },
     { id: 'analitica_downtime_ai', label: 'Analítica Downtime AI', group: 'Relatórios IA' },
+    { id: 'downtime_horas_ia', label: 'Downtime Horas IA', group: 'Relatórios IA' },
   ];
 
   const PAPEIS = [

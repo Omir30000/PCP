@@ -18,6 +18,7 @@ import CalendarioVendas from './CalendarioVendas';
 import RelatorioBoletim from './RelatorioBoletim';
 import RelatorioBoletimAI from './RelatorioBoletimAI';
 import RelatorioAnaliticaDowntimeAI from './RelatorioAnaliticaDowntimeAI';
+import RelatorioDowntimeHorasIA from './RelatorioDowntimeHorasIA';
 import RelatoriosDowntimeHoras from './RelatoriosDowntimeHoras';
 import RelatorioDowntimeTecnico from './RelatorioDowntimeTecnico';
 import RelatorioBoletimPro from './RelatorioBoletimPro';
@@ -84,6 +85,7 @@ type Tab =
   | 'relatorio_boletim_ai'
   | 'relatorio_boletim_pro'
   | 'analitica_downtime_ai'
+  | 'downtime_horas_ia'
   | 'top5_equipamentos'
   | 'agenda'
   | 'perfil'
@@ -151,12 +153,12 @@ const App: React.FC = () => {
        'analise_disponibilidade', 'relatorios', 'relatorio_boletim', 'top5_equipamentos',
        'relatorios_downtime', 'relatorios_downtime_horas', 'relatorio_downtime_tecnico',
        'analise_gargalos', 'relatorio_boletim_pro', 'relatorio_boletim_ai',
-       'analitica_downtime_ai'].forEach(t => perms.add(t));
+       'analitica_downtime_ai', 'downtime_horas_ia'].forEach(t => perms.add(t));
     } else if (role === 'lider') {
       ['analise_disponibilidade', 'relatorios', 'relatorio_boletim', 'top5_equipamentos',
        'relatorios_downtime', 'relatorios_downtime_horas', 'relatorio_downtime_tecnico',
        'analise_gargalos', 'relatorio_boletim_pro', 'relatorio_boletim_ai',
-       'analitica_downtime_ai'].forEach(t => perms.add(t));
+       'analitica_downtime_ai', 'downtime_horas_ia'].forEach(t => perms.add(t));
     } else if (role === 'vendas') {
       perms.delete('registro');
       perms.delete('relatorio_registros');
@@ -393,7 +395,7 @@ const App: React.FC = () => {
             </>
           )}
 
-          {(screenPermissions.has('relatorio_boletim_pro') || screenPermissions.has('relatorio_boletim_ai')) && (
+          {(screenPermissions.has('relatorio_boletim_pro') || screenPermissions.has('relatorio_boletim_ai') || screenPermissions.has('downtime_horas_ia')) && (
             <>
               {isSidebarExpanded && (
                 <button
@@ -413,6 +415,7 @@ const App: React.FC = () => {
                 {screenPermissions.has('relatorio_boletim_pro') && <NavItem id="relatorio_boletim_pro" icon={Sparkles} label="Boletim Pro" isSubItem={isSidebarExpanded} />}
                 {screenPermissions.has('relatorio_boletim_ai') && <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" isSubItem={isSidebarExpanded} />}
                 {screenPermissions.has('analitica_downtime_ai') && <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" isSubItem={isSidebarExpanded} />}
+                {screenPermissions.has('downtime_horas_ia') && <NavItem id="downtime_horas_ia" icon={Clock} label="Downtime Horas IA" isSubItem={isSidebarExpanded} />}
               </div>
             </>
           )}
@@ -512,6 +515,7 @@ const App: React.FC = () => {
           {activeTab === 'relatorio_boletim_pro' && <RelatorioBoletimPro />}
           {activeTab === 'relatorio_boletim_ai' && <RelatorioBoletimAI />}
           {activeTab === 'analitica_downtime_ai' && <RelatorioAnaliticaDowntimeAI />}
+          {activeTab === 'downtime_horas_ia' && <RelatorioDowntimeHorasIA />}
           {activeTab === 'top5_equipamentos' && <RelatorioTop5Equipamentos />}
           {activeTab === 'perfil' && <Perfil userProfile={userProfile} onProfileUpdate={handleProfileUpdate} />}
           {activeTab === 'usuarios' && screenPermissions.has('usuarios') && (
@@ -617,6 +621,7 @@ const App: React.FC = () => {
                   {screenPermissions.has('relatorio_boletim_pro') && <NavItem id="relatorio_boletim_pro" icon={Sparkles} label="Boletim Pro" onClick={() => setIsMobileMenuOpen(false)} />}
                   {screenPermissions.has('relatorio_boletim_ai') && <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" onClick={() => setIsMobileMenuOpen(false)} />}
                   {screenPermissions.has('analitica_downtime_ai') && <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" onClick={() => setIsMobileMenuOpen(false)} />}
+                  {screenPermissions.has('downtime_horas_ia') && <NavItem id="downtime_horas_ia" icon={Clock} label="Downtime Horas IA" onClick={() => setIsMobileMenuOpen(false)} />}
                 </>
               )}
             </div>
