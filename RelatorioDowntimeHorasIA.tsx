@@ -241,7 +241,13 @@ const RelatorioDowntimeHorasIA: React.FC = () => {
             linhaBarData,
             top3Equipamentos,
             top3Motivos,
-            detailedMaintenances: detailedMaintenances.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+            detailedMaintenances: detailedMaintenances.sort((a, b) => {
+                const dataDiff = new Date(b.data).getTime() - new Date(a.data).getTime();
+                if (dataDiff !== 0) return dataDiff;
+                const linhaDiff = a.linha.localeCompare(b.linha);
+                if (linhaDiff !== 0) return linhaDiff;
+                return b.duracaoMin - a.duracaoMin;
+            })
         };
     }, [registros, maquinas]);
 
