@@ -23,6 +23,7 @@ import RelatoriosDowntimeHoras from './RelatoriosDowntimeHoras';
 import RelatorioDowntimeTecnico from './RelatorioDowntimeTecnico';
 import RelatorioBoletimPro from './RelatorioBoletimPro';
 import RelatorioTop5Equipamentos from './RelatorioTop5Equipamentos';
+import RelatorioDowntimePorMaquina from './RelatorioDowntimePorMaquina';
 import Auth from './Auth';
 import Perfil from './Perfil';
 import Usuarios from './Usuarios';
@@ -87,6 +88,7 @@ type Tab =
   | 'analitica_downtime_ai'
   | 'downtime_horas_ia'
   | 'top5_equipamentos'
+  | 'relatorio_downtime_maquina'
   | 'agenda'
   | 'perfil'
   | 'usuarios'
@@ -153,12 +155,12 @@ const App: React.FC = () => {
        'analise_disponibilidade', 'relatorios', 'relatorio_boletim', 'top5_equipamentos',
        'relatorios_downtime', 'relatorios_downtime_horas', 'relatorio_downtime_tecnico',
        'analise_gargalos', 'relatorio_boletim_pro', 'relatorio_boletim_ai',
-       'analitica_downtime_ai', 'downtime_horas_ia'].forEach(t => perms.add(t));
+       'analitica_downtime_ai', 'downtime_horas_ia', 'relatorio_downtime_maquina'].forEach(t => perms.add(t));
     } else if (role === 'lider') {
       ['analise_disponibilidade', 'relatorios', 'relatorio_boletim', 'top5_equipamentos',
        'relatorios_downtime', 'relatorios_downtime_horas', 'relatorio_downtime_tecnico',
        'analise_gargalos', 'relatorio_boletim_pro', 'relatorio_boletim_ai',
-       'analitica_downtime_ai', 'downtime_horas_ia'].forEach(t => perms.add(t));
+       'analitica_downtime_ai', 'downtime_horas_ia', 'relatorio_downtime_maquina'].forEach(t => perms.add(t));
     } else if (role === 'vendas') {
       perms.delete('registro');
       perms.delete('relatorio_registros');
@@ -390,6 +392,7 @@ const App: React.FC = () => {
                 {screenPermissions.has('relatorios_downtime') && <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime (Min)" isSubItem={isSidebarExpanded} />}
                 {screenPermissions.has('relatorios_downtime_horas') && <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" isSubItem={isSidebarExpanded} />}
                 {screenPermissions.has('relatorio_downtime_tecnico') && <NavItem id="relatorio_downtime_tecnico" icon={Activity} label="Downtime Técnico" isSubItem={isSidebarExpanded} />}
+                {screenPermissions.has('relatorio_downtime_maquina') && <NavItem id="relatorio_downtime_maquina" icon={Settings} label="Downtime por Máquina" isSubItem={isSidebarExpanded} />}
                 {screenPermissions.has('analise_gargalos') && <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" isSubItem={isSidebarExpanded} />}
               </div>
             </>
@@ -517,6 +520,7 @@ const App: React.FC = () => {
           {activeTab === 'analitica_downtime_ai' && <RelatorioAnaliticaDowntimeAI />}
           {activeTab === 'downtime_horas_ia' && <RelatorioDowntimeHorasIA />}
           {activeTab === 'top5_equipamentos' && <RelatorioTop5Equipamentos />}
+          {activeTab === 'relatorio_downtime_maquina' && <RelatorioDowntimePorMaquina />}
           {activeTab === 'perfil' && <Perfil userProfile={userProfile} onProfileUpdate={handleProfileUpdate} />}
           {activeTab === 'usuarios' && screenPermissions.has('usuarios') && (
             <Usuarios onPermissionsChange={() => fetchScreenPermissions(userProfile?.nivel_acesso || 'mecanico')} />
@@ -615,6 +619,7 @@ const App: React.FC = () => {
                   {screenPermissions.has('relatorios_downtime') && <NavItem id="relatorios_downtime" icon={ZapOff} label="Downtime" onClick={() => setIsMobileMenuOpen(false)} />}
                   {screenPermissions.has('relatorios_downtime_horas') && <NavItem id="relatorios_downtime_horas" icon={Clock} label="Downtime (Horas)" onClick={() => setIsMobileMenuOpen(false)} />}
                   {screenPermissions.has('relatorio_downtime_tecnico') && <NavItem id="relatorio_downtime_tecnico" icon={Activity} label="Downtime Técnico" onClick={() => setIsMobileMenuOpen(false)} />}
+                  {screenPermissions.has('relatorio_downtime_maquina') && <NavItem id="relatorio_downtime_maquina" icon={Settings} label="Downtime por Máquina" onClick={() => setIsMobileMenuOpen(false)} />}
                   {screenPermissions.has('analise_gargalos') && <NavItem id="analise_gargalos" icon={TrendingDown} label="Gargalos" onClick={() => setIsMobileMenuOpen(false)} />}
                   <div className="h-px bg-white/5 my-4" />
                   <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] px-4 mb-2">Relatórios com IA</p>
