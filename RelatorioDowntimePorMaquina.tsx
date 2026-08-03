@@ -30,6 +30,14 @@ import {
     Cell
 } from 'recharts';
 
+const MAQUINAS_OPCOES = [
+    'GERAL', 'ENCHEDORA', 'DATADORA', 'ROTULADORA', 'EMPACOTADORA', 'ESTEIRAS',
+    'PAVAN', 'UNIPLAS', 'MULTIPET', 'AEREO', 'HALMMER', 'CALDEIRA', 'DESPALETIZADOR',
+    'INTERVALO', 'INJETOR DE ESSENCIA', 'INJETOR DE NITROGENIO', 'CARBONATADOR',
+    'MANUTENÇÃO', 'GERADOR DE OZÔNIO', 'COMPRESSOR', 'SECADOR DE AR', 'AR POSITIVO',
+    'RESERVATÓRIO VAZIO'
+];
+
 const EmptyChartState = () => (
     <div className="h-full flex flex-col items-center justify-center text-slate-300">
         <AlertCircle className="w-12 h-12 mb-4 opacity-20" />
@@ -43,7 +51,7 @@ const RelatorioDowntimePorMaquina: React.FC = () => {
     const [dataFim, setDataFim] = useState(getHoje());
     const [linhaId, setLinhaId] = useState<string>('todos');
     const [turno, setTurno] = useState<string>('todos');
-    const [maquinaId, setMaquinaId] = useState<string>('todos');
+    const [maquinaNome, setMaquinaNome] = useState<string>('todos');
 
     const [loading, setLoading] = useState(false);
     const [registros, setRegistros] = useState<any[]>([]);
@@ -133,17 +141,14 @@ const RelatorioDowntimePorMaquina: React.FC = () => {
         printWindow.document.close();
     };
 
-    const maquinaSelecionada = maquinas.find(m => m.id === maquinaId);
-
     const matchesMaquina = (p: any): boolean => {
-        if (maquinaId === 'todos') return true;
-        if (p.maquina_id && p.maquina_id === maquinaId) return true;
-        if (maquinaSelecionada) {
-            const alvo = maquinaSelecionada.nome.trim().toLowerCase();
-            const porNome = String(p.maquina || '').trim().toLowerCase();
-            const porEquipamento = String(p.equipamento || '').trim().toLowerCase();
-            return porNome === alvo || porEquipamento === alvo;
-        }
+        if (maquinaNome === 'todos') return true;
+        const alvo = maquinaNome.trim().toLowerCase();
+        const porNome = String(p.maquina || '').trim().toLowerCase();
+        const porEquipamento = String(p.equipamento || '').trim().toLowerCase();
+        if (porNome === alvo || porEquipamento === alvo) return true;
+        const mObj = maquinas.find(m => m.id === p.maquina_id);
+        if (mObj && mObj.nome.trim().toLowerCase() === alvo) return true;
         return false;
     };
 
@@ -259,7 +264,7 @@ const RelatorioDowntimePorMaquina: React.FC = () => {
                 return b.duracaoMin - a.duracaoMin;
             })
         };
-    }, [registros, maquinas, maquinaId]);
+    }, [registros, maquinas, maquinaNome]);
 
     const formatarDataBR = (dateStr: string) => {
         if (!dateStr) return '';
@@ -332,12 +337,12 @@ const RelatorioDowntimePorMaquina: React.FC = () => {
                     </select>
 
                     <select
-                        value={maquinaId}
-                        onChange={e => setMaquinaId(e.target.value)}
+                        value={maquinaNome}
+                        onChange={e => setMaquinaNome(e.target.value)}
                         className="bg-white/5 border border-amber-500/30 p-2.5 rounded-xl text-[10px] font-black uppercase outline-none cursor-pointer text-white"
                     >
                         <option value="todos" className="bg-slate-900">Todas as Máquinas</option>
-                        {maquinas.map(m => <option key={m.id} value={m.id} className="bg-slate-900">{m.nome}</option>)}
+                        {MAQUINAS_OPCOES.map(nome => <option key={nome} value={nome} className="bg-slate-900">{nome}</option>)}
                     </select>
 
                     <button
@@ -377,7 +382,7 @@ const RelatorioDowntimePorMaquina: React.FC = () => {
                             Período: {formatarDataBR(dataInicio) === formatarDataBR(dataFim) ? formatarDataBR(dataInicio) : `${formatarDataBR(dataInicio)} - ${formatarDataBR(dataFim)}`}
                         </p>
                         <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mt-1">
-                            Máquina: {maquinaSelecionada ? maquinaSelecionada.nome : 'Todas as Máquinas'}
+                            Máquina: {maquinaNome !== 'todos' ? maquinaNome : 'Todas as Máquinas'}
                         </p>
                     </div>
                 </header>
