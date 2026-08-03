@@ -52,6 +52,7 @@ const RelatorioDowntimePorMaquina: React.FC = () => {
     const [linhaId, setLinhaId] = useState<string>('todos');
     const [turno, setTurno] = useState<string>('todos');
     const [maquinaNome, setMaquinaNome] = useState<string>('todos');
+    const [tipoParada, setTipoParada] = useState<string>('todos');
 
     const [loading, setLoading] = useState(false);
     const [registros, setRegistros] = useState<any[]>([]);
@@ -152,6 +153,18 @@ const RelatorioDowntimePorMaquina: React.FC = () => {
         return false;
     };
 
+    const tiposParada = useMemo(() => {
+        const set = new Set<string>();
+        registros.forEach(reg => {
+            const paradas = Array.isArray(reg.paradas) ? reg.paradas : [];
+            paradas.forEach((p: any) => {
+                const tipo = String(p.tipo || '').trim().toUpperCase();
+                set.add(tipo || 'SEM TIPO');
+            });
+        });
+        return Array.from(set).sort();
+    }, [registros]);
+
     const analytics = useMemo(() => {
         let totalParadas = 0;
         let totalDowntimeMin = 0;
@@ -173,12 +186,13 @@ const RelatorioDowntimePorMaquina: React.FC = () => {
 
             paradas.forEach((p: any) => {
                 if (!matchesMaquina(p)) return;
+                const tipo = (p.tipo || 'SEM TIPO').toUpperCase();
+                if (tipoParada !== 'todos' && tipo !== tipoParada) return;
 
                 const dur = parseMinutos(p.duracao || p.tempo || p.total_min || 0);
                 const mObj = maquinas.find(m => m.id === p.maquina_id);
                 const equipName = p.maquina || (mObj ? mObj.nome : (p.equipamento || 'GERAL'));
                 const motivo = (p.motivo || 'GERAL').toUpperCase();
-                const tipo = (p.tipo || 'SEM TIPO').toUpperCase();
 
                 totalParadas += 1;
                 totalDowntimeMin += dur;
@@ -264,7 +278,7 @@ const RelatorioDowntimePorMaquina: React.FC = () => {
                 return b.duracaoMin - a.duracaoMin;
             })
         };
-    }, [registros, maquinas, maquinaNome]);
+    }, [registros, maquinas, maquinaNome, tipoParada]);
 
     const formatarDataBR = (dateStr: string) => {
         if (!dateStr) return '';
@@ -276,7 +290,7 @@ const RelatorioDowntimePorMaquina: React.FC = () => {
         <div className="w-full max-w-[98%] mx-auto space-y-8 animate-in fade-in duration-500 pb-12 font-sans text-slate-100 print:text-black">
 
             {/* Header */}
-            <div className="flex flex-col xl:flex-row items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-2xl print-hide">
+            <div className="flex flex-col xl:flex-row flex-wrap items-center justify-between gap-6 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-2xl print-hide">
                 <div className="flex items-center gap-4 w-full xl:w-auto">
                     <div className="p-3 bg-amber-500 rounded-xl text-black shadow-lg shadow-amber-500/20">
                         <Settings className="w-6 h-6" />
@@ -289,7 +303,7 @@ const RelatorioDowntimePorMaquina: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
+                <div className="flex flex-wrap items-center justify-center gap-3 w-full xl:w-auto">
                     <div className="flex flex-col sm:flex-row items-center gap-3">
                         <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-xl border border-white/5 focus-within:border-amber-500/50 transition-all shadow-sm">
                             <Calendar className="w-5 h-5 text-slate-500" />
@@ -345,6 +359,15 @@ const RelatorioDowntimePorMaquina: React.FC = () => {
                         {MAQUINAS_OPCOES.map(nome => <option key={nome} value={nome} className="bg-slate-900">{nome}</option>)}
                     </select>
 
+                    <select
+                        value={tipoParada}
+                        onChange={e => setTipoParada(e.target.value)}
+                        className="bg-white/5 border border-white/10 p-2.5 rounded-xl text-[10px] font-black uppercase outline-none cursor-pointer text-white"
+                    >
+                        <option value="todos" className="bg-slate-900">Todos os Tipos</option>
+                        {tiposParada.map(tipo => <option key={tipo} value={tipo} className="bg-slate-900">{tipo}</option>)}
+                    </select>
+
                     <button
                         onClick={fetchData}
                         disabled={loading}
@@ -383,6 +406,9 @@ const RelatorioDowntimePorMaquina: React.FC = () => {
                         </p>
                         <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mt-1">
                             Máquina: {maquinaNome !== 'todos' ? maquinaNome : 'Todas as Máquinas'}
+                        </p>
+                        <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mt-1">
+                            Tipo: {tipoParada !== 'todos' ? tipoParada : 'Todos os Tipos'}
                         </p>
                     </div>
                 </header>
