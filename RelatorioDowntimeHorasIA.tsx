@@ -136,8 +136,7 @@ const RelatorioDowntimeHorasIA: React.FC = () => {
     const analytics = useMemo(() => {
         let totalManutencoes = 0;
         let totalDowntimeMin = 0;
-        let totalProduced = 0;
-        let totalNominal = 0;
+        let volumePerdidoEst = 0;
         const byMotivoCount: Record<string, number> = {};
         const byMotivoMin: Record<string, number> = {};
         const byEquipamentoMin: Record<string, number> = {};
@@ -149,9 +148,7 @@ const RelatorioDowntimeHorasIA: React.FC = () => {
         registros.forEach(reg => {
             const paradasRaw = reg.paradas;
             const paradas = Array.isArray(paradasRaw) ? paradasRaw : [];
-            totalProduced += Number(reg.quantidade_produzida) || 0;
             const nominalCap = Number(reg.capacidade_producao) || Number(reg.produtos?.capacidade_nominal) || 7200;
-            totalNominal += nominalCap;
             const capPerMin = nominalCap / 480;
             const linhaNome = reg.linhas?.nome || 'LINHA DESCONHECIDA';
 
@@ -166,6 +163,7 @@ const RelatorioDowntimeHorasIA: React.FC = () => {
 
                 totalManutencoes += 1;
                 totalDowntimeMin += dur;
+                volumePerdidoEst += dur * capPerMin;
 
                 byMotivoCount[motivo] = (byMotivoCount[motivo] || 0) + 1;
                 byMotivoMin[motivo] = (byMotivoMin[motivo] || 0) + dur;
@@ -233,9 +231,7 @@ const RelatorioDowntimeHorasIA: React.FC = () => {
             totalDowntimeHoras,
             totalDowntimeMin,
             mttr,
-            volumeLost: Math.round(totalProduced - totalNominal),
-            totalProduced,
-            somaNominal: Math.round(totalNominal),
+            volumeLost: Math.round(volumePerdidoEst),
             motivoBarData,
             equipBarData,
             linhaBarData,
