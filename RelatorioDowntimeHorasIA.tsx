@@ -197,14 +197,14 @@ const RelatorioDowntimeHorasIA: React.FC = () => {
             }))
             .sort((a, b) => b.ocorrencias - a.ocorrencias);
 
-        const equipBarData = Object.entries(byEquipamentoMin)
-            .map(([name, value]) => ({
+        const equipBarData = Object.entries(byEquipamentoCount)
+            .map(([name, count]) => ({
                 name,
-                horas: Number((value / 60).toFixed(2)),
-                minutos: value,
-                ocorrencias: byEquipamentoCount[name] || 0
+                horas: Number(((byEquipamentoMin[name] || 0) / 60).toFixed(2)),
+                minutos: byEquipamentoMin[name] || 0,
+                ocorrencias: count
             }))
-            .sort((a, b) => b.minutos - a.minutos)
+            .sort((a, b) => b.ocorrencias - a.ocorrencias)
             .slice(0, 10);
 
         const linhaBarData = Object.entries(byLinhaCount)
@@ -493,7 +493,7 @@ const RelatorioDowntimeHorasIA: React.FC = () => {
                     {/* Gráfico: Pareto de Equipamentos */}
                     <div className="border border-slate-200 rounded-3xl p-8 bg-white h-[450px] flex flex-col">
                         <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-6 flex items-center gap-2">
-                            <AlertTriangle className="w-4 h-4 text-red-600" /> Pareto de Equipamentos (Minutos)
+                            <AlertTriangle className="w-4 h-4 text-red-600" /> Pareto de Equipamentos (Chamados)
                         </h3>
                         <div className="flex-1 w-full">
                             {analytics.equipBarData.length > 0 ? (
@@ -516,9 +516,9 @@ const RelatorioDowntimeHorasIA: React.FC = () => {
                                         <RechartsTooltip
                                             cursor={{ fill: '#f8fafc' }}
                                             contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px' }}
-                                            formatter={(value: number, name: string) => [name === 'horas' ? `${value}h` : `${value} min`, name === 'horas' ? 'Horas' : 'Minutos']}
+                                            formatter={(value: number, name: string) => [name === 'ocorrencias' ? `${value}x` : `${value} min`, name === 'ocorrencias' ? 'Chamados' : 'Minutos']}
                                         />
-                                        <Bar dataKey="minutos" radius={[0, 6, 6, 0]} fill="#ef4444" barSize={20}>
+                                        <Bar dataKey="ocorrencias" radius={[0, 6, 6, 0]} fill="#ef4444" barSize={20}>
                                             {analytics.equipBarData.map((_, index) => (
                                                 <Cell key={`cell-e-${index}`} fill={index < 3 ? '#ef4444' : '#f87171'} />
                                             ))}
