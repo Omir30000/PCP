@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from './lib/supabase';
-import { sanitizeAndRender } from './lib/sanitize';
 import { Produto, Linha, RegistroProducao } from './types/database';
 import {
   AreaChart,
@@ -23,15 +22,33 @@ import {
   Package,
   Layers,
   Calculator,
-  ChevronRight,
   Zap,
   Target,
   BarChart3,
   BrainCircuit,
   Sparkles,
-  MessageSquareQuote
+  MessageSquareQuote,
+  X,
+  User,
+  Phone,
+  Send
 } from 'lucide-react';
 import { useToast } from './lib/toast';
+
+const EVO_CONFIG = {
+  baseURL: import.meta.env.VITE_EVO_BASE_URL,
+  apiKey: import.meta.env.VITE_EVO_API_KEY,
+  instance: import.meta.env.VITE_EVO_INSTANCE
+};
+
+interface Contato {
+  id: string;
+  nome: string;
+  apelido: string | null;
+  telefone: string;
+  email: string | null;
+  categoria: string;
+}
 
 const extrairNumeroLinha = (valor: string): string | null => {
   const m = String(valor || '').match(/linha\s*0*(\d+)/i);
@@ -52,6 +69,12 @@ const RelatorioBoletimAI: React.FC = () => {
   // Estados para IA
   const [insights, setInsights] = useState<string>('');
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+
+  // Estados do Modal de Envio
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [contatos, setContatos] = useState<Contato[]>([]);
+  const [selectedContact, setSelectedContact] = useState('');
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   const reportRef = useRef<HTMLDivElement>(null);
   const produtosMapRef = useRef<Record<string, any>>({});
@@ -90,6 +113,12 @@ const RelatorioBoletimAI: React.FC = () => {
 
   useEffect(() => {
     fetchRelatorioData();
+    (async () => {
+      try {
+        const { data } = await supabase.from('contatos').select('*').order('nome');
+        if (data) setContatos(data as Contato[]);
+      } catch { }
+    })();
   }, []);
 
   const handlePrint = () => {
@@ -128,6 +157,55 @@ const RelatorioBoletimAI: React.FC = () => {
       </html>
     `);
     printWindow.document.close();
+  };
+
+  const enviarBoletimWhatsApp = async () => {
+    if (!selectedContact) {
+      toast("Selecione um contato", 'error');
+      return;
+    }
+    if (!insights.trim()) {
+      toast("O boletim está vazio", 'error');
+      return;
+    }
+    setIsSendingMessage(true);
+    try {
+      const contato = contatos.find(c => c.id === selectedContact);
+      if (!contato) {
+        toast("Contato não encontrado", 'error');
+        return;
+      }
+      let number = contato.telefone.replace(/\D/g, '');
+      if (number.startsWith('0')) number = number.substring(1);
+      if (!number.startsWith('55') && (number.length === 10 || number.length === 11)) {
+        number = '55' + number;
+      }
+
+      const response = await fetch(`/api/evo/message/sendText/${EVO_CONFIG.instance}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apiKey': EVO_CONFIG.apiKey
+        },
+        body: JSON.stringify({
+          number,
+          text: insights.trim(),
+          linkPreview: false
+        })
+      });
+
+      if (!response.ok) {
+        await response.text();
+        toast(`Falha ao enviar (${response.status})`, 'error');
+        return;
+      }
+      toast(`Boletim enviado para ${contato.nome}!`, 'success');
+      setIsModalOpen(false);
+    } catch (err) {
+      toast("Erro de rede ao enviar mensagem", 'error');
+    } finally {
+      setIsSendingMessage(false);
+    }
   };
 
   const formatarDataBR = (dateStr: string) => {
@@ -459,6 +537,8 @@ REGRAS:
       const data = await response.json();
       if (data.choices && data.choices[0]) {
         setInsights(data.choices[0].message.content);
+        setSelectedContact('');
+        setIsModalOpen(true);
       } else {
         throw new Error("Resposta inválida da API");
       }
@@ -574,54 +654,6 @@ REGRAS:
             </div>
           </div>
         </header>
-
-        {/* Seção de Insights da IA (Exibida na tela e na impressão se disponível) */}
-        {(insights || isGeneratingInsights) && (
-          <div className="bg-indigo-50/50 border-2 border-indigo-100 rounded-[30px] p-8 shadow-sm print:shadow-none print:border-indigo-200 print:bg-indigo-50/20 break-inside-avoid mt-8">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg print:shadow-none">
-                <Sparkles className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-indigo-900 uppercase tracking-tighter">Nexus AI - Análise Estratégica</h3>
-                <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest leading-none mt-1">Análise de Performance e Sugestões Operacionais</p>
-              </div>
-            </div>
-
-            {isGeneratingInsights ? (
-              <div className="flex flex-col items-center justify-center py-12 space-y-4 print:hidden">
-                <div className="flex gap-2">
-                  <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                  <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                  <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce"></div>
-                </div>
-                <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.2em] animate-pulse">A IA está analisando seus dados de produção...</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="prose prose-indigo max-w-none">
-                  {insights.split('\n').filter(l => l.trim().length > 0).map((line, i) => (
-                    <p key={i} className="text-slate-700 font-medium leading-relaxed text-sm print:text-xs mb-2">
-                      {line.startsWith('-') || line.match(/^\d\./) ? (
-                        <span className="flex items-start gap-3">
-                          <ChevronRight className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
-                          <span dangerouslySetInnerHTML={sanitizeAndRender(line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>').replace(/^- /, ''))} />
-                        </span>
-                      ) : (
-                        <span dangerouslySetInnerHTML={sanitizeAndRender(line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900 font-black">$1</strong>'))} />
-                      )}
-                    </p>
-                  ))}
-                </div>
-                <div className="flex justify-end pt-4 border-t border-indigo-100 print:hidden">
-                  <p className="text-[9px] font-bold text-indigo-300 uppercase tracking-widest italic flex items-center gap-2">
-                    <ShieldCheck className="w-3 h-3" /> Análise baseada em dados reais sincronizados
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* TOTALIZAÇÃO GLOBAL DE FÁBRICA - ALICERCE */}
         <section className="space-y-6 break-inside-avoid">
@@ -868,6 +900,134 @@ REGRAS:
           </div>
         </footer>
       </div>
+
+      {/* MODAL DE BOLETIM DA IA */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-gradient-to-b from-[#1a1a1a] to-[#141414] border border-white/5 rounded-[32px] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-violet-900/10 relative">
+            {/* Header */}
+            <div className="p-5 md:p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#1a1a1a]/95 backdrop-blur-xl z-10">
+              <div className="flex items-center gap-4">
+                <div className="w-11 h-11 rounded-2xl flex items-center justify-center ring-1 bg-violet-500/20 text-violet-400 ring-violet-500/20">
+                  <BrainCircuit className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-black text-white uppercase tracking-wider">Boletim de Ocorrências</h2>
+                  <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">
+                    Gerado por IA Mistral · Nexus PCP
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-500 hover:text-white transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 md:p-6 space-y-5">
+              {/* Selecionar Contato */}
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] flex items-center gap-2">
+                  <User className="w-3 h-3 text-violet-400/70" /> Contato
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedContact}
+                    onChange={(e) => setSelectedContact(e.target.value)}
+                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-3 text-sm text-white focus:border-violet-500/50 outline-none transition-all uppercase font-bold appearance-none pl-10"
+                  >
+                    <option value="" className="bg-slate-900">Selecione um contato...</option>
+                    {contatos.map(c => (
+                      <option key={c.id} value={c.id} className="bg-slate-900">
+                        {c.nome}{c.categoria ? ` (${c.categoria})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <Phone className="w-4 h-4 text-slate-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+                {selectedContact && (
+                  <p className="text-[10px] text-violet-400/60 font-bold font-mono">
+                    → {contatos.find(c => c.id === selectedContact)?.telefone}
+                  </p>
+                )}
+              </div>
+
+              {/* Boletim */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] flex items-center gap-2">
+                    <MessageSquareQuote className="w-3 h-3 text-violet-400/70" /> Boletim
+                  </label>
+                  {!isGeneratingInsights && insights && (
+                    <button
+                      onClick={generateAIInsights}
+                      disabled={isGeneratingInsights || analytics.factoryTotals.totalUnits === 0}
+                      className="text-[9px] font-black text-violet-400 hover:text-violet-300 uppercase tracking-wider transition-colors flex items-center gap-1.5"
+                    >
+                      <Sparkles className="w-3 h-3" />
+                      Regenerar
+                    </button>
+                  )}
+                </div>
+
+                {isGeneratingInsights ? (
+                  <div className="w-full bg-black/40 border border-violet-500/20 rounded-2xl p-8 min-h-[200px] flex flex-col items-center justify-center gap-4">
+                    <div className="relative">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/10 flex items-center justify-center ring-1 ring-violet-500/30">
+                        <BrainCircuit className="w-7 h-7 text-violet-400 animate-pulse" />
+                      </div>
+                      <div className="absolute -top-1 -right-1">
+                        <div className="w-4 h-4 rounded-full bg-violet-500 flex items-center justify-center">
+                          <Sparkles className="w-2.5 h-2.5 text-white animate-pulse" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-violet-400 font-black text-xs uppercase tracking-wider">Gerando boletim com IA</p>
+                      <p className="text-slate-600 text-[9px] font-bold uppercase tracking-widest mt-1.5">Mistral AI está analisando os dados...</p>
+                    </div>
+                    <div className="flex gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-violet-500/60 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-2 h-2 rounded-full bg-violet-500/60 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-2 h-2 rounded-full bg-violet-500/60 animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                ) : (
+                  <textarea
+                    value={insights}
+                    onChange={(e) => setInsights(e.target.value)}
+                    className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-xs font-bold text-slate-200 transition-all outline-none min-h-[320px] focus:border-violet-500/50 placeholder-slate-700 resize-none leading-relaxed font-mono"
+                    placeholder="O boletim gerado pela IA será exibido aqui..."
+                  />
+                )}
+              </div>
+
+              {/* Ações */}
+              <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-white/5">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-5 py-2.5 rounded-xl bg-white/5 text-slate-400 font-bold uppercase tracking-widest text-[10px] hover:bg-white/10 hover:text-white transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={enviarBoletimWhatsApp}
+                  disabled={isSendingMessage || !selectedContact || !insights.trim()}
+                  className="px-6 py-2.5 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all flex items-center gap-2 shadow-lg bg-gradient-to-r from-violet-600 to-purple-500 text-white hover:from-violet-500 hover:to-purple-400 shadow-violet-900/30 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {isSendingMessage ? (
+                    <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Enviando...</>
+                  ) : (
+                    <><Send className="w-3.5 h-3.5" /> Enviar Boletim</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
