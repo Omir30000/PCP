@@ -998,7 +998,7 @@ REGRAS:
                   <textarea
                     value={insights}
                     onChange={(e) => setInsights(e.target.value)}
-                    className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-xs font-bold text-slate-200 transition-all outline-none min-h-[320px] focus:border-violet-500/50 placeholder-slate-700 resize-none leading-relaxed font-mono"
+                    className="w-full bg-white border border-slate-200 rounded-2xl p-4 text-xs font-bold text-slate-900 transition-all outline-none min-h-[320px] focus:border-violet-500/50 placeholder-slate-400 resize-none leading-relaxed font-mono"
                     placeholder="O boletim gerado pela IA será exibido aqui..."
                   />
                 )}
