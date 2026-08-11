@@ -234,7 +234,7 @@ const PaginaRegistro: React.FC = () => {
   };
 
   const handleSaveParada = () => {
-    if (!tempParada.tipo || !tempParada.motivo || tempParada.duracao <= 0) {
+    if (!tempParada.tipo || !tempParada.motivo || Number(tempParada.duracao) <= 0) {
       toast("Por favor, preencha todos os campos da parada corretamente (Tipo, Motivo e Horários).", 'warning');
       return;
     }
@@ -344,7 +344,7 @@ const PaginaRegistro: React.FC = () => {
       if (error) throw error;
 
       if (enviarWhatsApp) {
-        const totalParado = paradas.reduce((acc, p) => acc + (p.duracao || 0), 0);
+        const totalParado = paradas.reduce((acc, p) => acc + (Number(p.duracao) || 0), 0);
         await enviarMensagemWhatsApp(payload, totalParado);
       }
 
@@ -689,7 +689,7 @@ const PaginaRegistro: React.FC = () => {
                           <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Início</label>
                           <input
                             type="time"
-                            value={parada.hora_inicio}
+                            value={parada.hora_inicio || ''}
                             onChange={e => updateParada(index, 'hora_inicio', e.target.value)}
                             className="w-full bg-white/10 border-2 border-white/5 p-3 rounded-xl text-[11px] font-bold text-white outline-none"
                           />
@@ -698,7 +698,7 @@ const PaginaRegistro: React.FC = () => {
                           <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Fim</label>
                           <input
                             type="time"
-                            value={parada.hora_fim}
+                            value={parada.hora_fim || ''}
                             onChange={e => updateParada(index, 'hora_fim', e.target.value)}
                             className="w-full bg-white/10 border-2 border-white/5 p-3 rounded-xl text-[11px] font-bold text-white outline-none"
                           />
@@ -817,7 +817,7 @@ const PaginaRegistro: React.FC = () => {
                   </label>
                   <input
                     type="time"
-                    value={tempParada.hora_inicio}
+                    value={tempParada.hora_inicio || ''}
                     onChange={e => updateTempParadaTime('hora_inicio', e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && horaFimRef.current?.focus()}
                     className="w-full p-4 bg-white/10 border-2 border-white/5 rounded-xl text-[11px] font-black text-white outline-none focus:border-red-500 transition-all"
@@ -830,7 +830,7 @@ const PaginaRegistro: React.FC = () => {
                   <input
                     type="time"
                     ref={horaFimRef}
-                    value={tempParada.hora_fim}
+                    value={tempParada.hora_fim || ''}
                     onChange={e => updateTempParadaTime('hora_fim', e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && motivoRef.current?.focus()}
                     className="w-full p-4 bg-white/10 border-2 border-white/5 rounded-xl text-[11px] font-black text-white outline-none focus:border-red-500 transition-all"

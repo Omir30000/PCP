@@ -153,7 +153,7 @@ const EscalaProducao: React.FC = () => {
         }
       });
 
-      const suggestion = JSON.parse(response.text);
+      const suggestion = JSON.parse(response.text ?? '{}');
       setAiSuggestion(suggestion);
     } catch (err) {
       console.error("Erro na otimização:", err);

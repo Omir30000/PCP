@@ -9,8 +9,8 @@ export type Parada = {
   maquina?: string; // Nome da máquina para facilitar filtragem
   motivo: string;
   duracao: string | number; // "120min" ou número
-  hora_inicio?: string;
-  hora_fim?: string;
+  hora_inicio?: string | null;
+  hora_fim?: string | null;
 }
 
 /**
@@ -358,6 +358,42 @@ export type Database = {
             referencedColumns: ["id"];
           }
         ];
+      };
+      contatos: {
+        Row: {
+          id: string;
+          nome: string;
+          apelido: string | null;
+          telefone: string;
+          email: string | null;
+          categoria: string;
+          observacoes: string | null;
+          foto_url: string | null;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          nome: string;
+          apelido?: string | null;
+          telefone: string;
+          email?: string | null;
+          categoria?: string;
+          observacoes?: string | null;
+          foto_url?: string | null;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          nome?: string;
+          apelido?: string | null;
+          telefone?: string;
+          email?: string | null;
+          categoria?: string;
+          observacoes?: string | null;
+          foto_url?: string | null;
+          created_at?: string | null;
+        };
+        Relationships: [];
       };
       perfis: {
         Row: {

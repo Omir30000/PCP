@@ -377,11 +377,11 @@ const Produtos: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 bg-black/20 p-8 rounded-2xl border border-white/5">
                   <div className="space-y-3 text-center sm:text-left">
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Unidades p/ Pack</label>
-                    <input type="number" name="unidades_por_fardo" value={formData.unidades_por_fardo} onChange={handleInputChange} className="w-full p-5 bg-white/5 border border-white/10 rounded-xl text-center font-black text-white text-xl" required />
+                    <input type="number" name="unidades_por_fardo" value={formData.unidades_por_fardo ?? ''} onChange={handleInputChange} className="w-full p-5 bg-white/5 border border-white/10 rounded-xl text-center font-black text-white text-xl" required />
                   </div>
                   <div className="space-y-3 text-center sm:text-left">
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Packs p/ Palete</label>
-                    <input type="number" name="fardos_por_palete" value={formData.fardos_por_palete} onChange={handleInputChange} className="w-full p-5 bg-white/5 border border-white/10 rounded-xl text-center font-black text-white text-xl" required />
+                    <input type="number" name="fardos_por_palete" value={formData.fardos_por_palete ?? ''} onChange={handleInputChange} className="w-full p-5 bg-white/5 border border-white/10 rounded-xl text-center font-black text-white text-xl" required />
                   </div>
                 </div>
 
@@ -393,7 +393,7 @@ const Produtos: React.FC = () => {
                   <input
                     type="number"
                     name="capacidade_nominal"
-                    value={formData.capacidade_nominal}
+                    value={formData.capacidade_nominal ?? ''}
                     onChange={handleInputChange}
                     className="w-full p-8 bg-emerald-500/5 border-4 border-emerald-500/10 rounded-2xl text-center font-black text-emerald-500 text-5xl tracking-tighter shadow-2xl shadow-emerald-500/5 outline-none focus:border-emerald-500 transition-all"
                     required

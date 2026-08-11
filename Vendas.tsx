@@ -101,7 +101,7 @@ const Vendas: React.FC = () => {
 
   // 🧠 INTELIGÊNCIA DE INVENTÁRIO NEXUS: SOMA HISTÓRICA TOTAL
   const inventoryMetrics = useMemo(() => {
-    const metrics: Record<string, { currentStock: number, pendingDemand: number, forecast: number }> = {};
+    const metrics: Record<string, { currentStock: number, pendingDemand: number, forecast: number, unidadesPorFardo: number }> = {};
 
     produtos.forEach(prod => {
       const unidadesPorFardo = prod.unidades_por_fardo || 1;

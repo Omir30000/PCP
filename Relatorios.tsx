@@ -156,7 +156,7 @@ const Relatorios: React.FC = () => {
           totalCargaHorariaLinha += (Number(r.carga_horaria) || 0);
 
           const paradas = Array.isArray(r.paradas) ? r.paradas : [];
-          const downtimeRegMin = paradas.reduce((a, b: any) => {
+          const downtimeRegMin = paradas.reduce((a: number, b: any) => {
             const min = parseMinutos(b.duracao || b.tempo || b.total_min || 0);
             const motivo = (b.motivo || b.equipamento || 'OUTROS').toUpperCase();
             bottlenecksMap[motivo] = (bottlenecksMap[motivo] || 0) + min;

@@ -82,6 +82,7 @@ interface ParadaCompleta {
 type RegistroExpandido = RegistroProducao & {
     nome_linha?: string;
     nome_produto?: string;
+    data_exibicao?: string;
     paradas_detalhadas?: ParadaCompleta[];
 };
 

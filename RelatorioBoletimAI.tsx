@@ -33,6 +33,11 @@ import {
 } from 'lucide-react';
 import { useToast } from './lib/toast';
 
+const extrairNumeroLinha = (valor: string): string | null => {
+  const m = String(valor || '').match(/linha\s*0*(\d+)/i);
+  return m ? m[1] : null;
+};
+
 const RelatorioBoletimAI: React.FC = () => {
   const { toast } = useToast();
   const getHoje = () => new Date().toISOString().split('T')[0];
@@ -132,7 +137,12 @@ const RelatorioBoletimAI: React.FC = () => {
   };
 
   const analytics = useMemo(() => {
-    const idsLinhas = ['1', '2', '3', '4', '5'];
+    let idsLinhas = linhas
+      .map(l => extrairNumeroLinha(l.nome))
+      .filter((n): n is string => n != null)
+      .sort((a, b) => Number(a) - Number(b));
+    if (idsLinhas.length === 0) idsLinhas = ['1', '2', '3', '4', '5'];
+
     const d1 = new Date(dataInicio);
     const d2 = new Date(dataFim);
     const diffTime = Math.abs(d2.getTime() - d1.getTime());
@@ -151,9 +161,7 @@ const RelatorioBoletimAI: React.FC = () => {
 
     const linesSummary = idsLinhas.map(num => {
       const regsDaLinha = registrosFiltradosTurno.filter(r =>
-        String(r.linha_producao).includes(num) ||
-        String(r.linha_producao).toUpperCase().includes(`LINHA ${num}`) ||
-        String(r.linha_producao).toUpperCase().includes(`LINHA 0${num}`)
+        extrairNumeroLinha(r.linha_producao) === num
       );
 
       let totalQty = 0;
@@ -251,7 +259,7 @@ const RelatorioBoletimAI: React.FC = () => {
     };
 
     return { linesSummary, factoryTotals, diffDays };
-  }, [registros, dataInicio, dataFim, filtroTurno]);
+  }, [registros, dataInicio, dataFim, filtroTurno, linhas]);
 
   const generateAIInsights = async () => {
     if (analytics.factoryTotals.totalUnits === 0) {
@@ -264,59 +272,168 @@ const RelatorioBoletimAI: React.FC = () => {
 
     const MISTRAL_API_KEY = "VUM0jYdoE3DFV4txchjU70t0QiCir6sx";
 
-    // Cálculo específico por turno para comparação
-    const performanceTurnos = ['1º Turno', '2º Turno'].map(t => {
-      const regsTurno = registros.filter(r => r.turno === t);
-      const prodTurno = regsTurno.reduce((acc, r) => acc + (Number(r.quantidade_produzida) || 0), 0);
-      const capTurno = regsTurno.reduce((acc, r) => acc + (Number(r.capacidade_producao) || 0), 0);
-      return {
-        turno: t,
-        producao: prodTurno,
-        eficiencia: capTurno > 0 ? ((prodTurno / capTurno) * 100).toFixed(1) + "%" : "0%"
-      };
-    });
-
-    // Preparar dados para o prompt
-    const resumoProducao = {
-      periodo: `${formatarDataBR(dataInicio)} até ${formatarDataBR(dataFim)}`,
-      turnoVisualizado: filtroTurno,
-      totalUnidades: analytics.factoryTotals.totalUnits,
-      eficienciaMediaPlanta: analytics.factoryTotals.avgEfficiency.toFixed(1) + "%",
-      paletesTotais: analytics.factoryTotals.pallets,
-      comparativoTurnos: filtroTurno === 'GLOBAL' ? performanceTurnos : undefined,
-      linhas: analytics.linesSummary.filter(l => l.status === 'active').map(l => ({
-        nome: l.nome,
-        producao: l.producaoTotal,
-        eficiencia: l.eficiencia.toFixed(1) + "%",
-        principaisSKUs: l.skusSummary.slice(0, 3).map(s => `${s.nome} (${s.unidades} un)`)
-      }))
+    const parseMinutos = (valor: any): number => {
+      if (valor == null) return 0;
+      if (typeof valor === 'number') return valor;
+      const s = String(valor).toLowerCase().trim();
+      if (s.includes('h') && !s.includes('min')) return Math.round((parseFloat(s) || 0) * 60);
+      if (s.includes('min')) return parseInt(s, 10) || 0;
+      return parseInt(s, 10) || 0;
     };
 
-    const prompt = `Você é um consultor sênior de produção e engenharia industrial, com anos de experiência em "chão de fábrica" e foco estratégico para apoiar tomadas de decisão da diretoria e donos da empresa.
-Analise os dados de produção fornecidos e gere de 3 a 4 insights profundos, realistas e focados em ações estruturais.
+    const registrosFiltradosTurno = filtroTurno === 'GLOBAL'
+      ? registros
+      : registros.filter(r => r.turno === filtroTurno);
 
-DIRETRIZES DE SEGURANÇA E RELACIONAMENTO (CRÍTICO):
-- PROIBIDO comparar turnos entre si (ex: Nunca diga "Turno A é melhor que Turno B"). Foque estritamente nos problemas sistêmicos da fábrica, independente de quem estava rodando.
+    const linhasParaRelatorio = analytics.linesSummary
+      .filter(l => l.status === 'active')
+      .map(l => {
+        const numero = l.id;
+        const regsDaLinha = registrosFiltradosTurno.filter(r => extrairNumeroLinha(r.linha_producao) === numero);
 
-REGRAS DE LINGUAGEM E TOM:
-1. DIRETO AO PONTO: Use linguagem simples, técnica e "pé no chão" (sem enrolação corporativa). 
-2. ESTILO: Mantenha um tom profissional, sério para decisões, mas com gírias leves de quem conhece o dia a dia da operação (ex: "máquina pedindo arrego", "gargalo", "ajuste fino").
+        let metaPaletes = 0;
+        regsDaLinha.forEach(r => {
+          const prod = produtosMapRef.current[r.produto_id] || produtosMapRef.current[r.produto_volume];
+          const cap = Number(r.capacidade_producao) || 0;
+          if (!prod || cap <= 0) return;
+          const unidPorPalete = (Number(prod.unidades_por_fardo) || 12) * (Number(prod.fardos_por_palete) || 100);
+          if (unidPorPalete > 0) metaPaletes += cap / unidPorPalete;
+        });
 
-FOCO DOS INSIGHTS (DIRECIONAMENTO PARA OS DONOS DA EMPRESA):
-Seus insights devem ajudar os proprietários a decidirem onde investir ou mudar. Foque exclusivamente em:
-- DISPONIBILIDADE E ATIVOS: Se uma linha/máquina está quebrando direto ou performando muito abaixo, aponte a necessidade real de uma reforma pesada (overhaul), revisão geral ou se já passou da hora de realizar a troca/compra de um novo equipamento.
-- MÃO DE OBRA E CAPACIDADE: Analise as paradas. Se a eficiência caiu por falta de braço ou gargalo operacional, indique claramente se há necessidade extrema de contratação de operadores/auxiliares ou se falta treinamento técnico para a equipe.
-- PROCESSOS E INFRAESTRUTURA: Identifique gargalos físicos (ex: falta de insumo, problemas de setup/troca de produto demorada, restrições de utilidades).
+        const turnosMap: Record<string, { paradas: any[]; observacoes: string[] }> = {};
+        regsDaLinha.forEach(r => {
+          const nomeTurno = r.turno || 'NÃO INFORMADO';
+          if (!turnosMap[nomeTurno]) turnosMap[nomeTurno] = { paradas: [], observacoes: [] };
+          (Array.isArray(r.paradas) ? r.paradas : []).forEach((p: any) => {
+            turnosMap[nomeTurno].paradas.push({
+              equipamento: String(p.maquina || p.maquina_id || p.equipamento || 'GERAL'),
+              tipo: p.tipo || 'Não Planejada',
+              motivo: p.motivo || 'NÃO INFORMADO',
+              duracaoMin: parseMinutos(p.duracao),
+              inicio: p.hora_inicio || null,
+              fim: p.hora_fim || null
+            });
+          });
+          if (r.observacoes) turnosMap[nomeTurno].observacoes.push(String(r.observacoes));
+        });
 
-DIRETRIZES DE FORMATAÇÃO (ESTREITAS):
-- Escreva de 3 a 4 tópicos (bullet points). Cada tópico deve ser um parágrafo completo e bem fundamentado (pode usar de 3 a 4 frases por tópico para detalhar bem a causa-raiz e a recomendação).
-- Inicie cada tópico destacando a **Linha, Equipamento ou Recurso** afetado em negrito.
-- Termine a resposta com uma frase de impacto focada em eficiência e resultado, em uma linha separada.
+        const turnos = Object.entries(turnosMap).map(([nomeTurno, v]) => {
+          const porEquipamento: Record<string, any[]> = {};
+          v.paradas.forEach(p => {
+            const chave = p.equipamento.toUpperCase();
+            if (!porEquipamento[chave]) porEquipamento[chave] = [];
+            porEquipamento[chave].push(p);
+          });
+          const turnoLabel = nomeTurno === '1º Turno' ? 'Dia' : nomeTurno === '2º Turno' ? 'Noite' : nomeTurno;
+          return {
+            nome: nomeTurno,
+            rotulo: turnoLabel,
+            emoji: nomeTurno === '1º Turno' ? '🌞' : nomeTurno === '2º Turno' ? '🌙' : '🔸',
+            ocorrencias: Object.entries(porEquipamento).map(([equip, lista]) => ({
+              equipamento: equip,
+              paradas: lista
+            })),
+            observacoes: v.observacoes
+          };
+        });
 
-DADOS DA PRODUÇÃO:
-${JSON.stringify(resumoProducao, null, 2)}
+        const metaPal = Math.round(metaPaletes);
+        const realPal = Math.round(l.totalPallets);
+        const aderencia = metaPal > 0 ? Math.round((realPal / metaPal) * 100) : 0;
 
-Gere a análise estratégica para os donos agora:`;
+        return {
+          numero,
+          nome: `LINHA ${String(numero).padStart(2, '0')}`,
+          rotuloCurto: `L${numero}`,
+          metaPaletes: metaPal,
+          realPaletes: realPal,
+          aderencia,
+          atingiuMeta: aderencia >= 100,
+          produtoPrincipal: l.skusSummary[0]?.nome || null,
+          producaoGarrafas: l.producaoTotal,
+          turnos
+        };
+      });
+
+    const realGeralPaletes = linhasParaRelatorio.reduce((acc, l) => acc + l.realPaletes, 0);
+    const metaGeralPaletes = linhasParaRelatorio.reduce((acc, l) => acc + l.metaPaletes, 0);
+    const aderenciaGeral = metaGeralPaletes > 0 ? Math.round((realGeralPaletes / metaGeralPaletes) * 100) : 0;
+    const gapGeral = metaGeralPaletes - realGeralPaletes;
+
+    const ranking = [...linhasParaRelatorio]
+      .sort((a, b) => b.aderencia - a.aderencia)
+      .map((l, i) => ({
+        linha: l.rotuloCurto,
+        aderencia: l.aderencia,
+        medalha: i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : String(i + 1),
+        atingiuMeta: l.atingiuMeta
+      }));
+
+    const periodoLabel = formatarDataBR(dataInicio);
+    const linhaSep = '━━━━━━━━━━━━━━━━━━━━━━';
+
+    const prompt = `Você é um analista sênior de produção e redator de boletins industriais. Transforme os dados brutos abaixo em um BOLETIM DE OCORRÊNCIAS no formato exato solicitado.
+
+DADOS REAIS DA PRODUÇÃO (use APENAS estes dados — NÃO invente números nem ocorrências):
+Período: ${periodoLabel}${dataInicio !== dataFim ? ` até ${formatarDataBR(dataFim)}` : ''} | Turno visualizado: ${filtroTurno}
+${JSON.stringify(linhasParaRelatorio, null, 2)}
+
+RESULTADO GERAL CALCULADO (utilize estes valores):
+- Meta total: ${metaGeralPaletes} paletes
+- Real total: ${realGeralPaletes} paletes
+- Aderência ao plano: ${aderenciaGeral}%
+- Gap: ${gapGeral} paletes
+
+RANKING CALCULADO (utilize estes valores, já em ordem decrescente):
+${ranking.map(r => `${r.medalha} ${r.linha} – ${r.aderencia}%${r.atingiuMeta ? ' ✅' : ''}`).join('\n')}
+
+FORMATO DE SAÍDA (OBRIGATÓRIO — reproduza exatamente esta estrutura e estes símbolos, preenchendo com os dados reais):
+📊 PRINCIPAIS OCORRÊNCIAS PRODUÇÃO – ${periodoLabel}
+${linhaSep}
+🏭 LINHA XX | Meta: N | Real: N (N%)
+📦 Produto: <produto principal>
+🥤 Produção: N garrafas
+🌞 Turno Dia
+Sopro: <ocorrências ou "sem ocorrências.">
+Enchedora: <ocorrências ou "sem ocorrências.">
+Rotuladora: <ocorrências ou "sem ocorrências.">
+Empacotadora: <ocorrências ou "sem ocorrências.">
+Paletizadora: <ocorrências ou "sem ocorrências.">
+⚠️ Principal impacto: <frase resumindo o maior impacto na linha>
+${linhaSep}
+📈 RESULTADO GERAL – ${periodoLabel}
+🎯 Meta: N paletes
+📦 Real: N paletes
+📊 Aderência ao Plano: N%
+📉 Gap: N paletes
+${linhaSep}
+🏆 RANKING DE ADERÊNCIA
+🥇 Lx – N% ✅
+🥈 Lx – N%
+🥉 Lx – N%
+4 Lx – N%
+5 Lx – N%
+${linhaSep}
+📌 PADRÕES DO DIA
+1 <padrão 1>
+2 <padrão 2>
+3 <padrão 3>
+4 <padrão 4>
+5 <padrão 5>
+${linhaSep}
+🎯 RESUMO GERENCIAL
+<parágrafo final para a diretoria>
+
+REGRAS:
+- Escreva em português do Brasil.
+- Repita o bloco de cada linha (de "🏭 LINHA XX" até "⚠️ Principal impacto") para TODAS as linhas que tiverem produção, cada bloco separado por uma linha de ${linhaSep}.
+- Se a linha tiver mais de um turno, liste cada um com seu emoji (🌞 Turno Dia / 🌙 Turno Noite) seguido das ocorrências por equipamento.
+- Considere os equipamentos padrão (Sopro, Enchedora, Rotuladora, Empacotadora, Paletizadora) e inclua outros que aparecerem nos dados. Equipamento sem ocorrência: "<Equipamento>: sem ocorrências.".
+- Descreva cada ocorrência de forma natural e técnica com base no tipo, motivo, horário e duração dos dados, sem inventar nada.
+- Nos 📌 PADRÕES DO DIA, escreva 4 a 5 tendências/recorrências (ex.: equipamento que mais parou, recorrência de defeito, linha destaque do dia).
+- No 🎯 RESUMO GERENCIAL, escreva 4 a 6 frases objetivas para a diretoria citando as linhas e os números, SEM comparar turnos entre si (nunca diga que um turno foi melhor que outro).
+- Use ponto como separador de milhar (ex.: 47.052).
+- Não adicione seções além das descritas.`;
     try {
       const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
         method: "POST",
@@ -329,7 +446,8 @@ Gere a análise estratégica para os donos agora:`;
           messages: [
             { role: "user", content: prompt }
           ],
-          temperature: 0.7
+          temperature: 0.3,
+          max_tokens: 4000
         })
       });
 
