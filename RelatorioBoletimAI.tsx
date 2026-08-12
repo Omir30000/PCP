@@ -55,6 +55,15 @@ const extrairNumeroLinha = (valor: string): string | null => {
   return m ? m[1] : null;
 };
 
+const limparMarkdown = (texto: string): string => {
+  return String(texto || '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/__(.*?)__/g, '$1')
+    .replace(/_([^_]+)_/g, '$1')
+    .replace(/`/g, '');
+};
+
 const RelatorioBoletimAI: React.FC = () => {
   const { toast } = useToast();
   const getHoje = () => new Date().toISOString().split('T')[0];
@@ -511,6 +520,7 @@ REGRAS:
 - Nos 📌 PADRÕES DO DIA, escreva 4 a 5 tendências/recorrências (ex.: equipamento que mais parou, recorrência de defeito, linha destaque do dia).
 - No 🎯 RESUMO GERENCIAL, escreva 4 a 6 frases objetivas para a diretoria citando as linhas e os números, SEM comparar turnos entre si (nunca diga que um turno foi melhor que outro).
 - Use ponto como separador de milhar (ex.: 47.052).
+- PROIBIDO usar formatação markdown: NÃO use asteriscos (duplo ou simples), underscores nem crases. O texto será enviado via WhatsApp, que não renderiza negrito/itálico — escreva tudo em TEXTO PURO, sem símbolos de destaque.
 - Não adicione seções além das descritas.`;
     try {
       const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
@@ -536,7 +546,7 @@ REGRAS:
 
       const data = await response.json();
       if (data.choices && data.choices[0]) {
-        setInsights(data.choices[0].message.content);
+        setInsights(limparMarkdown(data.choices[0].message.content));
         setSelectedContact('');
         setIsModalOpen(true);
       } else {
