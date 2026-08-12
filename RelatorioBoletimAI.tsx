@@ -387,38 +387,41 @@ const RelatorioBoletimAI: React.FC = () => {
           if (unidPorPalete > 0) metaPaletes += cap / unidPorPalete;
         });
 
-        const turnosMap: Record<string, { paradas: any[]; observacoes: string[] }> = {};
+        const turnosMap: Record<string, {
+          equipamentos: Record<string, { totalMin: number; quantidade: number; tipos: string[]; motivos: string[] }>;
+          observacoes: string[];
+        }> = {};
         regsDaLinha.forEach(r => {
           const nomeTurno = r.turno || 'NÃO INFORMADO';
-          if (!turnosMap[nomeTurno]) turnosMap[nomeTurno] = { paradas: [], observacoes: [] };
+          if (!turnosMap[nomeTurno]) turnosMap[nomeTurno] = { equipamentos: {}, observacoes: [] };
           (Array.isArray(r.paradas) ? r.paradas : []).forEach((p: any) => {
-            turnosMap[nomeTurno].paradas.push({
-              equipamento: String(p.maquina || p.maquina_id || p.equipamento || 'GERAL'),
-              tipo: p.tipo || 'Não Planejada',
-              motivo: p.motivo || 'NÃO INFORMADO',
-              duracaoMin: parseMinutos(p.duracao),
-              inicio: p.hora_inicio || null,
-              fim: p.hora_fim || null
-            });
+            const chave = String(p.maquina || p.maquina_id || p.equipamento || 'GERAL').toUpperCase();
+            if (!turnosMap[nomeTurno].equipamentos[chave]) {
+              turnosMap[nomeTurno].equipamentos[chave] = { totalMin: 0, quantidade: 0, tipos: [], motivos: [] };
+            }
+            const slot = turnosMap[nomeTurno].equipamentos[chave];
+            slot.totalMin += parseMinutos(p.duracao);
+            slot.quantidade += 1;
+            const tipo = String(p.tipo || 'Não Planejada');
+            if (!slot.tipos.includes(tipo)) slot.tipos.push(tipo);
+            const motivo = String(p.motivo || 'NÃO INFORMADO');
+            if (!slot.motivos.includes(motivo)) slot.motivos.push(motivo);
           });
           if (r.observacoes) turnosMap[nomeTurno].observacoes.push(String(r.observacoes));
         });
 
         const turnos = Object.entries(turnosMap).map(([nomeTurno, v]) => {
-          const porEquipamento: Record<string, any[]> = {};
-          v.paradas.forEach(p => {
-            const chave = p.equipamento.toUpperCase();
-            if (!porEquipamento[chave]) porEquipamento[chave] = [];
-            porEquipamento[chave].push(p);
-          });
           const turnoLabel = nomeTurno === '1º Turno' ? 'Dia' : nomeTurno === '2º Turno' ? 'Noite' : nomeTurno;
           return {
             nome: nomeTurno,
             rotulo: turnoLabel,
             emoji: nomeTurno === '1º Turno' ? '🌞' : nomeTurno === '2º Turno' ? '🌙' : '🔸',
-            ocorrencias: Object.entries(porEquipamento).map(([equip, lista]) => ({
+            ocorrencias: Object.entries(v.equipamentos).map(([equip, dados]) => ({
               equipamento: equip,
-              paradas: lista
+              totalMin: dados.totalMin,
+              quantidade: dados.quantidade,
+              tipos: dados.tipos,
+              motivos: dados.motivos
             })),
             observacoes: v.observacoes
           };
@@ -516,7 +519,7 @@ REGRAS:
 - Repita o bloco de cada linha (de "🏭 LINHA XX" até "⚠️ Principal impacto") para TODAS as linhas que tiverem produção, cada bloco separado por uma linha de ${linhaSep}.
 - Se a linha tiver mais de um turno, liste cada um com seu emoji (🌞 Turno Dia / 🌙 Turno Noite) seguido das ocorrências por equipamento.
 - Considere os equipamentos padrão (Sopro, Enchedora, Rotuladora, Empacotadora, Paletizadora) e inclua outros que aparecerem nos dados. Equipamento sem ocorrência: "<Equipamento>: sem ocorrências.".
-- Descreva cada ocorrência de forma natural e técnica com base no tipo, motivo, horário e duração dos dados, sem inventar nada.
+- Descreva cada ocorrência de forma natural e técnica com base no tipo, motivo e duração dos dados, sem inventar nada. PROIBIDO listar os horários de início/fim de cada parada (ex.: "07:20-07:30"). Informe apenas o TEMPO TOTAL parado por equipamento (ex.: "Empacotadora: 113 min de paradas por falhas de selagem").
 - Nos 📌 PADRÕES DO DIA, escreva 4 a 5 tendências/recorrências (ex.: equipamento que mais parou, recorrência de defeito, linha destaque do dia).
 - No 🎯 RESUMO GERENCIAL, escreva 4 a 6 frases objetivas para a diretoria citando as linhas e os números, SEM comparar turnos entre si (nunca diga que um turno foi melhor que outro).
 - Use ponto como separador de milhar (ex.: 47.052).
