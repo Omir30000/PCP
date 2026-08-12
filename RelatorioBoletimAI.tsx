@@ -378,14 +378,7 @@ const RelatorioBoletimAI: React.FC = () => {
         const numero = l.id;
         const regsDaLinha = registrosFiltradosTurno.filter(r => extrairNumeroLinha(r.linha_producao) === numero);
 
-        let metaPaletes = 0;
-        regsDaLinha.forEach(r => {
-          const prod = produtosMapRef.current[r.produto_id] || produtosMapRef.current[r.produto_volume];
-          const cap = Number(r.capacidade_producao) || 0;
-          if (!prod || cap <= 0) return;
-          const unidPorPalete = (Number(prod.unidades_por_fardo) || 12) * (Number(prod.fardos_por_palete) || 100);
-          if (unidPorPalete > 0) metaPaletes += cap / unidPorPalete;
-        });
+        const metaUnidades = Math.round(l.capNominal);
 
         const turnosMap: Record<string, {
           equipamentos: Record<string, { totalMin: number; quantidade: number; tipos: string[]; motivos: string[] }>;
@@ -427,16 +420,15 @@ const RelatorioBoletimAI: React.FC = () => {
           };
         });
 
-        const metaPal = Math.round(metaPaletes);
-        const realPal = Math.round(l.totalPallets);
-        const aderencia = metaPal > 0 ? Math.round((realPal / metaPal) * 100) : 0;
+        const realUnidades = Math.round(l.producaoTotal);
+        const aderencia = metaUnidades > 0 ? Math.round((realUnidades / metaUnidades) * 100) : 0;
 
         return {
           numero,
           nome: `LINHA ${String(numero).padStart(2, '0')}`,
           rotuloCurto: `L${numero}`,
-          metaPaletes: metaPal,
-          realPaletes: realPal,
+          metaUnidades,
+          realUnidades,
           aderencia,
           atingiuMeta: aderencia >= 100,
           produtoPrincipal: l.skusSummary[0]?.nome || null,
@@ -445,10 +437,10 @@ const RelatorioBoletimAI: React.FC = () => {
         };
       });
 
-    const realGeralPaletes = linhasParaRelatorio.reduce((acc, l) => acc + l.realPaletes, 0);
-    const metaGeralPaletes = linhasParaRelatorio.reduce((acc, l) => acc + l.metaPaletes, 0);
-    const aderenciaGeral = metaGeralPaletes > 0 ? Math.round((realGeralPaletes / metaGeralPaletes) * 100) : 0;
-    const gapGeral = metaGeralPaletes - realGeralPaletes;
+    const realGeralUnidades = linhasParaRelatorio.reduce((acc, l) => acc + l.realUnidades, 0);
+    const metaGeralUnidades = linhasParaRelatorio.reduce((acc, l) => acc + l.metaUnidades, 0);
+    const aderenciaGeral = metaGeralUnidades > 0 ? Math.round((realGeralUnidades / metaGeralUnidades) * 100) : 0;
+    const gapGeral = metaGeralUnidades - realGeralUnidades;
 
     const ranking = [...linhasParaRelatorio]
       .sort((a, b) => b.aderencia - a.aderencia)
@@ -469,10 +461,10 @@ Período: ${periodoLabel}${dataInicio !== dataFim ? ` até ${formatarDataBR(data
 ${JSON.stringify(linhasParaRelatorio, null, 2)}
 
 RESULTADO GERAL CALCULADO (utilize estes valores):
-- Meta total: ${metaGeralPaletes} paletes
-- Real total: ${realGeralPaletes} paletes
+- Meta total: ${metaGeralUnidades} unidades
+- Real total: ${realGeralUnidades} unidades
 - Aderência ao plano: ${aderenciaGeral}%
-- Gap: ${gapGeral} paletes
+- Gap: ${gapGeral} unidades
 
 RANKING CALCULADO (utilize estes valores, já em ordem decrescente):
 ${ranking.map(r => `${r.medalha} ${r.linha} – ${r.aderencia}%${r.atingiuMeta ? ' ✅' : ''}`).join('\n')}
@@ -482,7 +474,7 @@ FORMATO DE SAÍDA (OBRIGATÓRIO — reproduza exatamente esta estrutura e estes 
 ${linhaSep}
 🏭 LINHA XX | Meta: N | Real: N (N%)
 📦 Produto: <produto principal>
-🥤 Produção: N garrafas
+🥤 Produção: N unidades
 🌞 Turno Dia
 Sopro: <ocorrências ou "sem ocorrências.">
 Enchedora: <ocorrências ou "sem ocorrências.">
@@ -492,17 +484,13 @@ Paletizadora: <ocorrências ou "sem ocorrências.">
 ⚠️ Principal impacto: <frase resumindo o maior impacto na linha>
 ${linhaSep}
 📈 RESULTADO GERAL – ${periodoLabel}
-🎯 Meta: N paletes
-📦 Real: N paletes
+🎯 Meta: N unidades
+📦 Real: N unidades
 📊 Aderência ao Plano: N%
-📉 Gap: N paletes
+📉 Gap: N unidades
 ${linhaSep}
 🏆 RANKING DE ADERÊNCIA
-🥇 Lx – N% ✅
-🥈 Lx – N%
-🥉 Lx – N%
-4 Lx – N%
-5 Lx – N%
+${ranking.map(r => `${r.medalha} ${r.linha} – ${r.aderencia}%${r.atingiuMeta ? ' ✅' : ''}`).join('\n')}
 ${linhaSep}
 📌 PADRÕES DO DIA
 1 <padrão 1>
@@ -523,6 +511,8 @@ REGRAS:
 - Nos 📌 PADRÕES DO DIA, escreva 4 a 5 tendências/recorrências (ex.: equipamento que mais parou, recorrência de defeito, linha destaque do dia).
 - No 🎯 RESUMO GERENCIAL, escreva 4 a 6 frases objetivas para a diretoria citando as linhas e os números, SEM comparar turnos entre si (nunca diga que um turno foi melhor que outro).
 - Use ponto como separador de milhar (ex.: 47.052).
+- Todas as metas, reais e gaps (por linha e geral) estão em UNIDADES (unidades produzidas), NUNCA em paletes. Não mencione paletes em nenhuma parte do boletim.
+- No 🏆 RANKING DE ADERÊNCIA, liste APENAS as linhas presentes no bloco "RANKING CALCULADO", na mesma ordem e quantidade, SEM repetir nenhuma linha.
 - PROIBIDO usar formatação markdown: NÃO use asteriscos (duplo ou simples), underscores nem crases. O texto será enviado via WhatsApp, que não renderiza negrito/itálico — escreva tudo em TEXTO PURO, sem símbolos de destaque.
 - Não adicione seções além das descritas.`;
     try {
