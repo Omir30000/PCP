@@ -26,13 +26,7 @@ import {
 } from 'lucide-react';
 import { RegistroProducao, Linha, Produto } from './types/database';
 import { useToast } from './lib/toast';
-
-const EVO_CONFIG = {
-    baseURL: import.meta.env.VITE_EVO_BASE_URL,
-    apiKey: import.meta.env.VITE_EVO_API_KEY,
-    instance: import.meta.env.VITE_EVO_INSTANCE,
-    destination: import.meta.env.VITE_EVO_DESTINATION
-};
+import { sendWhatsAppMessage } from './lib/whatsapp';
 
 const MISTRAL_API_KEY = "VUM0jYdoE3DFV4txchjU70t0QiCir6sx";
 
@@ -597,30 +591,12 @@ Escreva como um gestor de produção apresentando um briefing gerencial para a d
                 toast("Contato não encontrado", 'error');
                 return;
             }
-            let number = contato.telefone.replace(/\D/g, '');
-            if (number.startsWith('0')) number = number.substring(1);
-            if (!number.startsWith('55') && (number.length === 10 || number.length === 11)) {
-                number = '55' + number;
-            }
 
-            const response = await fetch(`/api/evo/message/sendText/${EVO_CONFIG.instance}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apiKey': EVO_CONFIG.apiKey
-                },
-                body: JSON.stringify({
-                    number,
-                    text: messageText.trim(),
-                    linkPreview: false
-                })
+            await sendWhatsAppMessage({
+                number: contato.telefone,
+                message: messageText.trim()
             });
 
-            if (!response.ok) {
-                const erroTexto = await response.text();
-                toast(`Falha ao enviar (${response.status})`, 'error');
-                return;
-            }
             toast(`Mensagem enviada para ${contato.nome}!`, 'success');
             setIsSendModalOpen(false);
         } catch (err) {

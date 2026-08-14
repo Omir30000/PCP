@@ -26,13 +26,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { useToast } from './lib/toast';
-
-const EVO_CONFIG = {
-  baseURL: import.meta.env.VITE_EVO_BASE_URL,
-  apiKey: import.meta.env.VITE_EVO_API_KEY,
-  instance: import.meta.env.VITE_EVO_INSTANCE,
-  destination: import.meta.env.VITE_EVO_DESTINATION
-};
+import { sendWhatsAppMessage } from './lib/whatsapp';
 
 const MOTIVOS_COMUNS: Record<string, string[]> = {
   'FALHA DE ENERGIA': ['PICO DE TENSÃO', 'QUEDA GERAL', 'ACIONAMENTO DE GERADOR'],
@@ -274,24 +268,10 @@ const PaginaRegistro: React.FC = () => {
 ⏱️ *Tempo Total Parado:* ${totalParado}min
 📝 *Observações:* ${dados.observacoes || 'Nenhuma'}`;
 
-      const response = await fetch(`/api/evo/message/sendText/${EVO_CONFIG.instance}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apiKey': EVO_CONFIG.apiKey
-        },
-        body: JSON.stringify({
-          number: EVO_CONFIG.destination,
-          text: mensagem,
-          linkPreview: false
-        })
+      await sendWhatsAppMessage({
+        number: import.meta.env.VITE_EVO_DESTINATION,
+        message: mensagem
       });
-
-      if (!response.ok) {
-        const erroTexto = await response.text();
-        console.error("Evolution API Error:", response.status, erroTexto);
-        toast(`WhatsApp falhou (${response.status}). Verifique console.`, 'error');
-      }
     } catch (err) {
       console.error("Erro ao enviar WhatsApp:", err);
       toast("Erro de rede ao enviar WhatsApp.", 'error');

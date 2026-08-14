@@ -20,6 +20,7 @@ import {
   Target
 } from 'lucide-react';
 import { useToast } from './lib/toast';
+import { sendWhatsAppMessage } from './lib/whatsapp';
 
 const RelatorioBoletimPro: React.FC = () => {
   const { toast } = useToast();
@@ -153,9 +154,6 @@ const RelatorioBoletimPro: React.FC = () => {
 
     setIsSending(true);
     try {
-      const API_KEY = import.meta.env.VITE_EVO_API_KEY;
-      const INSTANCE_NAME = import.meta.env.VITE_EVO_INSTANCE;
-
       let number = contato.telefone.replace(/\D/g, '');
       if (number.startsWith('0')) number = number.substring(1);
       if (!number.startsWith('55') && (number.length === 10 || number.length === 11)) {
@@ -179,11 +177,7 @@ const RelatorioBoletimPro: React.FC = () => {
       const analises = partes.slice(1).map(p => '*📍' + p);
 
       const sendWithDelay = async (text: string) => {
-        await fetch(`/api/evo/message/sendText/${INSTANCE_NAME}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apiKey': API_KEY.trim() },
-          body: JSON.stringify({ number: number, text: text.trim() })
-        });
+        await sendWhatsAppMessage({ number, message: text.trim() });
         await new Promise(resolve => setTimeout(resolve, 1200));
       };
 
