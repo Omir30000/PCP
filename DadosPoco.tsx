@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import { supabase } from './lib/supabase';
 import {
   AreaChart,
@@ -27,7 +28,12 @@ import {
   Database,
   ArrowDown,
   ArrowUp,
-  Droplet
+  Droplet,
+  Upload,
+  FileSpreadsheet,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle
 } from 'lucide-react';
 
 interface RegistroPoco {
@@ -53,6 +59,9 @@ const DadosPoco: React.FC = () => {
   const [dataFim, setDataFim] = useState(getHoje());
   const [loading, setLoading] = useState(false);
   const [registros, setRegistros] = useState<RegistroPoco[]>([]);
+  const [importando, setImportando] = useState(false);
+  const [statusImport, setStatusImport] = useState<{ tipo: 'sucesso' | 'erro' | 'info' | null; mensagem: string }>({ tipo: null, mensagem: '' });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const reportRef = useRef<HTMLDivElement>(null);
 
@@ -79,6 +88,142 @@ const DadosPoco: React.FC = () => {
   useEffect(() => {
     fetchDadosPoco();
   }, []);
+
+  const limparHeader = (h: string) =>
+    h.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase().trim();
+
+  const parseNumero = (v: any): number | null => {
+    if (v === null || v === undefined || v === '') return null;
+    if (typeof v === 'number') return isFinite(v) ? v : null;
+    const s = String(v).trim().replace(/\./g, '').replace(',', '.');
+    const n = parseFloat(s);
+    return isFinite(n) ? n : null;
+  };
+
+  const parseData = (v: any): string | null => {
+    if (v === null || v === undefined || v === '') return null;
+    if (typeof v === 'number') {
+      if (v < 1) return null;
+      const utc = Math.round((v - 25569) * 86400);
+      const d = new Date(utc * 1000);
+      return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+    }
+    const s = String(v).trim();
+    let m = s.match(/^(\d{4})[\-/.](\d{1,2})[\-/.](\d{1,2})/);
+    if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+    m = s.match(/^(\d{1,2})[\-/.](\d{1,2})[\-/.](\d{4})/);
+    if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+    return null;
+  };
+
+  const parseHora = (v: any): string | null => {
+    if (v === null || v === undefined || v === '') return null;
+    if (typeof v === 'number') {
+      const totalSec = Math.round(v * 86400);
+      const h = Math.floor(totalSec / 3600) % 24;
+      const mi = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      return `${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+    const s = String(v).trim().replace(/[hH]/g, ':').replace(/[mMsS]/g, '');
+    const m = s.match(/(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/);
+    if (m) return `${m[1].padStart(2, '0')}:${m[2].padStart(2, '0')}:${(m[3] || '00').padStart(2, '0')}`;
+    return null;
+  };
+
+  const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    setImportando(true);
+    setStatusImport({ tipo: 'info', mensagem: 'Lendo arquivo Excel...' });
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const wb = XLSX.read(reader.result as ArrayBuffer, { type: 'array' });
+        const sheetName = wb.SheetNames[0];
+        const sheet = wb.Sheets[sheetName];
+        const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true });
+
+        if (!rows[0]) throw new Error('Planilha vazia ou sem cabeçalho.');
+
+        const heads = rows[0].map((h: any) => limparHeader(String(h ?? '')));
+
+        const col = (nome: string) => {
+          const i = heads.findIndex(h => h.includes(nome));
+          return i >= 0 ? i : null;
+        };
+
+        const cDate = col('date');
+        const cTime = col('time');
+        const cCond = col('condut');
+        const cNivD = col('dinamico');
+        const cNivE = col('estatico');
+        const cPh = col('ph');
+        const cTemp = col('temperatura');
+        const cVazao = col('vazao');
+        const cVol = col('acumulado');
+
+        if (cDate === null || cTime === null) throw new Error('Colunas DATE ou TIME não encontradas na planilha.');
+
+        const registrosNovos: Omit<RegistroPoco, 'id'>[] = [];
+        let ignorados = 0;
+
+        for (let i = 1; i < rows.length; i++) {
+          const r = rows[i];
+          if (!r || r.length === 0) continue;
+          const data = parseData(cDate !== null ? r[cDate] : null);
+          const hora = parseHora(cTime !== null ? r[cTime] : null);
+          if (!data || !hora) {
+            ignorados++;
+            continue;
+          }
+          registrosNovos.push({
+            data_registro: data,
+            hora_registro: hora,
+            condutividade_us_cm: cCond !== null ? parseNumero(r[cCond]) : null,
+            nivel_dinamico_m: cNivD !== null ? parseNumero(r[cNivD]) : null,
+            nivel_estatico_m: cNivE !== null ? parseNumero(r[cNivE]) : null,
+            ph: cPh !== null ? parseNumero(r[cPh]) : null,
+            temperatura_c: cTemp !== null ? parseNumero(r[cTemp]) : null,
+            vazao_instantanea: cVazao !== null ? parseNumero(r[cVazao]) : null,
+            volume_acumulado: cVol !== null ? parseNumero(r[cVol]) : null
+          });
+        }
+
+        if (registrosNovos.length === 0) throw new Error('Nenhum registro válido encontrado na planilha.');
+
+        setStatusImport({ tipo: 'info', mensagem: `Enviando ${registrosNovos.length} registros para o banco...` });
+
+        const BATCH = 500;
+        let enviados = 0;
+        for (let i = 0; i < registrosNovos.length; i += BATCH) {
+          const lote = registrosNovos.slice(i, i + BATCH);
+          const { error } = await supabase.from('dados_poco').upsert(lote as any, { onConflict: 'data_registro,hora_registro' });
+          if (error) throw new Error(error.message);
+          enviados += lote.length;
+        }
+
+        setStatusImport({
+          tipo: 'sucesso',
+          mensagem: `${enviados} registros importados do arquivo.${ignorados > 0 ? ` ${ignorados} linhas ignoradas (data/hora inválidos).` : ''}`
+        });
+        fetchDadosPoco();
+      } catch (err: any) {
+        console.error('Erro na importação:', err);
+        setStatusImport({ tipo: 'erro', mensagem: err?.message || 'Falha na importação do arquivo.' });
+      } finally {
+        setImportando(false);
+      }
+    };
+    reader.onerror = () => {
+      setImportando(false);
+      setStatusImport({ tipo: 'erro', mensagem: 'Falha ao ler o arquivo.' });
+    };
+    reader.readAsArrayBuffer(file);
+  };
 
   const handlePrint = () => {
     if (!reportRef.current) return;
@@ -300,8 +445,29 @@ const DadosPoco: React.FC = () => {
             <Printer className="w-4 h-4" />
             Imprimir
           </button>
+
+          <button onClick={() => fileInputRef.current?.click()} disabled={importando}
+            className="px-6 py-3 bg-sky-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-sky-700 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed">
+            {importando ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />}
+            {importando ? 'Importando...' : 'Importar Excel'}
+          </button>
+
+          <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={handleFileImport} className="hidden" />
         </div>
       </div>
+
+      {statusImport.tipo && (
+        <div className={`flex items-start gap-3 px-5 py-4 rounded-2xl border-2 shadow-lg print:hidden ${
+          statusImport.tipo === 'sucesso' ? 'bg-emerald-50 border-emerald-500/40 text-emerald-800' :
+          statusImport.tipo === 'erro' ? 'bg-red-50 border-red-500/40 text-red-800' :
+          'bg-sky-50 border-sky-500/40 text-sky-800'
+        }`}>
+          {statusImport.tipo === 'sucesso' ? <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" /> :
+            statusImport.tipo === 'erro' ? <XCircle className="w-5 h-5 shrink-0 mt-0.5" /> :
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />}
+          <p className="text-xs font-black uppercase tracking-widest leading-relaxed">{statusImport.mensagem}</p>
+        </div>
+      )}
 
       <div ref={reportRef} className="bg-white p-0 space-y-8 print:p-0">
 

@@ -27,6 +27,10 @@ DROP POLICY IF EXISTS "Acesso Total Dados Poco" ON dados_poco;
 CREATE POLICY "Acesso Total Dados Poco" ON dados_poco
   FOR ALL USING (true) WITH CHECK (true);
 
+-- Permissões para a aplicação (chave anon/publishable)
+GRANT SELECT, INSERT, UPDATE, DELETE ON dados_poco TO anon, authenticated;
+GRANT USAGE, SELECT ON SEQUENCE dados_poco_id_seq TO anon, authenticated;
+
 -- Índices para consultas por período
 CREATE INDEX IF NOT EXISTS idx_dados_poco_data ON dados_poco (data_registro);
 CREATE INDEX IF NOT EXISTS idx_dados_poco_data_hora ON dados_poco (data_registro, hora_registro);
