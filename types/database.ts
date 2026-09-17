@@ -466,6 +466,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      dados_poco: {
+        Row: {
+          id: number;
+          data_registro: string;
+          hora_registro: string;
+          condutividade_us_cm: number | null;
+          nivel_dinamico_m: number | null;
+          nivel_estatico_m: number | null;
+          ph: number | null;
+          temperatura_c: number | null;
+          vazao_instantanea: number | null;
+          volume_acumulado: number | null;
+          criado_em: string | null;
+        };
+        Insert: {
+          id?: number;
+          data_registro: string;
+          hora_registro: string;
+          condutividade_us_cm?: number | null;
+          nivel_dinamico_m?: number | null;
+          nivel_estatico_m?: number | null;
+          ph?: number | null;
+          temperatura_c?: number | null;
+          vazao_instantanea?: number | null;
+          volume_acumulado?: number | null;
+          criado_em?: string | null;
+        };
+        Update: {
+          id?: number;
+          data_registro?: string;
+          hora_registro?: string;
+          condutividade_us_cm?: number | null;
+          nivel_dinamico_m?: number | null;
+          nivel_estatico_m?: number | null;
+          ph?: number | null;
+          temperatura_c?: number | null;
+          vazao_instantanea?: number | null;
+          volume_acumulado?: number | null;
+          criado_em?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
