@@ -23,6 +23,7 @@ import RelatoriosDowntimeHoras from './RelatoriosDowntimeHoras';
 import RelatorioDowntimeTecnico from './RelatorioDowntimeTecnico';
 import RelatorioBoletimPro from './RelatorioBoletimPro';
 import RelatorioConsumoAgua from './RelatorioConsumoAgua';
+import RelatorioConsumoAguaSKU from './RelatorioConsumoAguaSKU';
 import RelatorioTop5Equipamentos from './RelatorioTop5Equipamentos';
 import RelatorioDowntimePorMaquina from './RelatorioDowntimePorMaquina';
 import Auth from './Auth';
@@ -65,7 +66,8 @@ import {
   Gauge,
   BarChart3,
   Send,
-  Droplets
+  Droplets,
+  Boxes
 } from 'lucide-react';
 
 type Tab =
@@ -88,6 +90,7 @@ type Tab =
   | 'relatorio_boletim_ai'
   | 'relatorio_boletim_pro'
   | 'relatorio_consumo_agua'
+  | 'relatorio_consumo_agua_sku'
   | 'analitica_downtime_ai'
   | 'downtime_horas_ia'
   | 'top5_equipamentos'
@@ -158,13 +161,13 @@ const App: React.FC = () => {
        'analise_disponibilidade', 'relatorios', 'relatorio_boletim', 'top5_equipamentos',
        'relatorios_downtime', 'relatorios_downtime_horas', 'relatorio_downtime_tecnico',
        'analise_gargalos', 'relatorio_boletim_pro', 'relatorio_boletim_ai',
-       'relatorio_consumo_agua',
+       'relatorio_consumo_agua', 'relatorio_consumo_agua_sku',
        'analitica_downtime_ai', 'downtime_horas_ia', 'relatorio_downtime_maquina'].forEach(t => perms.add(t));
     } else if (role === 'lider') {
       ['analise_disponibilidade', 'relatorios', 'relatorio_boletim', 'top5_equipamentos',
        'relatorios_downtime', 'relatorios_downtime_horas', 'relatorio_downtime_tecnico',
        'analise_gargalos', 'relatorio_boletim_pro', 'relatorio_boletim_ai',
-       'relatorio_consumo_agua',
+       'relatorio_consumo_agua', 'relatorio_consumo_agua_sku',
        'analitica_downtime_ai', 'downtime_horas_ia', 'relatorio_downtime_maquina'].forEach(t => perms.add(t));
     } else if (role === 'vendas') {
       perms.delete('registro');
@@ -403,7 +406,7 @@ const App: React.FC = () => {
             </>
           )}
 
-          {(screenPermissions.has('relatorio_boletim_pro') || screenPermissions.has('relatorio_boletim_ai') || screenPermissions.has('downtime_horas_ia') || screenPermissions.has('relatorio_consumo_agua')) && (
+          {(screenPermissions.has('relatorio_boletim_pro') || screenPermissions.has('relatorio_boletim_ai') || screenPermissions.has('downtime_horas_ia') || screenPermissions.has('relatorio_consumo_agua') || screenPermissions.has('relatorio_consumo_agua_sku')) && (
             <>
               {isSidebarExpanded && (
                 <button
@@ -422,6 +425,7 @@ const App: React.FC = () => {
               <div className={`space-y-0.5 transition-all duration-500 overflow-hidden ${isAIReportsOpen || !isSidebarExpanded ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'}`}>
                 {screenPermissions.has('relatorio_boletim_pro') && <NavItem id="relatorio_boletim_pro" icon={Sparkles} label="Boletim Pro" isSubItem={isSidebarExpanded} />}
                 {screenPermissions.has('relatorio_consumo_agua') && <NavItem id="relatorio_consumo_agua" icon={Droplets} label="Consumo de Água" isSubItem={isSidebarExpanded} />}
+                {screenPermissions.has('relatorio_consumo_agua_sku') && <NavItem id="relatorio_consumo_agua_sku" icon={Boxes} label="Água por SKU" isSubItem={isSidebarExpanded} />}
                 {screenPermissions.has('relatorio_boletim_ai') && <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" isSubItem={isSidebarExpanded} />}
                 {screenPermissions.has('analitica_downtime_ai') && <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" isSubItem={isSidebarExpanded} />}
                 {screenPermissions.has('downtime_horas_ia') && <NavItem id="downtime_horas_ia" icon={Clock} label="Downtime Horas IA" isSubItem={isSidebarExpanded} />}
@@ -523,6 +527,7 @@ const App: React.FC = () => {
           {activeTab === 'relatorio_boletim' && <RelatorioBoletim />}
           {activeTab === 'relatorio_boletim_pro' && <RelatorioBoletimPro />}
           {activeTab === 'relatorio_consumo_agua' && <RelatorioConsumoAgua />}
+          {activeTab === 'relatorio_consumo_agua_sku' && <RelatorioConsumoAguaSKU />}
           {activeTab === 'relatorio_boletim_ai' && <RelatorioBoletimAI />}
           {activeTab === 'analitica_downtime_ai' && <RelatorioAnaliticaDowntimeAI />}
           {activeTab === 'downtime_horas_ia' && <RelatorioDowntimeHorasIA />}
@@ -632,6 +637,7 @@ const App: React.FC = () => {
                   <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] px-4 mb-2">Relatórios com IA</p>
                   {screenPermissions.has('relatorio_boletim_pro') && <NavItem id="relatorio_boletim_pro" icon={Sparkles} label="Boletim Pro" onClick={() => setIsMobileMenuOpen(false)} />}
                   {screenPermissions.has('relatorio_consumo_agua') && <NavItem id="relatorio_consumo_agua" icon={Droplets} label="Consumo de Água" onClick={() => setIsMobileMenuOpen(false)} />}
+                  {screenPermissions.has('relatorio_consumo_agua_sku') && <NavItem id="relatorio_consumo_agua_sku" icon={Boxes} label="Água por SKU" onClick={() => setIsMobileMenuOpen(false)} />}
                   {screenPermissions.has('relatorio_boletim_ai') && <NavItem id="relatorio_boletim_ai" icon={BrainCircuit} label="Boletim com IA" onClick={() => setIsMobileMenuOpen(false)} />}
                   {screenPermissions.has('analitica_downtime_ai') && <NavItem id="analitica_downtime_ai" icon={Timer} label="Analítica Downtime (AI)" onClick={() => setIsMobileMenuOpen(false)} />}
                   {screenPermissions.has('downtime_horas_ia') && <NavItem id="downtime_horas_ia" icon={Clock} label="Downtime Horas IA" onClick={() => setIsMobileMenuOpen(false)} />}
