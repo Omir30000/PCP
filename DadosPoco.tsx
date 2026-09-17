@@ -68,16 +68,32 @@ const DadosPoco: React.FC = () => {
   const fetchDadosPoco = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('dados_poco')
-        .select('*')
-        .gte('data_registro', dataInicio)
-        .lte('data_registro', dataFim)
-        .order('data_registro', { ascending: true })
-        .order('hora_registro', { ascending: true });
+      const todos: RegistroPoco[] = [];
+      const PAGE = 1000;
+      let from = 0;
+      let temMais = true;
 
-      if (error) throw error;
-      setRegistros(data || []);
+      while (temMais) {
+        const { data, error } = await supabase
+          .from('dados_poco')
+          .select('*')
+          .gte('data_registro', dataInicio)
+          .lte('data_registro', dataFim)
+          .order('data_registro', { ascending: true })
+          .order('hora_registro', { ascending: true })
+          .range(from, from + PAGE - 1);
+
+        if (error) throw error;
+        const lote = data || [];
+        todos.push(...lote);
+        if (lote.length < PAGE) {
+          temMais = false;
+        } else {
+          from += PAGE;
+        }
+      }
+
+      setRegistros(todos);
     } catch (err: any) {
       console.error("Erro ao buscar dados do poço:", err);
     } finally {
