@@ -345,7 +345,7 @@ const DadosPoco: React.FC = () => {
               <div className="absolute -top-4 -right-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl" />
               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-2">Volume Extraído</p>
               <h4 className="text-3xl font-black leading-none">{formatarNumero(analytics.volumeExtracao, 1)}</h4>
-              <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mt-1">m³ no período</p>
+              <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mt-1">{formatarNumero(analytics.volumeExtracao, 1)} m³ · {formatarNumero(analytics.volumeExtracao * 1000, 0)} L no período</p>
             </div>
             <div className="bg-white border-2 border-slate-100 p-6 rounded-[28px] shadow-sm">
               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-2">Condutividade Média</p>
@@ -379,7 +379,7 @@ const DadosPoco: React.FC = () => {
             </div>
             <div className="bg-slate-50 border-2 border-transparent p-5 rounded-[28px]">
               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Volume Acumulado Final</p>
-              <h5 className="text-2xl font-black text-emerald-600">{formatarNumero(analytics.volumeFinal, 1)} <span className="text-xs font-bold text-slate-400">m³</span></h5>
+              <h5 className="text-2xl font-black text-emerald-600">{formatarNumero(analytics.volumeFinal, 1)} <span className="text-xs font-bold text-slate-400">m³</span> <span className="text-sm font-bold text-slate-500">· {formatarNumero(analytics.volumeFinal * 1000, 0)} L</span></h5>
             </div>
           </div>
         </section>
@@ -482,7 +482,7 @@ const DadosPoco: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                   <XAxis dataKey="data" axisLine={false} tickLine={false} tick={{ fontSize: 8, fontWeight: 900, fill: '#94a3b8' }} interval={'preserveStartEnd'} />
                   <YAxis hide={true} />
-                  <RechartsTooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '9px', fontWeight: 900, color: '#fff' }} />
+                  <RechartsTooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '9px', fontWeight: 900, color: '#fff' }} formatter={(value: any, name: any) => name === 'volume' ? [`${formatarNumero(Number(value), 1)} m³ · ${formatarNumero(Number(value) * 1000, 0)} L`, 'Volume'] : [formatarNumero(Number(value), 1), name]} />
                   <Area type="monotone" dataKey="volume" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorVol)" name="Volume (m³)" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -511,7 +511,7 @@ const DadosPoco: React.FC = () => {
                     <th className="px-3 py-3 text-right font-black">pH</th>
                     <th className="px-3 py-3 text-right font-black">Temp °C</th>
                     <th className="px-3 py-3 text-right font-black">Vazão</th>
-                    <th className="px-3 py-3 text-right font-black">Vol. Extraído (m³)</th>
+                    <th className="px-3 py-3 text-right font-black">Vol. Extraído (m³ · L)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -524,7 +524,7 @@ const DadosPoco: React.FC = () => {
                       <td className="px-3 py-2.5 text-right font-bold text-violet-600">{formatarNumero(row.phMedio, 1)}</td>
                       <td className="px-3 py-2.5 text-right font-bold text-red-500">{formatarNumero(row.temperaturaMedia, 1)}</td>
                       <td className="px-3 py-2.5 text-right font-bold text-slate-700">{formatarNumero(row.vazaoMedia, 1)}</td>
-                      <td className="px-3 py-2.5 text-right font-black text-emerald-600">{formatarNumero(row.extracaoDia, 1)}</td>
+                      <td className="px-3 py-2.5 text-right font-black text-emerald-600">{formatarNumero(row.extracaoDia, 1)} m³ · {formatarNumero(row.extracaoDia * 1000, 0)} L</td>
                     </tr>
                   ))}
                 </tbody>
