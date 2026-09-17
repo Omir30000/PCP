@@ -20,11 +20,14 @@ import {
   ShieldCheck,
   Package,
   Droplets,
+  Droplet,
   Calculator,
   Zap,
   Target,
   BarChart3,
-  Waves
+  Waves,
+  Gauge,
+  AlertTriangle
 } from 'lucide-react';
 
 const RelatorioConsumoAgua: React.FC = () => {
@@ -36,6 +39,7 @@ const RelatorioConsumoAgua: React.FC = () => {
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [produtos, setProdutos] = useState<any[]>([]);
   const [filtroTurno, setFiltroTurno] = useState<'GLOBAL' | '1º Turno' | '2º Turno'>('GLOBAL');
+  const [dadosPoco, setDadosPoco] = useState<any[]>([]);
 
   const reportRef = useRef<HTMLDivElement>(null);
   const produtosMapRef = useRef<Record<string, any>>({});
@@ -51,6 +55,35 @@ const RelatorioConsumoAgua: React.FC = () => {
     const numericPart = parseFloat(cleanStr.match(/[\d.]+/)?.[0] || '0');
     if (cleanStr.includes('ml')) return numericPart / 1000;
     return numericPart;
+  };
+
+  const fetchDadosPoco = async () => {
+    const todos: any[] = [];
+    const PAGE = 1000;
+    let from = 0;
+    let temMais = true;
+
+    while (temMais) {
+      const { data, error } = await supabase
+        .from('dados_poco')
+        .select('*')
+        .gte('data_registro', dataInicio)
+        .lte('data_registro', dataFim)
+        .order('data_registro', { ascending: true })
+        .order('hora_registro', { ascending: true })
+        .range(from, from + PAGE - 1);
+
+      if (error) throw error;
+      const lote = data || [];
+      todos.push(...lote);
+      if (lote.length < PAGE) {
+        temMais = false;
+      } else {
+        from += PAGE;
+      }
+    }
+
+    return todos;
   };
 
   const fetchRelatorioData = async () => {
@@ -77,6 +110,14 @@ const RelatorioConsumoAgua: React.FC = () => {
       }
       if (registrosData.error) throw registrosData.error;
       setRegistros(registrosData.data || []);
+
+      try {
+        const dadosPocoPeriodo = await fetchDadosPoco();
+        setDadosPoco(dadosPocoPeriodo);
+      } catch (errPoco) {
+        console.error("Erro ao buscar dados do poço:", errPoco);
+        setDadosPoco([]);
+      }
     } catch (err) {
       console.error("Erro na consolidação do relatório:", err);
     } finally {
@@ -256,8 +297,59 @@ const RelatorioConsumoAgua: React.FC = () => {
       avgEfficiency
     };
 
-    return { linesSummary, factoryTotals, diffDays };
-  }, [registros, dataInicio, dataFim, filtroTurno, linhas]);
+    // === BALANÇO HÍDRICO: EXTRAÍDO (POÇO) vs CONSUMIDO (PRODUÇÃO) ===
+    // Volume extraído por dia: diferença do totalizador do poço
+    const pocosPorDia: Record<string, any[]> = {};
+    dadosPoco.forEach(r => {
+      if (!pocosPorDia[r.data_registro]) pocosPorDia[r.data_registro] = [];
+      pocosPorDia[r.data_registro].push(r);
+    });
+
+    const serieExtraido = Object.entries(pocosPorDia).map(([dia, regs]) => {
+      const volIni = regs[0]?.volume_acumulado || 0;
+      const volFim = regs[regs.length - 1]?.volume_acumulado || 0;
+      return {
+        data: dia.split('-').reverse().join('/'),
+        extraidoM3: volFim - volIni,
+        extraidoL: (volFim - volIni) * 1000
+      };
+    }).sort((a, b) => a.data.localeCompare(b.data));
+
+    // Consumo total de produção (litros envasados no período)
+    const consumidoTotalL = totalLitrosGeral;
+    const extraidoTotalL = serieExtraido.reduce((acc, d) => acc + d.extraidoL, 0);
+    const extraidoTotalM3 = extraidoTotalL / 1000;
+
+    // Série diária de envasamento (consumo) somando linhas
+    const consumidoPorDiaMap: Record<string, number> = {};
+    linesSummary.forEach(line => {
+      line.serieHistorica.forEach(s => {
+        consumidoPorDiaMap[s.data] = (consumidoPorDiaMap[s.data] || 0) + s.litros;
+      });
+    });
+
+    const graficoComparativo = serieExtraido.map(dia => ({
+      data: dia.data,
+      extraidoL: Math.round(dia.extraidoL),
+      consumidoL: Math.round(consumidoPorDiaMap[dia.data] || 0)
+    }));
+
+    const aproveitamento = extraidoTotalL > 0 ? (consumidoTotalL / extraidoTotalL) * 100 : 0;
+    const diferencaL = extraidoTotalL - consumidoTotalL;
+    const diferencaM3 = diferencaL / 1000;
+
+    return { linesSummary, factoryTotals, diffDays, balanco: {
+      extraidoTotalL,
+      extraidoTotalM3,
+      consumidoTotalL,
+      consumidoTotalM3: consumidoTotalL / 1000,
+      diferencaL,
+      diferencaM3,
+      aproveitamento,
+      graficoComparativo,
+      temDadosPoco: dadosPoco.length > 0
+    } };
+  }, [registros, dataInicio, dataFim, filtroTurno, linhas, dadosPoco]);
 
   return (
     <div className="w-full max-w-[98%] mx-auto space-y-8 animate-in fade-in duration-500 pb-12 font-sans text-slate-900 print:text-black">
@@ -364,7 +456,7 @@ const RelatorioConsumoAgua: React.FC = () => {
           <div className="flex items-center gap-4 mb-2">
             <div className="h-8 w-1.5 bg-cyan-600 rounded-full" />
             <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.3em]">
-              III. TOTALIZAÇÃO GLOBAL DE FÁBRICA (ALICERCE OPERACIONAL)
+              I. TOTALIZAÇÃO GLOBAL DE FÁBRICA (ALICERCE OPERACIONAL)
             </h3>
           </div>
 
@@ -429,7 +521,7 @@ const RelatorioConsumoAgua: React.FC = () => {
           <div className="flex items-center gap-4 mb-2">
             <div className="h-8 w-1.5 bg-cyan-600 rounded-full" />
             <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.3em]">
-              I. VOLUME ENVASADO POR CENTRO DE TRABALHO
+              II. VOLUME ENVASADO POR CENTRO DE TRABALHO
             </h3>
           </div>
 
@@ -582,6 +674,132 @@ const RelatorioConsumoAgua: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* BALANÇO HÍDRICO: EXTRAÍDO DO POÇO vs CONSUMIDO NA PRODUÇÃO */}
+        <section className="space-y-8 break-inside-avoid">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="h-8 w-1.5 bg-cyan-600 rounded-full" />
+            <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.3em]">
+              III. BALANÇO HÍDRICO: EXTRAÍDO DO POÇO vs CONSUMIDO NA PRODUÇÃO
+            </h3>
+          </div>
+
+          {!analytics.balanco.temDadosPoco && (
+            <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl px-6 py-4 flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+              <p className="text-[11px] font-black text-amber-800 uppercase tracking-widest">
+                Sem dados do poço no período — importe a planilha do poço para habilitar o comparativo.
+              </p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-12 gap-6 w-full">
+            <div className="col-span-12 lg:col-span-4 bg-slate-900 text-white p-8 rounded-[40px] shadow-2xl relative overflow-hidden">
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 flex items-center gap-2">
+                <Droplet className="w-4 h-4 text-emerald-400" /> Extraído do Poço
+              </p>
+              <h4 className="text-4xl font-black tracking-tighter leading-none mb-1">
+                {analytics.balanco.extraidoTotalM3.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}
+                <span className="text-lg text-emerald-400 font-bold"> m³</span>
+              </h4>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                {analytics.balanco.extraidoTotalL.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} LITROS
+              </p>
+            </div>
+
+            <div className="col-span-12 lg:col-span-4 bg-cyan-600 text-white p-8 rounded-[40px] shadow-xl shadow-cyan-600/20 relative overflow-hidden">
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+              <p className="text-[9px] font-black text-slate-900/70 uppercase tracking-[0.3em] mb-3 flex items-center gap-2">
+                <Droplets className="w-4 h-4 text-white" /> Consumido na Produção
+              </p>
+              <h4 className="text-4xl font-black tracking-tighter leading-none mb-1">
+                {analytics.balanco.consumidoTotalM3.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}
+                <span className="text-lg text-slate-900 font-bold"> m³</span>
+              </h4>
+              <p className="text-[9px] font-bold text-slate-800 uppercase tracking-widest mt-2">
+                {analytics.balanco.consumidoTotalL.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} LITROS ENVASADOS
+              </p>
+            </div>
+
+            <div className="col-span-12 lg:col-span-4 bg-white border-2 border-slate-100 p-8 rounded-[40px] shadow-sm flex flex-col justify-between">
+              <div>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 flex items-center gap-2">
+                  <Gauge className="w-4 h-4 text-emerald-600" /> Aproveitamento do Poço
+                </p>
+                <h4 className="text-5xl font-black tracking-tighter leading-none mb-2">
+                  {analytics.balanco.aproveitamento.toFixed(1)}<span className="text-2xl text-emerald-600">%</span>
+                </h4>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  {analytics.balanco.aproveitamento >= 100 ? 'Superavit de Produção' : 'da extração virou produto'}
+                </p>
+              </div>
+              <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden mt-6">
+                <div
+                  className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full"
+                  style={{ width: `${Math.min(100, analytics.balanco.aproveitamento)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-12 gap-6 w-full">
+            <div className="col-span-12 lg:col-span-8 bg-white border-2 border-slate-100 rounded-[40px] p-6 shadow-sm">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4">
+                <TrendingUp className="w-3 h-3 inline mr-2 text-cyan-500" /> Extraído vs Consumido por Dia (Litros)
+              </p>
+              <div className="h-[220px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={analytics.balanco.graficoComparativo} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorExtraido" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.35} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorConsumido" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.35} />
+                        <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="data" axisLine={false} tickLine={false} tick={{ fontSize: 8, fontWeight: 900, fill: '#94a3b8' }} interval={'preserveStartEnd'} />
+                    <YAxis hide={true} />
+                    <RechartsTooltip
+                      contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '9px', fontWeight: 900, color: '#fff' }}
+                      formatter={(value: any, name: any) => [`${Number(value).toLocaleString('pt-BR', { maximumFractionDigits: 0 })} L`, name === 'extraidoL' ? 'Extraído' : 'Consumido']}
+                    />
+                    <Area type="monotone" dataKey="consumidoL" stroke="#06b6d4" strokeWidth={2.5} fillOpacity={1} fill="url(#colorConsumido)" name="consumidoL" />
+                    <Area type="monotone" dataKey="extraidoL" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorExtraido)" name="extraidoL" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="col-span-12 lg:col-span-4 bg-slate-50 border-2 border-transparent rounded-[40px] p-8 flex flex-col justify-center">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Fechamento do Balanço</p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between bg-white rounded-2xl px-5 py-4 shadow-sm">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Diferença (Ext. - Cons.)</span>
+                  <span className={`text-lg font-black ${analytics.balanco.diferencaM3 >= 0 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                    {analytics.balanco.diferencaM3 >= 0 ? '+' : ''}{analytics.balanco.diferencaM3.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} m³
+                  </span>
+                </div>
+                <div className="flex items-center justify-between bg-white rounded-2xl px-5 py-4 shadow-sm">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Volume Consumido / Dia</span>
+                  <span className="text-lg font-black text-slate-900">
+                    {(analytics.balanco.consumidoTotalL / analytics.diffDays).toLocaleString('pt-BR', { maximumFractionDigits: 0 })} L
+                  </span>
+                </div>
+                <div className="flex items-center justify-between bg-white rounded-2xl px-5 py-4 shadow-sm">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Volume Extraído / Dia</span>
+                  <span className="text-lg font-black text-slate-900">
+                    {(analytics.balanco.extraidoTotalL / analytics.diffDays).toLocaleString('pt-BR', { maximumFractionDigits: 0 })} L
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
